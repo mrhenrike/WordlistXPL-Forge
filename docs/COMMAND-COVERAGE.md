@@ -49,12 +49,25 @@ Generated from live `wlf.py` argparse. 100% of subparsers plus nested `pcfg`/`ma
 | prince | `wlf prince --help` | 0 | exit 0 | exit 2 | ok |
 | br-names | `wlf br-names --help` | 0 | exit 0 | exit 0 | ok |
 | iwlgen | `wlf iwlgen --help` | 0 | exit 0 | exit 2 | ok |
+| rules | `wlf rules --help` | 0 | exit 0 | exit 2 | ok |
+| dedup | `wlf dedup --help` | 0 | exit 0 | exit 2 | ok |
+| subtract | `wlf subtract --help` | 0 | exit 0 | exit 2 | ok |
+| split | `wlf split --help` | 0 | exit 0 | exit 2 | ok |
+| keyspace | `wlf keyspace --help` | 0 | exit 0 | exit 0 | ok |
+| neural | `wlf neural --help` | 0 | exit 0 | exit 2 | ok |
+| strength | `wlf strength --help` | 0 | exit 0 | exit 0 | ok |
+| hash-id | `wlf hash-id --help` | 0 | exit 0 | exit 0 | ok |
+| hash-gen | `wlf hash-gen --help` | 0 | exit 0 | exit 2 | ok |
+| hcmask | `wlf hcmask --help` | 0 | exit 0 | exit 2 | ok |
+| osint | `wlf osint --help` | 0 | exit 0 | exit 0 | ok |
+| passphrase | `wlf passphrase --help` | 0 | exit 0 | exit 0 | ok |
+| evaluate | `wlf evaluate --help` | 0 | exit 0 | exit 2 | ok |
+| curate | `wlf curate --help` | 0 | exit 0 | exit 2 | ok |
 
-Total rows: 45. Help failures: 0.
+Total rows: 60. Help failures: 0.
 
-Nested modes (also `--help` exit 0): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`. Pages: `docs/commands/pcfg-train.md`, `pcfg-generate.md`, `markov-train.md`, `markov-generate.md`.
+Nested modes (also `--help` exit 0): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`. Pages: `docs/commands/pcfg-train.md`, `pcfg-generate.md`, `markov-train.md`, `markov-generate.md`.
 
 `--limit` is a **global** flag and must appear before the subcommand (`wlf --limit 5 charset 3 3 ab`).
 
 Per-command pages live in `docs/commands/` (en-US) and `docs/pt-BR/commands/`.
-

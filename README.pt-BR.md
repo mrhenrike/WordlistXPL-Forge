@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  Toolkit unificado de geração de wordlists para pentest autorizado, red team e treinamentos de segurança: <strong>44 subcomandos em uma única CLI</strong>. Membro oficial da suíte <strong>XPL-Forge</strong>. Geração por charset/máscara, profiling pessoal e corporativo, scraping web (JS/CSS/PDF), OCR, parsing de documentos (PDF/XLSX/DOCX), leet speak, XOR crypto, DNS fuzzing, telefones, enumeração de usuários corporativos, padrões de credenciais para redes varejistas, base de credenciais default (IoT/ICS/SCADA/PLC/HMI), keyspace WiFi ISP, análise comportamental password-DNA, combinador de keywords, word mangling, merge e sanitização, ranking ML com corpus SecLists, análise estatística, gramática probabilística PCFG, geração Markov OMEN-style, keyboard walks, auto-geração de regras hashcat, ataque PRINCE, benchmarking de qualidade, gerador por acróstico de frases, motor de mutação de senha existente, dígito-para-texto (EN/PT/BR/ES), permutação OSINT, profiling estilo CUPP, ranking MAYA, anomaly score, filtros globais de comprimento e verificação de espaço em disco.
+  Toolkit unificado de geração de wordlists para pentest autorizado, red team e treinamentos de segurança: <strong>58 subcomandos em uma única CLI</strong>. Membro oficial da suíte <strong>XPL-Forge</strong>. Geração por charset/máscara, profiling pessoal e corporativo, scraping web (JS/CSS/PDF), OCR, parsing de documentos (PDF/XLSX/DOCX), leet speak, XOR crypto, DNS fuzzing, telefones, enumeração de usuários corporativos, padrões de credenciais para redes varejistas, base de credenciais default (IoT/ICS/SCADA/PLC/HMI), keyspace WiFi ISP, análise comportamental password-DNA, combinador de keywords, word mangling, merge e sanitização, ranking ML com corpus SecLists, análise estatística, gramática probabilística PCFG, geração Markov OMEN-style, keyboard walks, auto-geração de regras hashcat, ataque PRINCE, benchmarking de qualidade, gerador por acróstico de frases, motor de mutação de senha existente, dígito-para-texto (EN/PT/BR/ES), permutação OSINT, profiling estilo CUPP, ranking MAYA, anomaly score, filtros globais de comprimento e verificação de espaço em disco. Também executa e converte regras hashcat/John, operações de lista de alta performance (dedup, subtract, split, keyspace), geração neural opcional (estilo FLA/PassGPT), força e entropia estilo zxcvbn com HIBP, identificação e geração de hashes, exportação hcmask, OSINT avançado (Wayback/GitHub org), passphrases diceware e avaliação e curadoria de motores estilo MAYA.
 </p>
 
 CLI: `wlf` / `python wlf.py`.
@@ -72,7 +72,7 @@ chmod +x setup_venv.sh && ./setup_venv.sh && source .venv/bin/activate
 
 ```bash
 python wlf.py              # menu interativo
-python wlf.py --help       # ajuda completa (44 subcomandos)
+python wlf.py --help       # ajuda completa (58 subcomandos)
 wlf --help                 # após pip install
 ```
 
@@ -130,8 +130,22 @@ Páginas por comando: [docs/commands/](docs/commands/) (en-US) e [docs/pt-BR/com
 | 42 | `prince` | Ataque PRINCE: combinação encadeada |
 | 43 | `br-names` | Usernames a partir de nomes brasileiros (listas locais opcionais) |
 | 44 | `iwlgen` | Permutação de keywords (intelligence-wordlist-generator) |
+| 45 | `rules` | Aplica, converte ou otimiza regras hashcat/John (equivalente a `--stdout -r`) |
+| 46 | `dedup` | Deduplicação sem ordenar, preservando ordem (Bloom opcional) |
+| 47 | `subtract` | Remove entradas presentes em outros arquivos (estilo rli) |
+| 48 | `split` | Particiona por contagem, tamanho ou comprimento (estilo splitlen) |
+| 49 | `keyspace` | Estima contagem de candidatos e tempo para exaurir |
+| 50 | `neural` | Geração neural em nível de caractere, amostragem guiada e DPG (extra `[neural]`) |
+| 51 | `strength` | Força e entropia estilo zxcvbn, crack time, HIBP opcional |
+| 52 | `hash-id` | Identifica tipos prováveis de hash |
+| 53 | `hash-gen` | Gera hashes para corpora de teste (md5/sha/ntlm/bcrypt/argon2/...) |
+| 54 | `hcmask` | Exporta um `.hcmask` do hashcat a partir de uma wordlist |
+| 55 | `osint` | OSINT avançado (Wayback, GitHub org, NER, enriquecimento LLM opcional) |
+| 56 | `passphrase` | Geração de passphrases diceware/mnemônicas (CSPRNG) |
+| 57 | `evaluate` | Compara motores por guess-number e cobertura (estilo MAYA) |
+| 58 | `curate` | Ranqueia listas por crack rate e funde as melhores (estilo weakpass) |
 
-Modos aninhados (também documentados): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`.
+Modos aninhados (também documentados): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`.
 
 > **Sintaxe e exemplos de cada subcomando:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
 
@@ -318,6 +332,86 @@ python wlf.py pattern-rank senhas.lst --layout qwerty
 
 ---
 
+## Motor de regras
+
+Executa regras hashcat e John contra uma wordlist (equivalente a `hashcat --stdout -r`), converte entre os dois dialetos e otimiza arquivos de regras.
+
+```bash
+python wlf.py rules apply --wordlist base.txt --rules best64.rule -o out.lst
+python wlf.py rules apply --wordlist base.txt --rule "c $1;so0;u" --dedupe
+python wlf.py rules convert --rules hc.rule --to john -o jtr.rule
+python wlf.py rules optimize --rules messy.rule -o clean.rule
+```
+
+## Operações de lista de alta performance
+
+Utilitários em streaming para listas muito grandes: dedup preservando ordem (Bloom opcional), subtração, particionamento e estimativa de keyspace.
+
+```bash
+python wlf.py dedup huge.txt --bloom --capacity 50000000 -o unique.txt
+python wlf.py subtract candidatos.txt --remove cracked.txt -o restante.txt
+python wlf.py split big.txt --lines 1000000 -o part
+python wlf.py split words.txt --by-length -o bylen
+python wlf.py keyspace --mask "?u?l?l?l?d?d?d?d" --pps 5e9
+```
+
+## Geração neural (extra opcional `[neural]`)
+
+Geração neural em nível de caractere na tradição FLA e PassGPT. Requer `pip install wordlistxpl-forge[neural]` (torch, e transformers para adapters PassGPT). O core segue funcionando com `pcfg` e `markov` sem este extra.
+
+```bash
+python wlf.py neural train --wordlist rockyou.txt --epochs 5
+python wlf.py --limit 100000 neural generate --temperature 0.9 -o out.lst
+python wlf.py --limit 5000 neural generate --prefix admin --mask "?u?l?l?l?d?d"
+python wlf.py --limit 100000 neural generate --adapt cracked.txt   # Dynamic Password Guessing
+python wlf.py --limit 5000 neural generate --adapter passgpt --model javirandor/passgpt-10characters
+```
+
+## Força e entropia de senha
+
+Pontuação estilo zxcvbn com detecção de padrões (dicionário, l33t, sequências, repetições, teclado, datas), entropia, crack time por cenário e por hash, e checagem HIBP opcional via k-anonymity.
+
+```bash
+python wlf.py strength "Verao2024!"
+python wlf.py strength "P@ssw0rd" --hibp
+python wlf.py strength --wordlist candidatos.txt -o scored.tsv
+```
+
+## Hashing e interop de cracking
+
+Identifica hashes, gera digests para corpora de teste e exporta masks do hashcat.
+
+```bash
+python wlf.py hash-id 5f4dcc3b5aa765d61d8327deb882cf99
+python wlf.py hash-gen --wordlist pw.txt --algo ntlm --format hash:plain -o ntlm.txt
+python wlf.py hash-gen --wordlist pw.txt --algo bcrypt --format plain:hash
+python wlf.py hcmask --wordlist leaked.txt --top 50 -o masks.hcmask
+```
+
+## OSINT avançado e passphrases
+
+Constrói wordlists contextuais a partir de OSINT passivo (Wayback Machine, organizações do GitHub) com NER leve e enriquecimento LLM opcional, e gera passphrases diceware com fonte aleatória segura.
+
+```bash
+python wlf.py osint --wayback example.com --github-org acme --enrich -o rich.lst
+python wlf.py osint --github-org acme --lowercase -o org.lst
+python wlf.py passphrase --words 5 --separator . --capitalize --number
+python wlf.py passphrase --wordlist eff_large_wordlist.txt --words 6 --symbol
+```
+
+## Avaliação e curadoria de motores
+
+Compara motores por guess-number e cobertura contra um split de teste (estilo MAYA), e ranqueia listas candidatas por crack rate para fundir as melhores (estilo weakpass).
+
+```bash
+python wlf.py evaluate --candidates pcfg.lst markov.lst --labels pcfg,markov --reference test.txt
+python wlf.py curate --candidates a.txt b.txt c.txt --reference test.txt --top-k 2 -o best.txt
+```
+
+Veja a análise competitiva e a paridade de recursos em [docs/pt-BR/COMPETITIVE-ANALYSIS.md](docs/pt-BR/COMPETITIVE-ANALYSIS.md).
+
+---
+
 ## Base de credenciais default
 
 Base integrada com **1.506** credenciais de fábrica cobrindo **88 vendors** (mais comunidades SNMP): routers, switches, impressoras, câmeras IP, ICS/SCADA (PLCs, HMIs, RTUs), gateways IoT e mais.
@@ -469,6 +563,19 @@ Se uma senha sua ou da sua organização aparece numa wordlist **gerada** daqui,
 | [PACK](https://github.com/iphelix/pack) | Password Analysis and Cracking Kit (rulegen) |
 | [princeprocessor](https://github.com/hashcat/princeprocessor) | Modo de ataque PRINCE |
 | [MAYA](https://github.com/williamcorrias/MAYA-Password-Benchmarking) | Framework de benchmarking de wordlists |
+| [hashcat](https://github.com/hashcat/hashcat) | Sintaxe do motor de regras e tokens de mask |
+| [hashcat-utils](https://github.com/hashcat/hashcat-utils) | Operações de lista (splitlen, rli, rules_optimize) |
+| [rling](https://github.com/Cynosureprime/rling) / [duplicut](https://github.com/nil0x42/duplicut) | Dedup e subtração de alta performance |
+| [John the Ripper](https://github.com/openwall/john) | Dialeto de regras para conversão |
+| [zxcvbn](https://github.com/dropbox/zxcvbn) / [zxcvbn-ts](https://github.com/zxcvbn-ts/zxcvbn) | Estimativa de força e entropia |
+| [Have I Been Pwned](https://haveibeenpwned.com/Passwords) | Checagem de vazamento por k-anonymity |
+| [PassGPT](https://github.com/javirandor/passgpt) | Modelagem de senha por transformer (adapter) |
+| [FLA](https://github.com/cupslab/neural_network_cracking) | Adivinhação de senha neural (LSTM) |
+| [name-that-hash](https://github.com/HashPals/Name-That-Hash) | Identificação de hash |
+| [CeWLeR / cewlai](https://github.com/chocapikk/cewlai) | Wordlists OSINT assistidas por IA |
+| [WordForge](https://pypi.org/project/wordforge/) | Coletores OSINT (Wayback, GitHub org, NER) |
+| [EFF Diceware](https://www.eff.org/dice) | Geração de passphrases |
+| [weakpass](https://weakpass.com/) | Ranqueamento por crack-rate e curadoria |
 
 ---
 

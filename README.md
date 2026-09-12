@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/pypi/v/wordlistxpl-forge?style=flat-square&logo=pypi&logoColor=white&color=green" alt="PyPI">
 </p>
 
-**Unified wordlist generation toolkit for pentest and red team operations: 44 subcommands in a single CLI.** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks.
+**Unified wordlist generation toolkit for pentest and red team operations: 58 subcommands in a single CLI.** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks. It also runs and converts hashcat/John rules, performs high-performance list operations (dedup, subtract, split, keyspace), optional neural generation (FLA/PassGPT style), zxcvbn-style strength scoring with HIBP, hash identification and generation, hcmask export, advanced OSINT (Wayback/GitHub org), diceware passphrases, and MAYA-style engine evaluation and curation.
 
 CLI: `wlf` / `python wlf.py`.
 
@@ -122,8 +122,22 @@ Per-command pages: [docs/commands/](docs/commands/) (en-US) and [docs/pt-BR/comm
 | 42 | `prince` | PRINCE attack: chained element combination |
 | 43 | `br-names` | Brazilian name-based username generator (optional local name lists) |
 | 44 | `iwlgen` | Intelligence keyword permutation generator |
+| 45 | `rules` | Apply, convert or optimize hashcat/John rules (`--stdout -r` equivalent) |
+| 46 | `dedup` | Order-preserving deduplication (optional Bloom filter) |
+| 47 | `subtract` | Remove entries present in other files (rli-style) |
+| 48 | `split` | Split by count, size or entry length (splitlen-style) |
+| 49 | `keyspace` | Estimate candidate count and time to exhaust |
+| 50 | `neural` | Neural char-level generation, guided sampling and DPG (optional `[neural]`) |
+| 51 | `strength` | zxcvbn-style strength and entropy, crack time, optional HIBP |
+| 52 | `hash-id` | Identify likely hash algorithms |
+| 53 | `hash-gen` | Generate hashes for test corpora (md5/sha/ntlm/bcrypt/argon2/...) |
+| 54 | `hcmask` | Export a hashcat `.hcmask` from a wordlist |
+| 55 | `osint` | Advanced OSINT (Wayback, GitHub org, NER, optional LLM enrichment) |
+| 56 | `passphrase` | Diceware/mnemonic passphrase generation (CSPRNG) |
+| 57 | `evaluate` | Compare engines by guess-number and coverage (MAYA-style) |
+| 58 | `curate` | Rank lists by crack rate and merge the best (weakpass-style) |
 
-Nested modes (also documented): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`.
+Nested modes (also documented): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`.
 
 > **Detailed syntax and examples for each subcommand:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
 
@@ -310,6 +324,86 @@ python wlf.py pattern-rank passwords.lst --layout qwerty
 
 ---
 
+## Rule Engine
+
+Run hashcat and John the Ripper rules against a wordlist (the equivalent of `hashcat --stdout -r`), convert between the two dialects, and optimize rule files.
+
+```bash
+python wlf.py rules apply --wordlist base.txt --rules best64.rule -o out.lst
+python wlf.py rules apply --wordlist base.txt --rule "c $1;so0;u" --dedupe
+python wlf.py rules convert --rules hc.rule --to john -o jtr.rule
+python wlf.py rules optimize --rules messy.rule -o clean.rule
+```
+
+## High-Performance List Operations
+
+Streaming utilities for very large lists: order-preserving deduplication (optional Bloom filter), set subtraction, splitting, and keyspace estimation.
+
+```bash
+python wlf.py dedup huge.txt --bloom --capacity 50000000 -o unique.txt
+python wlf.py subtract candidates.txt --remove cracked.txt -o todo.txt
+python wlf.py split big.txt --lines 1000000 -o part
+python wlf.py split words.txt --by-length -o bylen
+python wlf.py keyspace --mask "?u?l?l?l?d?d?d?d" --pps 5e9
+```
+
+## Neural Generation (optional `[neural]` extra)
+
+Character-level neural generation in the FLA and PassGPT tradition. Requires `pip install wordlistxpl-forge[neural]` (torch, plus transformers for PassGPT adapters). The core keeps working with `pcfg` and `markov` without this extra.
+
+```bash
+python wlf.py neural train --wordlist rockyou.txt --epochs 5
+python wlf.py --limit 100000 neural generate --temperature 0.9 -o out.lst
+python wlf.py --limit 5000 neural generate --prefix admin --mask "?u?l?l?l?d?d"
+python wlf.py --limit 100000 neural generate --adapt cracked.txt   # Dynamic Password Guessing
+python wlf.py --limit 5000 neural generate --adapter passgpt --model javirandor/passgpt-10characters
+```
+
+## Password Strength and Entropy
+
+zxcvbn-style scoring with pattern detection (dictionary, l33t, sequences, repeats, keyboard, dates), entropy, crack time per scenario and per hash, and optional HIBP check via k-anonymity.
+
+```bash
+python wlf.py strength "Summer2024!"
+python wlf.py strength "P@ssw0rd" --hibp
+python wlf.py strength --wordlist candidates.txt -o scored.tsv
+```
+
+## Hashing and Cracking Interop
+
+Identify hashes, generate digests for test corpora, and export hashcat masks.
+
+```bash
+python wlf.py hash-id 5f4dcc3b5aa765d61d8327deb882cf99
+python wlf.py hash-gen --wordlist pw.txt --algo ntlm --format hash:plain -o ntlm.txt
+python wlf.py hash-gen --wordlist pw.txt --algo bcrypt --format plain:hash
+python wlf.py hcmask --wordlist leaked.txt --top 50 -o masks.hcmask
+```
+
+## Advanced OSINT and Passphrases
+
+Build contextual wordlists from passive OSINT (Wayback Machine, GitHub organizations) with lightweight NER and optional LLM enrichment, and generate diceware passphrases with a secure random source.
+
+```bash
+python wlf.py osint --wayback example.com --github-org acme --enrich -o rich.lst
+python wlf.py osint --github-org acme --lowercase -o org.lst
+python wlf.py passphrase --words 5 --separator . --capitalize --number
+python wlf.py passphrase --wordlist eff_large_wordlist.txt --words 6 --symbol
+```
+
+## Engine Evaluation and Curation
+
+Compare engines by guess-number and coverage against a test split (MAYA-style), and rank candidate lists by crack rate to merge the best (weakpass-style).
+
+```bash
+python wlf.py evaluate --candidates pcfg.lst markov.lst --labels pcfg,markov --reference test.txt
+python wlf.py curate --candidates a.txt b.txt c.txt --reference test.txt --top-k 2 -o best.txt
+```
+
+See the full competitive analysis and feature parity in [docs/COMPETITIVE-ANALYSIS.md](docs/COMPETITIVE-ANALYSIS.md).
+
+---
+
 ## Default Credentials Database
 
 Query the built-in database of **1,506** factory-default credentials covering **88 vendors** (plus SNMP communities): routers, switches, printers, IP cameras, ICS/SCADA (PLCs, HMIs, RTUs), IoT gateways, and more.
@@ -453,6 +547,19 @@ The model stores **only structural patterns**: no PII, passwords, or company nam
 | [PACK](https://github.com/iphelix/pack) | Password Analysis and Cracking Kit (rulegen) |
 | [princeprocessor](https://github.com/hashcat/princeprocessor) | PRINCE attack mode |
 | [MAYA](https://github.com/williamcorrias/MAYA-Password-Benchmarking) | Wordlist quality benchmarking framework |
+| [hashcat](https://github.com/hashcat/hashcat) | Rule engine syntax and mask tokens |
+| [hashcat-utils](https://github.com/hashcat/hashcat-utils) | List operations (splitlen, rli, rules_optimize) |
+| [rling](https://github.com/Cynosureprime/rling) / [duplicut](https://github.com/nil0x42/duplicut) | High-performance dedup and subtraction |
+| [John the Ripper](https://github.com/openwall/john) | Rule dialect for conversion |
+| [zxcvbn](https://github.com/dropbox/zxcvbn) / [zxcvbn-ts](https://github.com/zxcvbn-ts/zxcvbn) | Strength and entropy estimation |
+| [Have I Been Pwned](https://haveibeenpwned.com/Passwords) | k-anonymity breach check |
+| [PassGPT](https://github.com/javirandor/passgpt) | Transformer password modeling (adapter) |
+| [FLA](https://github.com/cupslab/neural_network_cracking) | Neural (LSTM) password guessing |
+| [name-that-hash](https://github.com/HashPals/Name-That-Hash) | Hash identification |
+| [CeWLeR / cewlai](https://github.com/chocapikk/cewlai) | AI-assisted OSINT wordlists |
+| [WordForge](https://pypi.org/project/wordforge/) | OSINT collectors (Wayback, GitHub org, NER) |
+| [EFF Diceware](https://www.eff.org/dice) | Passphrase generation |
+| [weakpass](https://weakpass.com/) | Crack-rate ranking and curation |
 
 ---
 
