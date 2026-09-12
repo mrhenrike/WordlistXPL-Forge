@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wlf.py - WordlistXPL-Forge v2.0.0
+wlf.py - WordlistXPL-Forge v1.0.0
 
 Unified wordlist generation tool for pentest and red team operations.
 Supports: charset, pattern, profile, corp, phone, scrape, ocr, extract,
@@ -33,7 +33,7 @@ Usage:
   python wlf.py reverse list.lst            # reverse line order (tac)
 
 Author: André Henrique (@mrhenrike)
-Version: 1.8.0
+Version: 1.0.0
 """
 from __future__ import annotations
 

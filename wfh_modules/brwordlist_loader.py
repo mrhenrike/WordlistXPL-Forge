@@ -1,4 +1,4 @@
-"""brwordlist_loader.py - BRWordList integration for WFH.
+"""brwordlist_loader.py - BRWordList integration for WordlistXPL-Forge.
 
 Loads Brazilian name lists and PT-BR web discovery paths from the
 BRWordList submodule located at ../Wordlists/BRWordList relative to

@@ -1,7 +1,7 @@
-# WFH — Brazilian Web Discovery & Fuzzing Wordlist
+# WordlistXPL-Forge: Brazilian web discovery and fuzzing wordlist
 # Sources: BRWordList (Open Banking BR, common web paths, directory traversal)
 # Author: Andre Henrique (LinkedIn/X: @mrhenrike)
-# Usage: wfh.py dns -w fuzzing/discovery_br.lst -d target.com.br
+# Usage: wlf.py dns -w fuzzing/discovery_br.lst -d acme.example
 #        or with any directory brute-force tool (gobuster, ffuf, dirsearch)
 
 %%32%65%%32%65%%32%66
