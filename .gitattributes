@@ -1,0 +1,8 @@
+# Track text as LF. Lab/vendor wordlists stay in git.
+* text=auto eol=lf
+*.lst text eol=lf
+*.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.png binary
+*.jpg binary

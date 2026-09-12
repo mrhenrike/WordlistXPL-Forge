@@ -1,0 +1,29 @@
+# wlf.py - WordlistXPL-Forge
+# Author: André Henrique (@mrhenrike)
+# Compatible with Python 3.8+
+
+# ── Core dependencies (required) ────────────────────────────────────────────
+colorama>=0.4.6
+tqdm>=4.66.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+chardet>=5.2.0
+unidecode>=1.3.6
+
+# ── Document parsing (optional: pip install wordlistxpl-forge[docs]) ─────────────
+openpyxl>=3.1.0
+pdfplumber>=0.10.0
+python-docx>=1.1.0
+striprtf>=0.0.26
+
+# ── Web scrape extras (optional: pip install wordlistxpl-forge[scrape]) ──────────
+pypdf>=4.0.0         # PDF text extraction during crawl (--include-pdf)
+
+# ── OCR / image processing (optional: pip install wordlistxpl-forge[ocr]) ────────
+# easyocr>=1.7.0      # Requires PyTorch - heavy dependency, install manually
+# Pillow>=10.0.0      # Installed as easyocr dependency
+
+# ── Build / publish (dev only) ──────────────────────────────────────────────
+# build>=1.0.0
+# twine>=5.0.0

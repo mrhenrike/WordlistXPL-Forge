@@ -1,0 +1,87 @@
+# IDE / editor local
+.cursor/
+wiki/
+
+__pycache__/
+*.pyc
+.log/
+.tmp/
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.ppk
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.*
+*.credentials
+credentials.json
+secrets.json
+**/secrets/
+
+# Not distributed in this public tree
+passwords/wlist_brasil.lst
+# Operator-supplied personal wordlists stay local
+personal_profile.lst
+target_profile.lst
+HANDOFF.md
+HANDOFF-AUDIT.md
+
+# Internal local tooling
+update_wordlists.py
+
+# Temp / generated
+*.tmp.lst
+temp/
+.model/
+generated/*.lst
+generated/*.txt
+!generated/.gitkeep
+
+# PyPI build artifacts and public-git packaging block
+dist/
+build/
+*.egg-info/
+*.egg
+pyproject.toml
+setup.py
+setup.cfg
+MANIFEST.in
+tox.ini
+.pypirc
+scripts/publish*
+scripts/release*
+packages/**/build.sh
+packages/**/build.ps1
+*.example
+*.sample
+
+# Lab YAML profiles stay local
+labs/*/
+labs/*.yaml
+labs/*.yml
+labs/labs_number2text.lst
+
+# CI/CD and contributor metadata stay local
+.github/workflows/
+.github/dependabot.yml
+.github/CODEOWNERS
+CODEOWNERS
+.github/FUNDING.yml
+FUNDING.yml
+.github/ISSUE_TEMPLATE*
+.github/PULL_REQUEST_TEMPLATE*
+CONTRIBUTING*
+CONTRIBUTORS*
+.travis.yml
+.gitlab-ci.yml
+azure-pipelines.yml
+Jenkinsfile
+.circleci/
+appveyor.yml
