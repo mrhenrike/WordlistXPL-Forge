@@ -63,8 +63,9 @@ Generated from live `wlf.py` argparse. 100% of subparsers plus nested `pcfg`/`ma
 | passphrase | `wlf passphrase --help` | 0 | exit 0 | exit 0 | ok |
 | evaluate | `wlf evaluate --help` | 0 | exit 0 | exit 2 | ok |
 | curate | `wlf curate --help` | 0 | exit 0 | exit 2 | ok |
+| affix | `wlf affix --help` | 0 | exit 0 | exit 2 | ok |
 
-Total rows: 60. Help failures: 0.
+Total rows: 61. Help failures: 0.
 
 Nested modes (also `--help` exit 0): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`. Pages: `docs/commands/pcfg-train.md`, `pcfg-generate.md`, `markov-train.md`, `markov-generate.md`.
 

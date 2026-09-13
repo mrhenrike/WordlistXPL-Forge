@@ -12,7 +12,7 @@ Deduplicate a wordlist without sorting, preserving order.
     \  /\  /  | |    | |  | |       
      \/  \/   |_|    |_|  |_|       
 
-  WordlistXPL-Forge  v1.1.0
+  WordlistXPL-Forge  v1.2.0
   Author: André Henrique (@mrhenrike)
   Unified wordlist generation for pentest & red team
 

@@ -3,13 +3,13 @@
 <p align="center">
   <img src="https://img.shields.io/github/stars/mrhenrike/WordlistXPL-Forge?style=flat-square" alt="GitHub Stars">
   <img src="https://img.shields.io/github/license/mrhenrike/WordlistXPL-Forge?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white" alt="Python 3.8+">
   <img src="https://img.shields.io/pypi/v/wordlistxpl-forge?style=flat-square&logo=pypi&logoColor=white&color=green" alt="PyPI">
 </p>
 
 <p align="center">
-  Toolkit unificado de geração de wordlists para pentest autorizado, red team e treinamentos de segurança: <strong>58 subcomandos em uma única CLI</strong>. Membro oficial da suíte <strong>XPL-Forge</strong>. Geração por charset/máscara, profiling pessoal e corporativo, scraping web (JS/CSS/PDF), OCR, parsing de documentos (PDF/XLSX/DOCX), leet speak, XOR crypto, DNS fuzzing, telefones, enumeração de usuários corporativos, padrões de credenciais para redes varejistas, base de credenciais default (IoT/ICS/SCADA/PLC/HMI), keyspace WiFi ISP, análise comportamental password-DNA, combinador de keywords, word mangling, merge e sanitização, ranking ML com corpus SecLists, análise estatística, gramática probabilística PCFG, geração Markov OMEN-style, keyboard walks, auto-geração de regras hashcat, ataque PRINCE, benchmarking de qualidade, gerador por acróstico de frases, motor de mutação de senha existente, dígito-para-texto (EN/PT/BR/ES), permutação OSINT, profiling estilo CUPP, ranking MAYA, anomaly score, filtros globais de comprimento e verificação de espaço em disco. Também executa e converte regras hashcat/John, operações de lista de alta performance (dedup, subtract, split, keyspace), geração neural opcional (estilo FLA/PassGPT), força e entropia estilo zxcvbn com HIBP, identificação e geração de hashes, exportação hcmask, OSINT avançado (Wayback/GitHub org), passphrases diceware e avaliação e curadoria de motores estilo MAYA.
+  Toolkit unificado de geração de wordlists para pentest autorizado, red team e treinamentos de segurança: <strong>59 subcomandos em uma única CLI</strong>. Membro oficial da suíte <strong>XPL-Forge</strong>. Geração por charset/máscara, profiling pessoal e corporativo, scraping web (JS/CSS/PDF), OCR, parsing de documentos (PDF/XLSX/DOCX), leet speak, XOR crypto, DNS fuzzing, telefones, enumeração de usuários corporativos, padrões de credenciais para redes varejistas, base de credenciais default (IoT/ICS/SCADA/PLC/HMI), keyspace WiFi ISP, análise comportamental password-DNA, combinador de keywords, word mangling, merge e sanitização, ranking ML com corpus SecLists, análise estatística, gramática probabilística PCFG, geração Markov OMEN-style, keyboard walks, auto-geração de regras hashcat, ataque PRINCE, benchmarking de qualidade, gerador por acróstico de frases, motor de mutação de senha existente, dígito-para-texto (EN/PT/BR/ES), permutação OSINT, profiling estilo CUPP, ranking MAYA, anomaly score, filtros globais de comprimento e verificação de espaço em disco. Também executa e converte regras hashcat/John, operações de lista de alta performance (dedup, subtract, split, keyspace), geração neural opcional (estilo FLA/PassGPT), força e entropia estilo zxcvbn com HIBP, identificação e geração de hashes, exportação hcmask, OSINT avançado (Wayback/GitHub org), passphrases diceware e avaliação e curadoria de motores estilo MAYA.
 </p>
 
 CLI: `wlf` / `python wlf.py`.
@@ -144,6 +144,7 @@ Páginas por comando: [docs/commands/](docs/commands/) (en-US) e [docs/pt-BR/com
 | 56 | `passphrase` | Geração de passphrases diceware/mnemônicas (CSPRNG) |
 | 57 | `evaluate` | Compara motores por guess-number e cobertura (estilo MAYA) |
 | 58 | `curate` | Ranqueia listas por crack rate e funde as melhores (estilo weakpass) |
+| 59 | `affix` | Camada de afixos compostos: encadeia data + especiais; emite ruleset hashcat |
 
 Modos aninhados (também documentados): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`.
 

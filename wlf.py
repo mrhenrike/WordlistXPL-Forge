@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wlf.py - WordlistXPL-Forge v1.1.0
+wlf.py - WordlistXPL-Forge v1.2.0
 
 Unified wordlist generation tool for pentest and red team operations.
 Supports: charset, pattern, profile, corp, phone, scrape, ocr, extract,
@@ -33,7 +33,7 @@ Usage:
   python wlf.py reverse list.lst            # reverse line order (tac)
 
 Author: André Henrique (@mrhenrike)
-Version: 1.1.0
+Version: 1.2.0
 """
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("wfh")
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 # ── Graceful shutdown ──────────────────────────────────────────────────────────
 _SHUTDOWN_REQUESTED = False
@@ -1182,17 +1182,31 @@ def cmd_mutate(args: argparse.Namespace) -> None:
     _info(f"Password : {password}")
     _info(f"Leet     : {leet_mode}")
 
-    variants = password_variants(
-        password,
-        extra_prefixes=extra_prefixes,
-        extra_suffixes=extra_suffixes,
-        leet_mode=leet_mode,
-        min_len=min_len,
-        max_len=max_len,
-    )
+    # Base passwords to mutate. With --titlecase, also seed a per-token
+    # CamelCase variant of the base (e.g. nerd_trilha -> Nerd_Trilha), a common
+    # human pattern the mutation engine does not derive on its own.
+    base_passwords = [password]
+    if getattr(args, "titlecase", False):
+        from wfh_modules.affix_engine import titlecase_word
+        tc = titlecase_word(password)
+        if tc and tc != password:
+            base_passwords.append(tc)
+
+    seen_variants: set[str] = set()
 
     def _gen():
-        yield from variants
+        for base in base_passwords:
+            for v in password_variants(
+                base,
+                extra_prefixes=extra_prefixes,
+                extra_suffixes=extra_suffixes,
+                leet_mode=leet_mode,
+                min_len=min_len,
+                max_len=max_len,
+            ):
+                if v not in seen_variants:
+                    seen_variants.add(v)
+                    yield v
 
     count = _write_output(_gen(), args.output)
     _ok(f"Generated: {count:,} mutation variants")
@@ -2630,6 +2644,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  wlf.py mutate \"1q2w3e4r\"\n"
             "  wlf.py mutate \"minhasenha\" --leet-mode basic --min-len 8\n"
             "  wlf.py mutate \"abc123\" --prefixes _,! --suffixes @0x90,#0x90,EMPTY\n"
+            "  wlf.py mutate \"nerd_trilha\" --titlecase --suffixes '0724!,@0724!'\n"
             "  wlf.py mutate \"senha\" --leet-mode none -o mutations.lst\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -2652,6 +2667,8 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Minimum result length (default: 1)")
     p_mut.add_argument("--max-len", dest="max_len", type=int, default=128,
                        help="Maximum result length (default: 128)")
+    p_mut.add_argument("--titlecase", action="store_true",
+                       help="Also seed a per-token CamelCase variant of the base (e.g. nerd_trilha -> Nerd_Trilha)")
     p_mut.add_argument("-o", "--output", help="Output file")
 
     # ── num2text ──────────────────────────────────────────────────────────
@@ -3364,7 +3381,9 @@ def build_parser() -> argparse.ArgumentParser:
             "  wlf.py combiner admin password secret\n"
             "  wlf.py combiner admin test --connectors ',-,_,.,EMPTY' --leet --reverse\n"
             "  wlf.py combiner --keywords-file keywords.txt --depth 3 --abbreviation\n"
-            "  wlf.py combiner brandx corp 2026 --tails '!,@,#,123' -o wordlist.lst"
+            "  wlf.py combiner brandx corp 2026 --tails '!,@,#,123' -o wordlist.lst\n"
+            "  wlf.py combiner nerd trilha --titlecase --tails '0724' --affix-specials '!,@,#'\n"
+            "  wlf.py combiner nerd trilha --link-lang pt --tails '0724!'"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -3385,6 +3404,18 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Generate leet speak variants")
     p_cb.add_argument("--lowercase", action="store_true",
                        help="Add lowercase duplicates")
+    p_cb.add_argument("--titlecase", action="store_true",
+                       help="Capitalize each component before joining (CamelCase, e.g. NerdTrilha)")
+    p_cb.add_argument("--affix-specials", dest="affix_specials", metavar="LIST",
+                       help="Special chars wrapped around numeric tails for composite affixes "
+                            "(e.g. '!,@,#' yields word@0724, word0724!, word@0724!)")
+    p_cb.add_argument("--link-lang", dest="link_lang", metavar="LANGS",
+                       help="Add linguistic linking words as connectors for the given languages "
+                            "(comma-separated codes/aliases or 'all': pt,en,es,fr,it,de). Prompts for confirmation")
+    p_cb.add_argument("--link-words", dest="link_words", metavar="LIST",
+                       help="Explicit extra linking words to use as connectors (comma-separated)")
+    p_cb.add_argument("--assume-yes", dest="assume_yes", action="store_true",
+                       help="Skip the linking-words confirmation prompt (for automation)")
     p_cb.add_argument("--min-len", dest="min_len", type=int, default=1,
                        help="Minimum output length (default: 1)")
     p_cb.add_argument("--max-len", dest="max_len", type=int, default=64,
@@ -3737,6 +3768,50 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument("--dedupe", action="store_true",
                          help="Suppress duplicate outputs (apply mode)")
     p_rules.add_argument("-o", "--output", help="Output file")
+
+    # ── affix ────────────────────────────────────────────────────────────
+    p_affix = sub.add_parser(
+        "affix",
+        help="Composite-affix mutation layer (chain date + special affixes)",
+        description=(
+            "Append composite affixes to a wordlist in a single pass: the core\n"
+            "alone, special+core, core+special, and special+core+special (e.g.\n"
+            "0724, @0724, 0724!, @0724!). Guarantees two-affix chaining that a\n"
+            "single combiner --tails or plain mutate --suffixes does not produce.\n"
+            "Can also emit a hashcat rule set for use with 'rules apply'.\n\n"
+            "Examples:\n"
+            "  wlf.py combiner nerd trilha --titlecase | wlf.py affix - --dates '0724,1988'\n"
+            "  wlf.py affix base.lst --dates '0724,2806' --specials '!,@,#' -o out.lst\n"
+            "  wlf.py affix base.lst --dates '0724' --case -o out.lst\n"
+            "  wlf.py affix nerdtrilha --dates '0724' --titlecase\n"
+            "  wlf.py affix --dates '0724,1988' --specials '!,@,#' --emit-ruleset affix.rule\n"
+            "  wlf.py rules apply --wordlist base.lst --rules affix.rule -o out.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_affix.add_argument("keywords", nargs="*",
+                         help="Inline base words (or use WORDLIST / '-' for stdin)")
+    p_affix.add_argument("--wordlist", metavar="FILE",
+                         help="Input wordlist file, or '-' for stdin")
+    p_affix.add_argument("--dates", metavar="LIST", required=True,
+                         help="Comma-separated numeric cores (dates/years), e.g. '0724,1988'")
+    p_affix.add_argument("--specials", metavar="LIST",
+                         help="Comma-separated special chars to wrap around cores (default: !,@,#)")
+    p_affix.add_argument("--positions", choices=["suffix", "prefix", "both"], default="both",
+                         help="Where specials may appear relative to the core (default: both)")
+    p_affix.add_argument("--titlecase", action="store_true",
+                         help="Also emit a per-token CamelCase variant of each base word")
+    p_affix.add_argument("--case", action="store_true",
+                         help="Also emit lower/UPPER/Title case variants of each base word")
+    p_affix.add_argument("--bare-specials", dest="bare_specials", action="store_true",
+                         help="Also append lone specials (e.g. word!) independent of cores")
+    p_affix.add_argument("--no-base", dest="no_base", action="store_true",
+                         help="Do not emit the untouched base words")
+    p_affix.add_argument("--no-dedupe", dest="no_dedupe", action="store_true",
+                         help="Allow duplicate outputs")
+    p_affix.add_argument("--emit-ruleset", dest="emit_ruleset", metavar="FILE",
+                         help="Write a hashcat rule set for these affixes instead of expanding")
+    p_affix.add_argument("-o", "--output", help="Output file")
 
     # ── dedup ────────────────────────────────────────────────────────────
     p_dd = sub.add_parser(
@@ -4531,10 +4606,23 @@ def cmd_rules(args: argparse.Namespace) -> None:
         _ok(f"Rules {action}: {count:,} rule line(s)")
 
 
+def cmd_affix(args: argparse.Namespace) -> None:
+    """Handler for the composite-affix mutation layer."""
+    from wfh_modules.affix_engine import handle_affix
+
+    gen = handle_affix(args, _GLOBAL_CTX)
+    if gen is None:
+        # Either an error was logged or a ruleset file was written.
+        if getattr(args, "emit_ruleset", None):
+            _ok(f"Composite affix ruleset written to: {args.emit_ruleset}")
+        return
+    count = _write_output(gen, getattr(args, "output", None))
+    _ok(f"Generated: {count:,} composite-affix candidates")
+
+
 def cmd_dedup(args: argparse.Namespace) -> None:
     """Handler for order-preserving deduplication."""
     from wfh_modules.list_ops import handle_dedup
-
     gen = handle_dedup(args, _GLOBAL_CTX)
     if gen is None:
         return
@@ -4887,6 +4975,7 @@ def main() -> None:
         "mutate":        cmd_mutate,
         "num2text":      cmd_num2text,
         "rules":         cmd_rules,
+        "affix":         cmd_affix,
         "dedup":         cmd_dedup,
         "subtract":      cmd_subtract,
         "split":         cmd_split,

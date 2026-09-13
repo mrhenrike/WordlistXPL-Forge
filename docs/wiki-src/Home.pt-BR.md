@@ -1,6 +1,6 @@
 # Wiki WordlistXPL-Forge (pt-BR)
 
-Gerador de wordlists da suite XPL-Forge. CLI: `wlf`. Versao 1.1.0.
+Gerador de wordlists da suite XPL-Forge. CLI: `wlf`. Versao 1.2.0.
 
 Autor: Andre Henrique (mrhenrike) | Uniao Geek | https://uniaogeek.com.br/
 

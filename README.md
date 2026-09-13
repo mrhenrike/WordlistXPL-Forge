@@ -3,12 +3,12 @@
 <p align="center">
   <img src="https://img.shields.io/github/stars/mrhenrike/WordlistXPL-Forge?style=flat-square" alt="GitHub Stars">
   <img src="https://img.shields.io/github/license/mrhenrike/WordlistXPL-Forge?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white" alt="Python 3.8+">
   <img src="https://img.shields.io/pypi/v/wordlistxpl-forge?style=flat-square&logo=pypi&logoColor=white&color=green" alt="PyPI">
 </p>
 
-**Unified wordlist generation toolkit for pentest and red team operations: 58 subcommands in a single CLI.** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks. It also runs and converts hashcat/John rules, performs high-performance list operations (dedup, subtract, split, keyspace), optional neural generation (FLA/PassGPT style), zxcvbn-style strength scoring with HIBP, hash identification and generation, hcmask export, advanced OSINT (Wayback/GitHub org), diceware passphrases, and MAYA-style engine evaluation and curation.
+**Unified wordlist generation toolkit for pentest and red team operations: 59 subcommands in a single CLI.** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks. It also runs and converts hashcat/John rules, performs high-performance list operations (dedup, subtract, split, keyspace), optional neural generation (FLA/PassGPT style), zxcvbn-style strength scoring with HIBP, hash identification and generation, hcmask export, advanced OSINT (Wayback/GitHub org), diceware passphrases, and MAYA-style engine evaluation and curation.
 
 CLI: `wlf` / `python wlf.py`.
 
@@ -136,6 +136,7 @@ Per-command pages: [docs/commands/](docs/commands/) (en-US) and [docs/pt-BR/comm
 | 56 | `passphrase` | Diceware/mnemonic passphrase generation (CSPRNG) |
 | 57 | `evaluate` | Compare engines by guess-number and coverage (MAYA-style) |
 | 58 | `curate` | Rank lists by crack rate and merge the best (weakpass-style) |
+| 59 | `affix` | Composite-affix mutation layer: chain date + special affixes; emit hashcat ruleset |
 
 Nested modes (also documented): `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`.
 
