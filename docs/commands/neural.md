@@ -12,7 +12,7 @@ Character-level neural password generation (optional [neural] extra).
     \  /\  /  | |    | |  | |       
      \/  \/   |_|    |_|  |_|       
 
-  WordlistXPL-Forge  v1.0.0
+  WordlistXPL-Forge  v1.1.0
   Author: André Henrique (@mrhenrike)
   Unified wordlist generation for pentest & red team
 

@@ -1,8 +1,10 @@
 # Wiki WordlistXPL-Forge (pt-BR)
 
-Gerador de wordlists da suite XPL-Forge. CLI: `wlf`.
+Gerador de wordlists da suite XPL-Forge. CLI: `wlf`. Versao 1.1.0.
 
 Autor: Andre Henrique (mrhenrike) | Uniao Geek | https://uniaogeek.com.br/
+
+English: [Home](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Home)
 
 ## Aviso
 
@@ -12,67 +14,94 @@ O programa gera muitos padroes de senha e username. Se os segredos vem de inform
 
 Este repositorio nao distribui `wlist_brasil`.
 
+## Instalacao
+
+Veja o README. Apos o clone: `python wlf.py --help`. Motor neural opcional: `pip install wordlistxpl-forge[neural]`.
+
+## Referencia
+
+- [Matriz de cobertura](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Command-Coverage)
+- [Analise competitiva](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/Competitive-Analysis)
+
 ## Comandos
 
-- [charset](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/charset.md)
-- [pattern](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/pattern.md)
-- [profile](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/profile.md)
-- [corp](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/corp.md)
-- [corp-users](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/corp-users.md)
-- [phone](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/phone.md)
-- [scrape](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/scrape.md)
-- [ocr](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/ocr.md)
-- [extract](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/extract.md)
-- [mutate](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/mutate.md)
-- [num2text](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/num2text.md)
-- [phrase](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/phrase.md)
-- [leet](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/leet.md)
-- [leet-perm](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/leet-perm.md)
-- [xor](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/xor.md)
-- [analyze](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/analyze.md)
-- [merge](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/merge.md)
-- [dns](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/dns.md)
-- [pharma](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/pharma.md)
-- [sanitize](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/sanitize.md)
-- [reverse](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/reverse.md)
-- [mangle](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/mangle.md)
-- [improve](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/improve.md)
-- [maya-rank](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/maya-rank.md)
-- [osint-perm](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/osint-perm.md)
-- [cupp](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/cupp.md)
-- [pattern-rank](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/pattern-rank.md)
-- [scrape-target](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/scrape-target.md)
-- [default-creds](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/default-creds.md)
-- [isp-keygen](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/isp-keygen.md)
-- [sysinfo](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/sysinfo.md)
-- [corp-prefixes](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/corp-prefixes.md)
-- [train](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/train.md)
-- [password-dna](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/password-dna.md)
-- [combiner](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/combiner.md)
-- [pcfg](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/pcfg.md)
-- [markov](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/markov.md)
-- [kwalk](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/kwalk.md)
-- [rulegen](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/rulegen.md)
-- [benchmark](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/benchmark.md)
-- [anomaly-score](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/anomaly-score.md)
-- [prince](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/prince.md)
-- [br-names](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/br-names.md)
-- [iwlgen](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/iwlgen.md)
-- [rules](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/rules.md)
-- [dedup](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/dedup.md)
-- [subtract](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/subtract.md)
-- [split](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/split.md)
-- [keyspace](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/keyspace.md)
-- [neural](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/neural.md)
-- [strength](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/strength.md)
-- [hash-id](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/hash-id.md)
-- [hash-gen](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/hash-gen.md)
-- [hcmask](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/hcmask.md)
-- [osint](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/osint.md)
-- [passphrase](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/passphrase.md)
-- [evaluate](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/evaluate.md)
-- [curate](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/commands/curate.md)
+### Geracao
 
-Matriz de cobertura: [COMMAND-COVERAGE.md](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/COMMAND-COVERAGE.md)
+- [charset](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/charset)
+- [pattern](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/pattern)
+- [profile](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/profile)
+- [corp](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/corp)
+- [corp-users](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/corp-users)
+- [corp-prefixes](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/corp-prefixes)
+- [phone](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/phone)
+- [mutate](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/mutate)
+- [num2text](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/num2text)
+- [phrase](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/phrase)
+- [leet](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/leet)
+- [leet-perm](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/leet-perm)
+- [combiner](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/combiner)
+- [iwlgen](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/iwlgen)
+- [br-names](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/br-names)
+- [pharma](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/pharma)
+- [isp-keygen](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/isp-keygen)
+- [dns](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/dns)
+- [osint-perm](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/osint-perm)
+- [cupp](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/cupp)
+- [passphrase](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/passphrase)
 
-Analise competitiva: [COMPETITIVE-ANALYSIS.md](https://github.com/mrhenrike/WordlistXPL-Forge/blob/main/docs/pt-BR/COMPETITIVE-ANALYSIS.md)
+### Modelos probabilisticos e neural
+
+- [pcfg](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/pcfg)
+- [markov](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/markov)
+- [prince](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/prince)
+- [kwalk](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/kwalk)
+- [neural](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/neural)
+
+### OSINT e extracao
+
+- [scrape](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/scrape)
+- [scrape-target](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/scrape-target)
+- [ocr](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/ocr)
+- [extract](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/extract)
+- [default-creds](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/default-creds)
+- [osint](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/osint)
+
+### Regras e operacoes de lista
+
+- [rules](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/rules)
+- [rulegen](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/rulegen)
+- [mangle](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/mangle)
+- [dedup](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/dedup)
+- [subtract](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/subtract)
+- [split](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/split)
+- [keyspace](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/keyspace)
+- [merge](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/merge)
+- [sanitize](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/sanitize)
+- [reverse](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/reverse)
+- [improve](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/improve)
+
+### Analise, forca e avaliacao
+
+- [analyze](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/analyze)
+- [strength](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/strength)
+- [pattern-rank](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/pattern-rank)
+- [maya-rank](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/maya-rank)
+- [anomaly-score](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/anomaly-score)
+- [benchmark](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/benchmark)
+- [password-dna](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/password-dna)
+- [evaluate](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/evaluate)
+- [curate](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/curate)
+
+### Hashing e cripto
+
+- [hash-id](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/hash-id)
+- [hash-gen](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/hash-gen)
+- [hcmask](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/hcmask)
+- [xor](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/xor)
+
+### Utilidade e ML
+
+- [train](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/train)
+- [sysinfo](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/pt-BR/sysinfo)
+
+Modos aninhados: `pcfg train`, `pcfg generate`, `markov train`, `markov generate`, `neural train`, `neural generate`.
