@@ -248,6 +248,37 @@ python wlf.py combiner --keywords admin,router,brandx -o combo.lst
 python wlf.py iwlgen --keywords admin,router,2026 --connectors @. --leet -o iwl.lst
 ```
 
+### Targeted cracking workflow (combiner + affix + rules)
+
+Chain per-component CamelCase and linguistic connectors (combiner) with composite
+date/special affixes (affix), then let hashcat apply the affix rule set on the GPU
+so the large expansion never has to be written to disk. The consolidated helper
+scripts run the whole flow in one command:
+
+```bash
+# Linux/macOS
+./scripts/targeted-crack.sh --keywords alpha,bravo,charlie --dates '0724,1988' \
+    --hashfile hashes.txt --hashmode 1000 --run
+```
+
+```powershell
+# Windows
+./scripts/targeted-crack.ps1 -Keywords alpha,bravo,charlie -Dates '0724,1988' `
+    -HashFile hashes.txt -HashMode 1000 -Run
+```
+
+Without `--run` (or `-Run`) the scripts build `generated/targeted_bases.lst` and
+`generated/targeted_affix.rule` and print the ready hashcat command. The
+equivalent manual steps are:
+
+```bash
+python wlf.py combiner alpha bravo charlie --titlecase --link-lang pt --assume-yes \
+    --connectors 'EMPTY,_,.,na,no,da' -o bases.lst
+python wlf.py affix bases.lst --dates '0724,1988' --specials '!,@,#' --emit-ruleset affix.rule
+hashcat -a 0 -m 1000 hashes.txt bases.lst -r affix.rule
+```
+
+
 > **Coverage matrix and per-flag pages:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md)
 
 ---

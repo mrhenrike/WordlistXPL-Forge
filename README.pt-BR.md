@@ -256,6 +256,37 @@ python wlf.py combiner --keywords admin,router,brandx -o combo.lst
 python wlf.py iwlgen --keywords admin,router,2026 --connectors @. --leet -o iwl.lst
 ```
 
+### Fluxo de cracking direcionado (combiner + affix + regras)
+
+Encadeia CamelCase por componente e conectores linguísticos (combiner) com afixos
+compostos de data/especial (affix), e deixa o hashcat aplicar o ruleset na GPU,
+sem precisar gravar em disco a expansão gigante. Os scripts consolidados executam
+todo o fluxo em um comando:
+
+```bash
+# Linux/macOS
+./scripts/targeted-crack.sh --keywords alpha,bravo,charlie --dates '0724,1988' \
+    --hashfile hashes.txt --hashmode 1000 --run
+```
+
+```powershell
+# Windows
+./scripts/targeted-crack.ps1 -Keywords alpha,bravo,charlie -Dates '0724,1988' `
+    -HashFile hashes.txt -HashMode 1000 -Run
+```
+
+Sem `--run` (ou `-Run`), os scripts geram `generated/targeted_bases.lst` e
+`generated/targeted_affix.rule` e imprimem o comando hashcat pronto. Passos
+manuais equivalentes:
+
+```bash
+python wlf.py combiner alpha bravo charlie --titlecase --link-lang pt --assume-yes \
+    --connectors 'EMPTY,_,.,na,no,da' -o bases.lst
+python wlf.py affix bases.lst --dates '0724,1988' --specials '!,@,#' --emit-ruleset affix.rule
+hashcat -a 0 -m 1000 hashes.txt bases.lst -r affix.rule
+```
+
+
 > **Matriz de cobertura e páginas por flag:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md)
 
 ---
