@@ -601,26 +601,35 @@ The model stores **only structural patterns**: no PII, passwords, or company nam
 | [WordForge](https://pypi.org/project/wordforge/) | OSINT collectors (Wayback, GitHub org, NER) |
 | [EFF Diceware](https://www.eff.org/dice) | Passphrase generation |
 | [weakpass](https://weakpass.com/) | Crack-rate ranking and curation |
-
 ---
 
 ## Contact
 
-- **Support / general inquiries:** [suporte@uniaogeek.com.br](mailto:suporte@uniaogeek.com.br)
-- **Security issues:** [SECURITY.md](SECURITY.md)
-- **Organization:** [União Geek](https://github.com/Uniao-Geek)
-
-## License
-
-[MIT License](LICENSE) - Copyright (c) 2026 André Henrique ([@mrhenrike](https://github.com/mrhenrike))
+**Support / general inquiries:** security.research@uniaogeek.com.br
+**Security issues:** [SECURITY.md](SECURITY.md)
 
 ---
 
-<p align="center">
-  Created by <a href="https://github.com/mrhenrike">André Henrique (@mrhenrike)</a> | <a href="https://github.com/Uniao-Geek">União Geek</a><br>
-  <a href="mailto:suporte@uniaogeek.com.br">suporte@uniaogeek.com.br</a>
-</p>
+### André Henrique
 
-<p align="center">
-  <a href="README.pt-BR.md">Leia em Português</a> · <a href="docs/COMMAND-COVERAGE.md">Command coverage</a> · <a href="https://github.com/mrhenrike/WordlistXPL-Forge/wiki">Wiki</a>
-</p>
+| | |
+|---|---|
+| GitHub | [@mrhenrike](https://github.com/mrhenrike) |
+| X / Twitter | [@mrhenrike](https://x.com/mrhenrike) |
+| LinkedIn | [mrhenrike](https://www.linkedin.com/in/mrhenrike/) |
+
+### União Geek
+
+| | |
+|---|---|
+| Website | [uniaogeek.com.br](https://uniaogeek.com.br/) |
+| Blog | [uniaogeek.com.br/blog](https://uniaogeek.com.br/blog/) |
+| GitHub | [Uniao-Geek](https://github.com/Uniao-Geek) |
+| Instagram | [@uniaogeek](https://www.instagram.com/uniaogeek/) |
+
+---
+
+**License:** BSD-3-Clause License - Copyright (c) 2026 União Geek
+**Created by:** André Henrique ([@mrhenrike](https://github.com/mrhenrike)) | [União Geek](https://uniaogeek.com.br/)
+
+[Leia em Português](README.pt-BR.md) - [Command coverage](docs/commands.md) - [Wiki](../../wiki)
