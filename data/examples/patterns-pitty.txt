@@ -1,0 +1,7 @@
+# Templates WFH pattern — trilha P1 (Pitty)
+# Uso:
+#   python wfh.py pattern -t "_{nome}@{ano}#{pet}" \
+#     --vars nome=D4RYU5,Daryus,daryus,d@ryu5 ano=2026,26 pet=Pitty,pitty \
+#     -o .tmp/wlist-P1-pitty.lst
+
+_{nome}@{ano}#{pet}

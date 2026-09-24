@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# AUTHORIZED USE ONLY — See DISCLAIMER.md
+# WordlistXPL-Forge generates wordlists for authorized security testing.
+# Use only in systems you own or have written permission to test.
+# See: docs/malware-research/DISCLAIMER.md for full terms.
 """
 wlf.py - WordlistXPL-Forge v1.2.0
 
@@ -5004,3 +5009,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,99 @@
+# Melissa Andrade — perfil OSINT para WFH profile
+# Cenario: data exata desconhecida; usa modo age_sign (26 anos, signo touro)
+# Politica Daryus: senhas entre 10 e 18 caracteres
+# Fonte Wi-Fi: extrair 3 ESSIDs de ColetaTF09.pcap e colar em wifi_essids
+
+locale: pt-br
+
+full_name: "Melissa Andrade"
+short_name: "Melissa"
+surname: "Andrade"
+nicknames:
+  - "Mel"
+  - "Melissa"
+  - "Andrade"
+
+# Formato estruturado novo — substitui birth_day/month/year separados
+# mode: age_sign usa idade + signo sem precisar da data exata
+birth:
+  mode: age_sign
+  age: 26
+  sign: touro
+
+partner_name: "Jorge Santos"
+partner_nick: "Jorge"
+
+pets:
+  - name: "Ozzy"
+    year: 2025
+  - name: "Pitty"
+    year: 2026
+
+company_name: "Daryus"
+company_legal: "Daryus"
+company_department: "Cyber Security"
+company_domain: "daryus.com.br"
+
+# Data de contratação na Daryus (formato estruturado)
+hire:
+  mode: month_year
+  value: "01/2026"
+
+social_handles:
+  - "ozzys2pitty"
+  - "@ozzys2pitty"
+
+keywords:
+  - "ozzys2pitty"
+  - "Ozzy"
+  - "Pitty"
+  - "Jorge"
+  - "Santos"
+  - "Cyber"
+  - "Security"
+
+special_dates:
+  - "2026"          # contratacao na Daryus
+  - "01/1990"       # nascimento aproximado Jan/1990
+
+phrases:
+  - "é melhor pedir do que tentar quebrar"
+
+phrase_options:
+  mode: both
+  prefixes: true
+  suffix_years: true
+
+leet_mode: "aggressive"
+depth: 4
+min_len: 10
+max_len: 18
+include_specials: true
+include_recent_years: true
+recent_years_lookback: 1
+year_start: 2024
+year_end: 2026
+
+# Motores de geração (preset potente para cobertura máxima)
+engines: "1-15,17,20,21,22,24,25,27,28"
+
+# Mutações opcionais de palavras-chave
+keyword_mutations:
+  enabled: true
+  modes:
+    - letter_reverse
+    - syllable_reverse
+
+# Saída
+output:
+  sanitize: true
+  dedupe: true
+  strip_control: true
+  sort: none
+  format: lst
+
+# Alvos conhecidos para validação pós-geração (feedback loop)
+known_targets:
+  - "_D4RYU5@2026#Pitty"
+  - "#d@ryu5@CS"
+  - "Daryus#OzZY25"

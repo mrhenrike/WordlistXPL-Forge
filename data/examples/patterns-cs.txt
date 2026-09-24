@@ -1,0 +1,7 @@
+# Templates WFH pattern — trilha P2 (CS)
+# Uso:
+#   python wfh.py pattern -t "#{nome}@{tag}" \
+#     --vars nome=d@ryu5,D4RYU5,daryus,Daryus tag=CS \
+#     -o .tmp/wlist-P2-cs.lst
+
+#{nome}@{tag}

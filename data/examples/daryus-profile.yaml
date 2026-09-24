@@ -1,0 +1,37 @@
+# Perfil alvo lab — padroes: _D4RYU5@2026#Pitty, #d@ryu5@CS, Daryus#OzZY25
+# Fonte OSINT: strings extraidas de ColetaTP01.pcap (ver guia 05)
+
+full_name: "Daryus"
+short_name: "Daryus"
+nicknames:
+  - "daryu5"
+  - "D4RYU5"
+
+company_name: "Daryus"
+company_department: "Cyber Security"
+company_domain: "daryus.local"
+
+pets:
+  - name: "Pitty"
+    year: 2026
+  - name: "Ozzy"
+    year: 2025
+
+keywords:
+  - "Pitty"
+  - "Ozzy"
+  - "CS"
+
+special_dates:
+  - "2026"
+  - "2025"
+
+leet_mode: "aggressive"
+depth: 4
+min_len: 8
+max_len: 32
+year_start: 2025
+year_end: 2026
+include_recent_years: true
+recent_years_lookback: 1
+include_specials: true
