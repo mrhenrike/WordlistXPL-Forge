@@ -1,0 +1,7 @@
+# Templates WFH pattern — trilha P3 (Ozzy)
+# Uso:
+#   python wfh.py pattern -t "{nome}#{pet}{ano2}" \
+#     --vars nome=Daryus,daryus pet=OzZY,Ozzy,ozzy ano2=25 \
+#     -o .tmp/wlist-P3-ozzy.lst
+
+{nome}#{pet}{ano2}
