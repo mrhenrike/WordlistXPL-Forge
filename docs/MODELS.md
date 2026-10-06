@@ -20,17 +20,25 @@ Defaults are **safe** (stream, beam caps, RAM/VRAM governor). Large monoliths ne
 | Family | Priority | Command | Notes |
 |---|---|---|---|
 | ResourceGovernor + stream | P0 | global flags + `emit` | Anti-OOM; stdout pipe |
+| Async multi-engine merge | P0 | `pipeline FILE.yaml` | **CLI-wired (v2.0)** |
+| Session checkpoint | P0 | `session list\|show\|resume` | **CLI-wired** |
 | Mask cartesian (GPU-aware) | P1 | `maskgen`, `emit --engine mask` | Chunked; `--compute gpu` |
 | Leet / case | P1 | `leet --gpu`, `leet-perm` | `compute_backend.expand_leet_batch` |
 | OMEN / Markov | P1 | `markov generate`, `emit --engine markov` | Cost heap + `--beam-width` |
 | PCFG | P1 | `pcfg generate`, `emit --engine pcfg` | Prob heap + `--zipf-s` |
+| BR deep | P1 | `br-deep` | CPF/CNPJ/CEP + PT-BR vocab |
+| REST API | P1 | `serve` | Extra `[api]` |
 | PRINCE | P2 | `prince` | Combinatorial chains |
 | Semantic / personal PCFG | P2 | `emit --engine semantic`, `strategy --run` | NAME/YEAR/PET from YAML |
 | Bandit router (UCB1) | P3 | `bandit` | Arm pick via proxy reward |
-| PBMP-lite strategy | P3 | `strategy --profile-file …` | Weighted engine plan |
-| Bayesian structure prior | P3 | (inside `strategy`) | Soft priors over templates |
+| PBMP full / lite | P3 | `pbmp`, `strategy` | Weighted engine plan |
+| Genetic / MAP-Elites | P3 | `evolve` | Population search |
+| Graph / temporal / domain PCFG | P3–P4 | `graph-expand`, `temporal-model`, `domain-pcfg` | |
 | Neural LSTM | P4 | `neural` + `[gpu]` extra | VRAM governor; not default |
-| Transformer / GAN / … | P5 | plugins only | Documented, not shipped |
+| GAN / VAE / Transformer | P1–P2 modules | `pipeline` stages / `vae-interp` | Optional torch |
+| TUI / PassLLM | open | — | Next cycle / P5 |
+
+v2 commands require a current checkout: `python wlf.py --help` must list `pipeline`, `br-deep`, `serve`, etc. See [CHANGELOG.md](../CHANGELOG.md) and [CLI-REFERENCE.md](CLI-REFERENCE.md).
 
 ## Streaming first
 

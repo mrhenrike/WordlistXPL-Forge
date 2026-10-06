@@ -17,13 +17,13 @@
 
 # WordlistXPL-Forge
 
-**Unified wordlist generation toolkit for pentest and red team operations: 59 subcommands in a single CLI.** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks. It also runs and converts hashcat/John rules, performs high-performance list operations (dedup, subtract, split, keyspace), optional neural generation (FLA/PassGPT style), zxcvbn-style strength scoring with HIBP, hash identification and generation, hcmask export, advanced OSINT (Wayback/GitHub org), diceware passphrases, and MAYA-style engine evaluation and curation.
+**Unified wordlist generation toolkit for pentest and red team operations: 70+ subcommands in a single CLI (v2.0).** Official member of the **XPL-Forge** suite. Charset/mask generation, personal and corporate target profiling, web scraping (JS/CSS/PDF extraction), OCR, document parsing (PDF/XLSX/DOCX), leet speak permutations, XOR crypto, DNS/subdomain fuzzing, phone number generation, corporate user enumeration, retail/pharmacy credential patterns, default credential databases (IoT/ICS/SCADA/PLC/HMI), ISP WiFi keyspace generation, password-DNA behavioral analysis, keyword combiner, word mangling, merge and sanitize, ML-based ranking with SecLists corpus training, statistical analysis, PCFG probabilistic grammar generation, OMEN-style Markov chain generation, keyboard walk generation, automatic hashcat rule generation, PRINCE combinatorial chaining, wordlist quality benchmarking, phrase-initials acrostic generation, existing-password mutation engine, digit-to-text variants (EN/PT/BR/ES), OSINT permutation, CUPP-style profiling, MAYA ranking, anomaly scoring, global length filters, and disk-space safety checks. It also runs and converts hashcat/John rules, performs high-performance list operations (dedup, subtract, split, keyspace), optional neural generation (FLA/PassGPT style), zxcvbn-style strength scoring with HIBP, hash identification and generation, hcmask export, advanced OSINT (Wayback/GitHub org), diceware passphrases, MAYA-style engine evaluation and curation, plus Aurora v2 multi-engine `pipeline` / `session` / `br-deep` / `serve` / evolutionary engines.
 
 CLI: `wlf` / `python wlf.py`.
 
 Author: André Henrique (`mrhenrike`) | União Geek | https://uniaogeek.com.br/
 
-> **Full documentation:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) (every subcommand, flag, input and output) · [docs/MODELS.md](docs/MODELS.md) (generation models + GPU/governor) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
+> **Full documentation:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) · [docs/CLI-REFERENCE.md](docs/CLI-REFERENCE.md) · [docs/MODELS.md](docs/MODELS.md) · [CHANGELOG.md](CHANGELOG.md) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
 
 ---
 
@@ -43,14 +43,16 @@ This public tree ships the **same generator**. It does **not** distribute a Braz
 
 ```bash
 pip install wordlistxpl-forge              # core
-pip install wordlistxpl-forge[full]        # all extras (OCR, docs, scrape)
+pip install wordlistxpl-forge[full]        # all extras (OCR, docs, scrape, gpu, api)
 pip install wordlistxpl-forge[ocr]         # OCR only (needs extra system libs)
 pip install wordlistxpl-forge[docs]        # PDF/XLSX/DOCX extract
 pip install wordlistxpl-forge[scrape]      # extra scrape parsers
+pip install wordlistxpl-forge[gpu]         # torch / transformers (neural / GAN / VAE)
+pip install wordlistxpl-forge[api]         # FastAPI serve mode
 ```
 
 ```bash
-wlf --help                 # 44 subcommands
+wlf --help                 # 70+ subcommands (v2.0)
 pip show wordlistxpl-forge
 ```
 
@@ -69,11 +71,18 @@ pip install -r requirements.txt pyyaml
 
 ```bash
 python wlf.py              # interactive menu
-python wlf.py --help       # full CLI help (44 subcommands)
+python wlf.py --help       # full CLI help (v2.0 Aurora commands included)
 wlf --help                 # after pip install
+
+# v2 quick examples (authorized testing only)
+python wlf.py --limit 2000 br-deep --sector finance -o /tmp/br.lst
+python wlf.py pbmp --n-engines 5
+python wlf.py score 'Admin2024!'
+python wlf.py session list
+# python wlf.py serve --port 8771   # needs: pip install wordlistxpl-forge[api]
 ```
 
-Packaging metadata stays local (`pyproject.toml` is not in git). Prefer `pip install wordlistxpl-forge` or run `python wlf.py` from this tree.
+Prefer `pip install wordlistxpl-forge` or run `python wlf.py` from this tree.
 
 Per-command pages: [docs/commands/](docs/commands/) (en-US) and [docs/pt-BR/commands/](docs/pt-BR/commands/).
 

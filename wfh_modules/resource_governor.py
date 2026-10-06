@@ -135,7 +135,10 @@ class ResourceGovernor:
             st.stop_reason = STOP_TIMEOUT
             return STOP_TIMEOUT
 
-        if st.emitted % max(cfg.poll_every, 1) == 0:
+        # Poll after progress has started (emitted==0 always matches `% N == 0`
+        # and would false-trip on busy hosts before any output).
+        poll_every = max(cfg.poll_every, 1)
+        if st.emitted > 0 and st.emitted % poll_every == 0:
             avail = self.ram_available_mb()
             st.last_ram_mb = avail
             total = max(self.ram_total_mb(), 1)
