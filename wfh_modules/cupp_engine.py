@@ -5,8 +5,8 @@ Generates password candidates from a structured user profile using the
 CUPP (Common User Passwords Profiler) algorithm.
 
 Native Python reimplementation of:
-  - submodules/Wordlists/cupp/cupp.py (komb, make_leet, concats)
-  - submodules/Wordlists/BEWGor/BEWGor.py (extended rules)
+  - upstream cupp/cupp.py (komb, make_leet, concats)
+  - upstream BEWGor/BEWGor.py (extended rules)
 
 Author: Andre Henrique (@mrhenrike) | Uniao Geek - https://github.com/Uniao-Geek
 Version: 1.0.0

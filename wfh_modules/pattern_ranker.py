@@ -7,10 +7,10 @@ Analyzes a wordlist and ranks passwords by:
   3. PTBR month/day name detection
 
 Native Python reimplementation from:
-  - submodules/Wordlists/pipal/passpat.rb (keyboard walk scoring)
-  - submodules/Wordlists/pipal/checkers_available/hashcat_mask_generator.rb
-  - submodules/Wordlists/pipal/layouts/ptbr.rb (ABNT2 keyboard layout)
-  - submodules/Wordlists/pipal/checkers_available/PTBR_date_checker.rb
+  - upstream pipal/passpat.rb (keyboard walk scoring)
+  - upstream pipal/checkers_available/hashcat_mask_generator.rb
+  - upstream pipal/layouts/ptbr.rb (ABNT2 keyboard layout)
+  - upstream pipal/checkers_available/PTBR_date_checker.rb
 
 Author: Andre Henrique (@mrhenrike) | Uniao Geek - https://github.com/Uniao-Geek
 Version: 1.0.0

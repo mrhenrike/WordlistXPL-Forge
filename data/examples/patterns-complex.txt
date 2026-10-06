@@ -1,0 +1,16 @@
+# Pattern templates for complex password families (placeholders only).
+# Use with: wlf.py pattern -f data/examples/patterns-complex.txt --vars ...
+#
+# P3-style: BrandX#OzZY25
+{company}#{pet}{yy}
+#
+# P1-style: _BR4NDX@2026#PetX  (pass leet.aggressive:BrandX for company)
+_{company}@{year}#{pet}
+#
+# P2-style: #br4ndx@CS
+#{company}@{tag}
+#
+# Examples:
+#   wlf.py pattern -t '{company}#{pet}{yy}' --vars company=BrandX pet=OzZY yy=25
+#   wlf.py pattern -t '_{company}@{year}#{pet}' --vars company=leet.aggressive:BrandX year=2026 pet=Pitty
+#   wlf.py pattern -t '#{company}@{tag}' --vars company=leet.medium:brandx tag=CS

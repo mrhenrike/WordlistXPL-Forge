@@ -32,6 +32,8 @@ personal_profile.lst
 target_profile.lst
 HANDOFF.md
 HANDOFF-AUDIT.md
+docs/competitive-gaps.md
+
 
 # Internal local tooling
 update_wordlists.py
@@ -72,7 +74,11 @@ usernames/
 data/default_credentials.json
 data/default-creds/
 data/waf_bypass_patterns.lst
-data/examples/
+# Keep only generic templates under data/examples/ (no client profiles)
+data/examples/**
+!data/examples/profile-template.yaml
+!data/examples/patterns-complex.txt
+!data/examples/.gitkeep
 
 # Local-only tooling / non-runtime
 tests/

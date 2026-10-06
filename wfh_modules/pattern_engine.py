@@ -89,6 +89,7 @@ def expand_variable(var_name: str, var_value: str) -> list[str]:
       - Lista: 'val1,val2,val3'
       - Faixa numérica: '1000-9999'
       - Faixa de anos: '2016-2026'
+      - Leet: 'leet:BrandX' ou 'leet.aggressive:BrandX'
       - Valor único: 'valor'
 
     Args:
@@ -98,17 +99,35 @@ def expand_variable(var_name: str, var_value: str) -> list[str]:
     Returns:
         Lista de strings com todos os valores possíveis.
     """
+    raw = var_value.strip()
+
+    # leet[:mode]:word  →  generate_leet variants (capped)
+    leet_match = re.match(r"^leet(?:\.(basic|medium|aggressive))?:(.+)$", raw, re.I)
+    if leet_match:
+        mode = (leet_match.group(1) or "medium").lower()
+        word = leet_match.group(2).strip()
+        from wfh_modules.leet_permuter import generate_leet
+
+        seen: list[str] = []
+        for seed in dict.fromkeys([word, word.upper(), word.lower(), word.title()]):
+            for variant in generate_leet(seed, mode=mode, max_results=64):
+                if variant not in seen:
+                    seen.append(variant)
+                if len(seen) >= 128:
+                    return seen
+        return seen or [word]
+
     # Faixa numérica: 1000-9999
-    range_match = re.match(r"^(\d+)-(\d+)$", var_value.strip())
+    range_match = re.match(r"^(\d+)-(\d+)$", raw)
     if range_match:
         start, end = int(range_match.group(1)), int(range_match.group(2))
         return [str(i) for i in range(start, end + 1)]
 
     # Lista separada por vírgula
-    if "," in var_value:
-        return [v.strip() for v in var_value.split(",") if v.strip()]
+    if "," in raw:
+        return [v.strip() for v in raw.split(",") if v.strip()]
 
-    return [var_value.strip()]
+    return [raw]
 
 
 def render_template(template: str, variables: dict[str, list[str]]) -> Generator[str, None, None]:

@@ -9,8 +9,8 @@ Generates target-aware password candidates from OSINT profile data:
   - Combinations at multiple complexity levels
 
 Native Python reimplementation of:
-  - submodules/Wordlists/elpscrk/perm_classes.py (names_perm, dates_perm)
-  - submodules/Wordlists/elpscrk/elpscrk.py (main_ganerator logic)
+  - upstream elpscrk/perm_classes.py (names_perm, dates_perm)
+  - upstream elpscrk/elpscrk.py (main_ganerator logic)
 
 No external dependencies beyond Python stdlib.
 

@@ -5,16 +5,17 @@ Loads a consolidated JSON database of factory-default user:password pairs,
 SNMP community strings, and SNMPv3 credentials. Supports filtering by vendor,
 protocol, category, and output format.
 
-Local corpus (gitignored): generated/default-creds.json
-Build/refresh with: python3 update_wordlists.py
+Database lives outside this repo (suite EmbedXPL resources). Pass ``--db``
+or set ``WLF_DEFAULT_CREDS_DB``.
 
 Author: Andre Henrique (LinkedIn/X: @mrhenrike)
-Version: 1.1.0
+Version: 1.2.0
 """
 from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Generator, Optional
 
@@ -27,14 +28,29 @@ _DB_PATH: Optional[Path] = None
 
 
 def _resolve_db_path(explicit: Optional[str | Path] = None) -> Path:
-    """Resolve local default-creds JSON under generated/ (not shipped publicly)."""
+    """Resolve default-creds JSON: --db, env, then EmbedXPL suite path."""
     if explicit:
         return Path(explicit)
-    return _REPO_ROOT / "generated" / "default-creds.json"
+    env = os.environ.get("WLF_DEFAULT_CREDS_DB", "").strip()
+    if env:
+        return Path(env)
+    candidates = [
+        _REPO_ROOT.parent
+        / "EmbedXPL-Forge"
+        / "embedxpl"
+        / "resources"
+        / "creds"
+        / "default-creds.json",
+        _REPO_ROOT / "generated" / "default-creds.json",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
 
 
 def _load_db(explicit: Optional[str | Path] = None) -> dict:
-    """Load and cache the credentials database from generated/."""
+    """Load and cache the credentials database."""
     global _DB, _DB_PATH
     db_path = _resolve_db_path(explicit)
     if _DB is not None and _DB_PATH == db_path:
@@ -42,8 +58,8 @@ def _load_db(explicit: Optional[str | Path] = None) -> dict:
     if not db_path.exists():
         logger.error(
             "Default credentials database not found: %s\n"
-            "  Local corpus only (not in the public tree). Place the file at\n"
-            "  generated/default-creds.json or run: python3 update_wordlists.py",
+            "  Pass --db PATH or set WLF_DEFAULT_CREDS_DB "
+            "(suite: EmbedXPL-Forge/embedxpl/resources/creds/).",
             db_path,
         )
         _DB = {"credentials": [], "snmp_communities": [], "snmpv3_defaults": []}

@@ -499,9 +499,9 @@ python wlf.py --min-len 10 mutate "admin" -o long_variants.lst
 | `data/behavior_patterns.json` | Structural generation patterns (generator config) |
 | `data/corp_prefix_patterns.json` | Generic corporate username prefix templates |
 | `data/seclists_corpus.json` | SecLists path index for optional `train` (no raw passwords) |
-| `data/isp_words_5.txt` / `isp_words_6.txt` | Word banks for `isp-keygen` |
+| `isp-keygen` banks | External: `WLF_ISP_WORDS_DIR` or EmbedXPL `resources/wordlists/isp/` |
 
-**Not in this tree (local only under `generated/`, gitignored):** offline corpora for authorized pentests — `users.lst`, `passwords.lst`, `default-creds.json` / `default-creds.lst`, `fuzzing/`, `labs/`, and related lists. Build or refresh with `python3 update_wordlists.py` on a machine that has the source corpora. The CLI **generates** pattern families from the flags you pass; it does not ship credential dumps.
+**Not in this tree (local only under `generated/`, gitignored):** `users.lst` and `passwords.lst` for local work. Discovery/creds/WAF/ISP banks live in sibling **EmbedXPL-Forge** resources. The CLI **generates** pattern families from the flags you pass; it does not ship credential dumps.
 
 `br-names` can load an optional local BRWordList directory if you provide `--brwordlist-path`. That corpus is not bundled here.
 

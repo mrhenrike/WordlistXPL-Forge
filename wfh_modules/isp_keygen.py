@@ -5,16 +5,19 @@ Generates vendor-specific WiFi password wordlists based on known ISP default
 password patterns (e.g., Xfinity/Comcast: word5 + 4digit + word6).
 
 Patterns are loaded from data/behavior_patterns.json (vendor_isp_patterns).
-Word banks are loaded from data/isp_words_5.txt and data/isp_words_6.txt.
+Word banks are NOT shipped in this repo — pass ``--word5-file`` /
+``--word6-file``, set ``WLF_ISP_WORDS_DIR``, or place banks under sibling
+EmbedXPL-Forge ``embedxpl/resources/wordlists/isp/``.
 
 Author: Andre Henrique (LinkedIn/X: @mrhenrike)
-Version: 1.0.0
+Version: 1.1.0
 """
 from __future__ import annotations
 
 import itertools
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Generator, Optional
@@ -28,8 +31,35 @@ _ISP_PATTERNS: Optional[dict] = None
 _WORD_BANKS: dict[int, list[str]] = {}
 
 
+def _isp_bank_dirs() -> list[Path]:
+    """Candidate directories that may contain isp_words_N.txt banks."""
+    dirs: list[Path] = []
+    env = os.environ.get("WLF_ISP_WORDS_DIR", "").strip()
+    if env:
+        dirs.append(Path(env))
+    dirs.extend(
+        [
+            _REPO_ROOT.parent
+            / "EmbedXPL-Forge"
+            / "embedxpl"
+            / "resources"
+            / "wordlists"
+            / "isp",
+            _MODULE_DIR / "data",
+            _REPO_ROOT / "data",
+        ]
+    )
+    return dirs
+
+
 def _resolve_data(filename: str) -> Path:
-    """Resolve data file path, checking wfh_modules/data/ first then repo root data/."""
+    """Resolve data file; prefer EmbedXPL / env banks for isp_words_*.txt."""
+    if filename.startswith("isp_words_"):
+        for d in _isp_bank_dirs():
+            candidate = d / filename
+            if candidate.exists():
+                return candidate
+        return _isp_bank_dirs()[0] / filename
     pkg_path = _MODULE_DIR / "data" / filename
     if pkg_path.exists():
         return pkg_path
