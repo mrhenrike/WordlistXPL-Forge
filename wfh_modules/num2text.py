@@ -20,7 +20,7 @@ Usage:
   wlf num2text --number 123
   wlf num2text --number 123 --lang pt
   wlf num2text --number 123456 --lang es --separators -,_,@
-  wlf num2text --range 0-9999 -o labs/labs_number2text.lst
+  wlf num2text --range 0-9999 -o numbers.lst
 
 Author: André Henrique (@mrhenrike)
 """

@@ -59,13 +59,9 @@ pip show wordlistxpl-forge
 git clone https://github.com/mrhenrike/WordlistXPL-Forge.git
 cd WordlistXPL-Forge
 
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt pyyaml
-
-# Linux / macOS / Termux
-chmod +x setup_venv.sh && ./setup_venv.sh && source .venv/bin/activate
-
-# Windows PowerShell
-.\setup_venv.ps1; .\.venv\Scripts\Activate.ps1
 ```
 
 ### Executar
@@ -260,24 +256,7 @@ python wlf.py iwlgen --keywords admin,router,2026 --connectors @. --leet -o iwl.
 
 Encadeia CamelCase por componente e conectores linguísticos (combiner) com afixos
 compostos de data/especial (affix), e deixa o hashcat aplicar o ruleset na GPU,
-sem precisar gravar em disco a expansão gigante. Os scripts consolidados executam
-todo o fluxo em um comando:
-
-```bash
-# Linux/macOS
-./scripts/targeted-crack.sh --keywords alpha,bravo,charlie --dates '0724,1988' \
-    --hashfile hashes.txt --hashmode 1000 --run
-```
-
-```powershell
-# Windows
-./scripts/targeted-crack.ps1 -Keywords alpha,bravo,charlie -Dates '0724,1988' `
-    -HashFile hashes.txt -HashMode 1000 -Run
-```
-
-Sem `--run` (ou `-Run`), os scripts geram `generated/targeted_bases.lst` e
-`generated/targeted_affix.rule` e imprimem o comando hashcat pronto. Passos
-manuais equivalentes:
+sem precisar gravar em disco a expansão gigante:
 
 ```bash
 python wlf.py combiner alpha bravo charlie --titlecase --link-lang pt --assume-yes \
@@ -358,7 +337,7 @@ Hit rate, eficiência, diversidade, cobertura por comprimento/charset e tempos e
 python wlf.py benchmark --wordlist gerada.lst --reference rockyou_sample.txt
 python wlf.py benchmark --wordlist output.lst --reference test_set.txt --json relatorio.json
 python wlf.py maya-rank gerada.lst --top 1000 -o ranked.lst
-python wlf.py anomaly-score labs/labs_passwords.lst --top 50
+python wlf.py anomaly-score wordlist.lst --top 50
 python wlf.py pattern-rank senhas.lst --layout qwerty
 ```
 
@@ -514,17 +493,14 @@ python wlf.py --min-len 10 mutate "admin" -o variantes_longas.lst
 
 ## O que este tree distribui
 
-| Arquivo | Descrição | Entradas |
-|---------|-----------|----------|
-| `data/default_credentials.json` | Base estruturada (1.506 entradas, 88 vendors, SNMP) | n/a |
-| `passwords/default-creds-combo.lst` | Combos `user:password` default (routers, impressoras, ICS/SCADA) | ~3,1K |
-| `usernames/username_br.lst` | Usernames brasileiros e globais | ~1,7K |
-| `fuzzing/discovery_br.lst` | Paths de descoberta web e API fuzzing | ~900 |
-| `labs/*.lst` | Wordlists de workshop e treino | pequenas |
-| `data/behavior_patterns.json` | Padrões estruturais de geração (não é lista de empresas) | n/a |
-| `data/corp_prefix_patterns.json` | Templates genéricos de prefixo de username | n/a |
+| Arquivo | Descrição |
+|---------|-----------|
+| `data/behavior_patterns.json` | Padrões estruturais de geração (config do gerador) |
+| `data/corp_prefix_patterns.json` | Templates genéricos de prefixo de username |
+| `data/seclists_corpus.json` | Índice de paths SecLists para `train` opcional (sem senhas) |
+| `data/isp_words_5.txt` / `isp_words_6.txt` | Bancos de palavras para `isp-keygen` |
 
-**Fora deste tree:** `passwords/wlist_brasil.lst` (corpus brasileiro de senhas) e qualquer wordlist corporativa de OSINT do operador. A CLI **ainda gera** essas famílias de padrão a partir das flags que você passa.
+**Fora deste tree (só local em `generated/`, gitignored):** corpora offline para pentest autorizado — `users.lst`, `passwords.lst`, `default-creds.json` / `default-creds.lst`, `fuzzing/`, `labs/`, etc. Monte ou atualize com `python3 update_wordlists.py` onde as fontes existirem. A CLI **gera** famílias de padrão pelas flags; não distribui dumps de credenciais.
 
 `br-names` pode carregar um diretório BRWordList local com `--brwordlist-path`. Esse corpus não vem empacotado aqui.
 
@@ -532,17 +508,13 @@ python wlf.py --min-len 10 mutate "admin" -o variantes_longas.lst
 
 ## Minha senha está nestas listas?
 
-Este repositório não distribui `wlist_brasil`. Dá para checar defaults, labs ou a **sua** saída gerada:
+Este repositório não distribui corpora grandes de senhas. Cheque a **sua** saída em `generated/` ou qualquer lista que você gerou:
 
 ```bash
-# Linux/macOS: defaults de fábrica
-grep -qxF 'admin:admin' passwords/default-creds-combo.lst && echo "ENCONTRADA" || echo "Não encontrada"
-
-# Sua wordlist gerada
-grep -qxF 'SuaSenha' generated/output.lst && echo "ENCONTRADA" || echo "Não encontrada"
+grep -qxF 'SuaSenha' generated/passwords.lst && echo "ENCONTRADA" || echo "Não encontrada"
 
 # Windows PowerShell
-Select-String -Path passwords\default-creds-combo.lst -Pattern '^admin:admin$' -SimpleMatch -Quiet
+Select-String -Path generated\passwords.lst -Pattern '^SuaSenha$' -SimpleMatch -Quiet
 ```
 
 Se um segredo **real** bater com um candidato gerado: troque, habilite MFA e use gerenciador de senhas. Isso é construção previsível, não dump deste repositório.

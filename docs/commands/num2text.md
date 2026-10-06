@@ -35,7 +35,7 @@ Examples:
   wlf num2text --number 123 --lang br
   wlf num2text --number 123 --lang es
   wlf num2text --number 1206 --lang en --separators -,_,@
-  wlf num2text --range 0-9999 --lang en -o labs/labs_number2text.lst
+  wlf num2text --range 0-9999 --lang en -o numbers.lst
 
 options:
   -h, --help            show this help message and exit

@@ -24,7 +24,7 @@ IsolationForest-lite and HBOS-lite algorithms. No external
 ML library required. Higher score = more anomalous.
 
 Examples:
-  wlf.py anomaly-score labs/labs_passwords.lst --top 50
+  wlf.py anomaly-score wordlist.lst --top 50
   wlf.py anomaly-score leak.txt --top 100 -o rare.txt
   wlf.py anomaly-score corpus.lst --max-lines 200000
 
