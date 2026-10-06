@@ -409,32 +409,31 @@ class PCFGGrammar:
         max_length: int = 64,
         top_structures: int = 0,
         top_terminals: int = 0,
+        beam_width: int = 250_000,
+        zipf_s: float = 0.0,
     ) -> Generator[str, None, None]:
         """Generate password candidates in approximate probability order.
-
-        Uses a priority queue to emit the most probable candidates first.
-        For each structure template, expands terminals by probability and
-        combines them via cartesian product with early cutoff.
 
         Args:
             max_candidates: Maximum candidates to generate (0 = unlimited).
             min_length: Minimum password length.
             max_length: Maximum password length.
-            top_structures: Limit structures to top N (0 = all).
+            top_structures: Limit structures to top N (0 = all; default caller often 50).
             top_terminals: Limit terminals per class to top N (0 = all).
-
-        Yields:
-            Password candidates in approximate probability order.
+            beam_width: Cap on pending heap size (RAM guard).
+            zipf_s: If >0, reweight emission rank by Zipf prior 1/r^s.
         """
         structures = self._get_sorted_structures()
-        if top_structures:
-            structures = structures[:top_structures]
+        if not top_structures:
+            top_structures = 50  # safe default under governor
+        structures = structures[:top_structures]
 
         seen: set[str] = set()
         count = 0
 
         heap: list[tuple[float, int, str]] = []
         batch_id = 0
+        beam_width = max(5_000, int(beam_width or 250_000))
 
         for struct_str, struct_prob in structures:
             segments = re.findall(r"[LDS]\d+", struct_str)
@@ -450,6 +449,8 @@ class PCFGGrammar:
                     break
                 if top_terminals:
                     terminals = terminals[:top_terminals]
+                elif not top_terminals:
+                    terminals = terminals[:80]
                 terminal_lists.append(terminals)
 
             if skip:
@@ -464,6 +465,8 @@ class PCFGGrammar:
                 seg_keys: list[str],
             ):
                 nonlocal batch_id
+                if len(heap) >= beam_width:
+                    return
                 if depth == len(terminal_lists):
                     candidate_base = "".join(current)
                     cap_variants = [candidate_base]
@@ -485,6 +488,10 @@ class PCFGGrammar:
 
                     for variant in cap_variants:
                         if min_length <= len(variant) <= max_length:
+                            if len(heap) >= beam_width:
+                                # keep only best
+                                heap[:] = list(heapq.nsmallest(beam_width // 2, heap))
+                                heapq.heapify(heap)
                             heapq.heappush(heap, (cum_neg_log, batch_id, variant))
                             batch_id += 1
                     return
@@ -498,14 +505,22 @@ class PCFGGrammar:
                         seg_keys,
                     )
                     current.pop()
+                    if len(heap) >= beam_width:
+                        break
 
             _expand(0, [], neg_log_struct, segments)
 
+        rank = 0
         while heap:
-            _, _, candidate = heapq.heappop(heap)
+            score, _, candidate = heapq.heappop(heap)
             if candidate in seen:
                 continue
             seen.add(candidate)
+            rank += 1
+            if zipf_s and zipf_s > 0:
+                # soft filter: skip very deep tail occasionally to prefer head
+                if rank > 1000 and (rank % max(1, int(rank ** (zipf_s / 3)))) != 0:
+                    continue
             yield candidate
             count += 1
             if max_candidates and count >= max_candidates:
@@ -609,4 +624,6 @@ def handle_pcfg(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         max_length=getattr(args, "max_len", 64),
         top_structures=getattr(args, "top_structures", 0) or 0,
         top_terminals=getattr(args, "top_terminals", 0) or 0,
+        beam_width=getattr(args, "beam_width", 250_000) or 250_000,
+        zipf_s=float(getattr(args, "zipf_s", 0) or 0),
     )

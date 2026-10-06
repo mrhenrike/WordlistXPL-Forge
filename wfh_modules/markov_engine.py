@@ -124,20 +124,16 @@ class MarkovModel:
         min_length: int = 4,
         max_length: int = 16,
         max_cost: int = 0,
+        beam_width: int = 100_000,
     ) -> Generator[str, None, None]:
-        """Generate passwords in ascending cost order.
-
-        Uses a priority queue (min-heap) with beam search to enumerate
-        candidates from lowest to highest cost.
+        """Generate passwords in ascending cost order (OMEN-style heap + beam).
 
         Args:
             max_candidates: Maximum candidates (0 = unlimited).
             min_length: Minimum password length.
             max_length: Maximum password length.
             max_cost: Maximum total cost threshold (0 = no limit).
-
-        Yields:
-            Password strings in approximate probability order.
+            beam_width: Max live heap nodes (caps RAM). Default 100k.
         """
         if not self.ngrams:
             return
@@ -149,6 +145,7 @@ class MarkovModel:
         initial_context = INITIAL_TOKEN * self.order
         heap: list[tuple[int, int, str, str]] = []
         seq_id = 0
+        beam_width = max(1_000, int(beam_width or 100_000))
 
         for char in sorted_alpha:
             cost = self._cost(0, initial_context, char)
@@ -157,10 +154,16 @@ class MarkovModel:
 
         seen: set[str] = set()
         count = 0
-        beam_limit = 5_000_000
+        steps = 0
+        max_steps = beam_width * 50
 
-        while heap and (beam_limit > 0):
-            beam_limit -= 1
+        while heap and steps < max_steps:
+            steps += 1
+            # Trim beam: keep only lowest-cost nodes
+            if len(heap) > beam_width:
+                heap = list(heapq.nsmallest(beam_width, heap))
+                heapq.heapify(heap)
+
             total_cost, _, current, context = heapq.heappop(heap)
 
             if max_cost and total_cost > max_cost:
@@ -304,4 +307,5 @@ def handle_markov(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         min_length=getattr(args, "min_len", 4),
         max_length=getattr(args, "max_len", 16),
         max_cost=getattr(args, "max_cost", 0) or 0,
+        beam_width=getattr(args, "beam_width", 100_000) or 100_000,
     )
