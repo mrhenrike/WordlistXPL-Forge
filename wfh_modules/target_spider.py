@@ -8,8 +8,8 @@ Native Python implementation using requests + BeautifulSoup.
 No Scrapy dependency required.
 
 Inspired by:
-  - submodules/Wordlists/cewler/src/cewler/spider.py (Scrapy version)
-  - submodules/Wordlists/CeWL/cewl.rb (Ruby CeWL - HTML/meta/PDF)
+  - upstream cewler/src/cewler/spider.py (Scrapy version)
+  - upstream CeWL/cewl.rb (Ruby CeWL - HTML/meta/PDF)
 
 Author: Andre Henrique (@mrhenrike) | Uniao Geek - https://github.com/Uniao-Geek
 Version: 1.0.0

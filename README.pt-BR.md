@@ -498,7 +498,7 @@ python wlf.py --min-len 10 mutate "admin" -o variantes_longas.lst
 | `data/behavior_patterns.json` | Padrões estruturais de geração (config do gerador) |
 | `data/corp_prefix_patterns.json` | Templates genéricos de prefixo de username |
 | `data/seclists_corpus.json` | Índice de paths SecLists para `train` opcional (sem senhas) |
-| `data/isp_words_5.txt` / `isp_words_6.txt` | Bancos de palavras para `isp-keygen` |
+| bancos `isp-keygen` | Externos: `WLF_ISP_WORDS_DIR` ou EmbedXPL `resources/wordlists/isp/` |
 
 **Fora deste tree (só local em `generated/`, gitignored):** corpora offline para pentest autorizado — `users.lst`, `passwords.lst`, `default-creds.json` / `default-creds.lst`, `fuzzing/`, `labs/`, etc. Monte ou atualize com `python3 update_wordlists.py` onde as fontes existirem. A CLI **gera** famílias de padrão pelas flags; não distribui dumps de credenciais.
 

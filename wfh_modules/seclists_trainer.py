@@ -1,37 +1,37 @@
 """
 seclists_trainer.py - Auto-discovery and batch training from SecLists corpus.
 
-Locates a SecLists installation (local submodule or custom path),
-reads the corpus index (data/seclists_corpus.json), and feeds
-relevant files into the PatternModel via train_from_wordlist.
+Locates a SecLists installation via explicit path, environment variable
+``WLF_SECLISTS_PATH``, or sibling directories, reads the corpus index
+(data/seclists_corpus.json), and feeds relevant files into the PatternModel
+via train_from_wordlist.
 
 Only structural patterns are extracted - no raw data is stored.
 
 Author: Andre Henrique (@mrhenrike) | Uniao Geek
-Version: 1.1.0
+Version: 1.2.0
 """
 from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 _CORPUS_INDEX = Path(__file__).parent.parent / "data" / "seclists_corpus.json"
+_SECLISTS_HINT = (
+    "Provide --seclists PATH or set WLF_SECLISTS_PATH to a SecLists checkout "
+    "(must contain a Passwords/ directory)."
+)
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 _KNOWN_SECLISTS_RELATIVES = [
-    # Superproject layout: submodules/Wordlists/SecLists
-    # WFH is at submodules/Uniao-Geek/WordlistXPL-Forge (3 levels inside submodules/)
-    # Resolved: go up 4 levels from wfh_modules/ -> submodules/ -> Wordlists/SecLists
-    Path(__file__).resolve().parents[3] / "Wordlists" / "SecLists",
-    # Alternate: go up 3 levels then into Wordlists (covers flat checkout)
-    Path(__file__).resolve().parents[2] / "Wordlists" / "SecLists",
-    # Legacy paths kept for backward compatibility
-    Path(__file__).parent.parent.parent.parent / "Wordlists" / "SecLists",
-    Path(__file__).parent.parent.parent / "SecLists",
-    Path(__file__).parent.parent / "SecLists",
+    _REPO_ROOT.parent / "Wordlists" / "SecLists",
+    _REPO_ROOT.parent / "SecLists",
+    _REPO_ROOT / "SecLists",
 ]
 
 
@@ -48,19 +48,26 @@ def find_seclists_root(hint: Optional[str] = None) -> Optional[Path]:
     Returns:
         Path to SecLists root or None if not found.
     """
+    candidates: List[Path] = []
     if hint:
-        p = Path(hint)
-        if p.is_dir() and _has_passwords(p):
-            return p
-        logger.warning("Provided SecLists path not valid or empty: %s", hint)
-        return None
+        candidates.append(Path(hint))
+    else:
+        env = os.environ.get("WLF_SECLISTS_PATH", "").strip()
+        if env:
+            candidates.append(Path(env))
+        candidates.extend(_KNOWN_SECLISTS_RELATIVES)
 
-    for candidate in _KNOWN_SECLISTS_RELATIVES:
-        resolved = candidate.resolve()
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            continue
         if resolved.is_dir() and _has_passwords(resolved):
             logger.info("SecLists auto-discovered at: %s", resolved)
             return resolved
 
+    if hint:
+        logger.warning("Provided SecLists path not valid or empty: %s", hint)
     return None
 
 
@@ -89,10 +96,7 @@ def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]
     result: Dict[str, List[str]] = {"found": [], "missing": [], "seclists_root": str(root) if root else "not found"}
 
     if not root:
-        logger.warning(
-            "SecLists not found. Run: git submodule update --init submodules/Wordlists/SecLists\n"
-            "Or specify path: wlf train --seclists /path/to/SecLists"
-        )
+        logger.warning("SecLists not found. %s", _SECLISTS_HINT)
         all_sources = (
             corpus.get("password_sources", [])
             + corpus.get("username_sources", [])
@@ -117,9 +121,7 @@ def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]
 
     if result["missing"]:
         logger.warning(
-            "%d corpus file(s) not found in SecLists. Run:\n"
-            "  git submodule update --init submodules/Wordlists/SecLists\n"
-            "Missing: %s",
+            "%d corpus file(s) not found in SecLists. Missing: %s",
             len(result["missing"]),
             ", ".join(result["missing"]),
         )
@@ -177,7 +179,7 @@ def train_from_seclists(
             fpath = seclists_root / src["path"]
             if not fpath.exists():
                 summary["skipped"].append(src["label"])
-                logger.debug("Corpus file not available: %s (run git submodule update --init submodules/Wordlists/SecLists)", fpath.relative_to(seclists_root) if seclists_root in fpath.parents else fpath)
+                logger.debug("Corpus file not available: %s", src["path"])
                 continue
 
             max_lines = src.get("max_lines", 500_000)
@@ -201,7 +203,7 @@ def train_from_seclists(
             fpath = seclists_root / src["path"]
             if not fpath.exists():
                 summary["skipped"].append(src["label"])
-                logger.debug("Corpus file not available: %s (run git submodule update --init submodules/Wordlists/SecLists)", src["path"])
+                logger.debug("Corpus file not available: %s", src["path"])
                 continue
 
             max_lines = src.get("max_lines", 200_000)

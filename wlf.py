@@ -1781,6 +1781,55 @@ def cmd_password_dna(args: argparse.Namespace) -> None:
     _ok(f"Generated: {count:,} candidates from {dna.n} password DNA(s)")
 
 
+def cmd_dna_extract(args: argparse.Namespace) -> None:
+    """Extract DNA profile + hashcat masks without full candidate explosion."""
+    from wfh_modules.password_dna import PasswordDNA
+    from wfh_modules.coverage_analyzer import hashcat_mask, structure_mask
+
+    passwords: list[str] = list(getattr(args, "passwords", None) or [])
+    if getattr(args, "file", None):
+        try:
+            with open(args.file, encoding="utf-8") as fh:
+                for line in fh:
+                    pw = line.strip()
+                    if pw and not pw.startswith("#") and len(passwords) < 10:
+                        passwords.append(pw)
+        except FileNotFoundError:
+            _err(f"File not found: {args.file}")
+            return
+    if not passwords:
+        _err("No passwords provided.")
+        return
+
+    dna = PasswordDNA(passwords[:10])
+    print(dna.describe())
+    print()
+    print("=== Per-sample masks ===")
+    for pw in passwords[:10]:
+        print(f"  {pw}")
+        print(f"    structure={structure_mask(pw)}")
+        print(f"    hcmask={hashcat_mask(pw)}")
+    out = getattr(args, "output", None)
+    if out:
+        lines = [dna.describe(), ""]
+        for pw in passwords[:10]:
+            lines.append(f"{pw}\t{structure_mask(pw)}\t{hashcat_mask(pw)}")
+        Path(out).write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _ok(f"Wrote DNA extract: {out}")
+
+
+def cmd_cover(args: argparse.Namespace) -> None:
+    """Sample local corpus and report structural coverage / engine hints."""
+    from wfh_modules.coverage_analyzer import handle_cover
+    handle_cover(args, {})
+
+
+def cmd_replay(args: argparse.Namespace) -> None:
+    """Replay generated candidates against a bloom sample of the corpus."""
+    from wfh_modules.coverage_analyzer import handle_replay
+    handle_replay(args, {})
+
+
 def cmd_combiner(args: argparse.Namespace) -> None:
     """Handler for keyword combiner wordlist generation."""
     from wfh_modules.combiner import handle_combiner
@@ -2005,8 +2054,8 @@ def cmd_br_names(args: argparse.Namespace) -> None:
     loader = BRWordListLoader(base_path)
     if not loader.is_available():
         _warn(
-            "BRWordList submodule not found. Run:\n"
-            "  git submodule update --init submodules/Wordlists/BRWordList"
+            "BRWordList not found. Provide --brwordlist-path or set "
+            "WLF_BRWORDLIST_PATH to a BRWordList checkout."
         )
         return
 
@@ -3128,7 +3177,7 @@ def build_parser() -> argparse.ArgumentParser:
         description=(
             "Query the local default-credentials corpus under generated/\n"
             "(gitignored; not shipped in the public tree).\n\n"
-            "Place or build: generated/default-creds.json\n"
+            "Requires --db PATH to a default-creds JSON (suite EmbedXPL resources).\n"
             "  python3 update_wordlists.py\n\n"
             "Examples:\n"
             "  wlf.py default-creds -o all_defaults.lst\n"
@@ -3380,6 +3429,70 @@ def build_parser() -> argparse.ArgumentParser:
     p_dna.add_argument("--show-dna", dest="show_dna", action="store_true",
                         help="Print the extracted DNA profile before generating")
     p_dna.add_argument("-o", "--output", help="Output file")
+
+    # ── dna-extract ────────────────────────────────────────────────────────
+    p_dx = sub.add_parser(
+        "dna-extract",
+        help="Extract password DNA profile and hashcat masks (no full generation)",
+        description=(
+            "Analyze known passwords and print DNA + structure/hashcat masks.\n"
+            "Does not explode the full candidate space (use password-dna for that).\n\n"
+            "Examples:\n"
+            '  wlf.py dna-extract "BrandX#OzZY25" "_BR4NDX@2026#Pitty"\n'
+            "  wlf.py dna-extract --file known.txt -o dna.txt"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_dx.add_argument("passwords", nargs="*", help="Known passwords (1-10)")
+    p_dx.add_argument("--file", metavar="FILE", help="File with known passwords")
+    p_dx.add_argument("-o", "--output", help="Output report file")
+
+    # ── cover ──────────────────────────────────────────────────────────────
+    p_cv = sub.add_parser(
+        "cover",
+        help="Sample local users/passwords corpus and report structural coverage",
+        description=(
+            "Memory-safe reservoir sample of generated/*.lst.\n"
+            "Reports structure/mask families and which engines can cover them.\n\n"
+            "Examples:\n"
+            "  wlf.py cover\n"
+            "  wlf.py cover --sample 2000 --kind passwords -o cover.tsv\n"
+            "  wlf.py cover --corpus generated/users.lst --kind users"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_cv.add_argument("--corpus", metavar="FILE", help="Corpus path (default: generated/passwords.lst)")
+    p_cv.add_argument("--kind", choices=["passwords", "users"], default="passwords")
+    p_cv.add_argument("--sample", type=int, default=1000, help="Reservoir sample size")
+    p_cv.add_argument("--seed", type=int, default=42)
+    p_cv.add_argument("-o", "--output", help="Optional TSV report")
+
+    # ── replay ─────────────────────────────────────────────────────────────
+    p_rp = sub.add_parser(
+        "replay",
+        help="Replay generated candidates vs bloom sample of local corpus",
+        description=(
+            "Generate (or load) candidates and measure hit-rate against a\n"
+            "bloom filter built from a sample of generated/*.lst.\n"
+            "Does not claim 100%% corpus coverage.\n\n"
+            "Examples:\n"
+            "  wlf.py replay\n"
+            "  wlf.py replay --company BrandX --pet OzZY --year 2026 --tag CS\n"
+            "  wlf.py replay --candidates my.lst --bloom-sample 100000"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_rp.add_argument("--corpus", metavar="FILE", help="Corpus path")
+    p_rp.add_argument("--kind", choices=["passwords", "users"], default="passwords")
+    p_rp.add_argument("--candidates", metavar="FILE", help="Candidate list to score")
+    p_rp.add_argument("--bloom-sample", dest="bloom_sample", type=int, default=200_000)
+    p_rp.add_argument("--company", default="BrandX")
+    p_rp.add_argument("--pet", default="OzZY")
+    p_rp.add_argument("--year", default="2026")
+    p_rp.add_argument("--tag", default="CS")
+    p_rp.add_argument("--seeds", nargs="*", help="Optional password seeds for DNA expansion")
+    p_rp.add_argument("--depth", choices=["quick", "normal", "deep"], default="quick")
+    p_rp.add_argument("-o", "--output", help="Write hit examples")
 
     # ── combiner ──────────────────────────────────────────────────────────
     p_cb = sub.add_parser(
@@ -3670,7 +3783,7 @@ def build_parser() -> argparse.ArgumentParser:
         description=(
             "Loads name lists from the BRWordList submodule and produces\n"
             "a deduplicated username wordlist suitable for credential attacks.\n\n"
-            "Requires: git submodule update --init submodules/Wordlists/BRWordList\n\n"
+            "Requires: --brwordlist-path PATH or WLF_BRWORDLIST_PATH\n\n"
             "Examples:\n"
             "  wlf.py br-names\n"
             "  wlf.py br-names --category surnames -o surnames.lst\n"
@@ -4381,8 +4494,7 @@ def cmd_train(args: argparse.Namespace) -> None:
         wfh_root = _resolve_path(".")
         auto_sources = [
             ("generated/passwords.lst", "password", 300_000),
-            ("generated/default-creds.lst", "password", 50_000),
-            ("generated/users.lst", "username", 10_000),
+            ("generated/users.lst", "username", 50_000),
         ]
         for rel, mode, limit in auto_sources:
             p = wfh_root / rel if wfh_root else None
@@ -4967,6 +5079,9 @@ def main() -> None:
         "default-creds": cmd_default_creds,
         "isp-keygen":    cmd_isp_keygen,
         "password-dna":  cmd_password_dna,
+        "dna-extract":   cmd_dna_extract,
+        "cover":         cmd_cover,
+        "replay":        cmd_replay,
         "combiner":      cmd_combiner,
         "pcfg":          cmd_pcfg,
         "markov":        cmd_markov,

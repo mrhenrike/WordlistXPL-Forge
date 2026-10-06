@@ -1,38 +1,43 @@
 """brwordlist_loader.py - BRWordList integration for WordlistXPL-Forge.
 
-Loads Brazilian name lists and PT-BR web discovery paths from the
-BRWordList submodule located at ../Wordlists/BRWordList relative to
-the WordlistXPL-Forge superproject root.
+Loads Brazilian name lists and PT-BR web discovery paths from an
+external BRWordList checkout. Path resolution order:
+
+1. Explicit constructor / CLI path
+2. Environment variable ``WLF_BRWORDLIST_PATH``
+3. Sibling directories relative to this repo (``../Wordlists/BRWordList``,
+   ``../BRWordList``, ``./BRWordList``)
 
 All file access is read-only. No raw entries are persisted by this
 module - callers are responsible for downstream storage.
 
 Author: Andre Henrique (@mrhenrike) | Uniao Geek
-Version: 1.0.0
+Version: 1.1.0
 """
 from __future__ import annotations
 
 import logging
+import os
 import unicodedata
 from pathlib import Path
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
+_BRWORDLIST_HINT = (
+    "Provide --brwordlist-path PATH or set WLF_BRWORDLIST_PATH to a "
+    "BRWordList checkout (must contain a Nomes/ directory)."
+)
+
 # ---------------------------------------------------------------------------
-# Candidate locations for BRWordList (checked in order)
+# Candidate locations for BRWordList (checked in order after env)
 # ---------------------------------------------------------------------------
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 _KNOWN_BRWORDLIST_RELATIVES: List[Path] = [
-    # Superproject layout: submodules/Wordlists/BRWordList
-    # WFH is at submodules/Uniao-Geek/WordlistXPL-Forge
-    # So we go up 3 levels to reach submodules/, then into Wordlists/BRWordList
-    Path(__file__).resolve().parents[2].parent / "Wordlists" / "BRWordList",
-    # Alternate: repo checked out side-by-side
-    Path(__file__).resolve().parents[3] / "Wordlists" / "BRWordList",
-    # Alternate: same parent directory
-    Path(__file__).resolve().parents[2].parent / "BRWordList",
-    Path(__file__).resolve().parents[2] / "BRWordList",
+    _REPO_ROOT.parent / "Wordlists" / "BRWordList",
+    _REPO_ROOT.parent / "BRWordList",
+    _REPO_ROOT / "BRWordList",
 ]
 
 # ---------------------------------------------------------------------------
@@ -144,10 +149,7 @@ class BRWordListLoader:
         if self._base:
             logger.debug("BRWordListLoader using: %s", self._base)
         else:
-            logger.warning(
-                "BRWordList not found. Run: "
-                "git submodule update --init submodules/Wordlists/BRWordList"
-            )
+            logger.warning("BRWordList not found. %s", _BRWORDLIST_HINT)
 
     # ------------------------------------------------------------------
     # Public API
@@ -157,14 +159,22 @@ class BRWordListLoader:
     def auto_detect_path() -> Optional[Path]:
         """Find BRWordList root directory.
 
-        Checks known relative paths relative to this file. A valid root
-        must contain a 'Nomes' subdirectory.
+        Checks ``WLF_BRWORDLIST_PATH``, then known sibling paths.
+        A valid root must contain a ``Nomes`` subdirectory.
 
         Returns:
             Resolved Path to BRWordList root, or None if not found.
         """
-        for candidate in _KNOWN_BRWORDLIST_RELATIVES:
-            resolved = candidate.resolve()
+        env = os.environ.get("WLF_BRWORDLIST_PATH", "").strip()
+        candidates: List[Path] = []
+        if env:
+            candidates.append(Path(env))
+        candidates.extend(_KNOWN_BRWORDLIST_RELATIVES)
+        for candidate in candidates:
+            try:
+                resolved = candidate.resolve()
+            except OSError:
+                continue
             if resolved.is_dir() and (resolved / "Nomes").is_dir():
                 logger.info("BRWordList auto-discovered at: %s", resolved)
                 return resolved

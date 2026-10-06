@@ -23,13 +23,14 @@ usage: wlf.py br-names [-h]
 Loads name lists from the BRWordList submodule and produces
 a deduplicated username wordlist suitable for credential attacks.
 
-Requires: git submodule update --init submodules/Wordlists/BRWordList
+Requires: `--brwordlist-path PATH` or env `WLF_BRWORDLIST_PATH` pointing at a
+BRWordList checkout (directory with `Nomes/`).
 
 Examples:
-  wlf.py br-names
+  wlf.py br-names --brwordlist-path /opt/BRWordList
   wlf.py br-names --category surnames -o surnames.lst
   wlf.py br-names --category all --leet -o names_leet.lst
-  wlf.py br-names --brwordlist-path /opt/BRWordList
+  WLF_BRWORDLIST_PATH=/opt/BRWordList wlf.py br-names
 
 options:
   -h, --help            show this help message and exit

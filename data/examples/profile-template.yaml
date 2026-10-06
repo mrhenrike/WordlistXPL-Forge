@@ -1,0 +1,105 @@
+# Generic personal/corporate profile template for `wlf profile --profile-file`
+# Replace all placeholders. Never commit real client/company identities.
+
+full_name: "PessoaX"
+short_name: "PessoaX"
+surname: "SobrenomeX"
+nicknames:
+  - "pessoax"
+  - "px"
+  - "P3ss0aX"
+
+birth_day: 15
+birth_month: 3
+birth_year: 1990
+
+partner_name: "ParceiroX"
+partner_nick: "parceirox"
+partner_birth: "01/01/1992"
+
+children:
+  - name: "FilhoX"
+    birth: "10/10/2015"
+  - name: "FilhaX"
+    birth: "20/05/2018"
+
+parents:
+  - "PaiX"
+  - "MaeX"
+
+siblings:
+  - "IrmaoX"
+  - "IrmaX"
+
+pets:
+  - name: "PetX"
+    year: 2020
+  - name: "OzZY"
+    year: 2025
+
+pet_adoptions:
+  - name: "PetX"
+    year: 2020
+
+company_name: "BrandX"
+company_department: "Cyber Security"
+company_domain: "acme.example"
+company_role: "analyst"
+work_id: "BX001"
+
+emails:
+  - "pessoax@acme.example"
+  - "pessoax@mail.example"
+
+phones:
+  - "11999990000"
+  - "5511999990000"
+
+locations:
+  - city: "Sao Paulo"
+    state: "SP"
+    country: "BR"
+  - city: "Curitiba"
+    state: "PR"
+
+sports_teams:
+  - "TeamX"
+favorite_artists:
+  - "ArtistX"
+favorite_movies:
+  - "MovieX"
+hobbies:
+  - "hacking"
+  - "soccer"
+
+keywords:
+  - "CS"
+  - "OzZY"
+  - "PetX"
+  - "BrandX"
+
+special_dates:
+  - "2026"
+  - "2025"
+  - "1990"
+  - "1503"
+
+old_passwords:
+  - "OldPass#2020"
+  - "BrandX@2019"
+
+social_handles:
+  - "pessoax"
+  - "brandx_ops"
+
+leet_mode: "aggressive"
+depth: 4
+min_len: 6
+max_len: 32
+year_start: 2018
+year_end: 2026
+include_recent_years: true
+recent_years_lookback: 3
+include_specials: true
+suffix_range_start: 0
+suffix_range_end: 99
