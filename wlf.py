@@ -2310,16 +2310,16 @@ def build_parser() -> argparse.ArgumentParser:
   python wlf.py leet admin -m aggressive
   python wlf.py leet password -m custom --custom-map "a=@,4;s=$;e=3"
   python wlf.py xor --brute 1a2b3c4d
-  python wlf.py analyze labs/labs_passwords.lst --top 30
-  python wlf.py analyze labs/labs_passwords.lst --masks --format json -o stats.json
-  python wlf.py analyze labs/labs_passwords.lst --base-words --base-output bases.lst
+  python wlf.py analyze wordlist.lst --top 30
+  python wlf.py analyze wordlist.lst --masks --format json -o stats.json
+  python wlf.py analyze wordlist.lst --base-words --base-output bases.lst
   python wlf.py merge l1.lst l2.lst --no-numeric --sort alpha -o merged.lst
   python wlf.py dns -w words.lst -d acme.example
   python wlf.py dns -d acme.example --template-file patterns.yaml -w words.lst
   python wlf.py dns --domain-list domains.txt -w words.lst -o subdomains.lst
   python wlf.py dns -d acme.example --match-regex "^api" --filter-regex "test"
   python wlf.py pharma --codes 1200-1250 -o pharma_passwords.lst
-  python wlf.py sanitize labs/labs_passwords.lst --min-len 8 --sort alpha --inplace
+  python wlf.py sanitize wordlist.lst --min-len 8 --sort alpha --inplace
   python wlf.py sanitize list.lst --filter "^[a-zA-Z]" --exclude "\\d{3,}$" -o clean.lst
   python wlf.py sanitize list.lst --min-len 6 --max-len 20 --sort length -o output.lst
   python wlf.py reverse list.lst -o reversed.lst
@@ -2694,7 +2694,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  wlf num2text --number 123 --lang br\n"
             "  wlf num2text --number 123 --lang es\n"
             "  wlf num2text --number 1206 --lang en --separators -,_,@\n"
-            "  wlf num2text --range 0-9999 --lang en -o labs/labs_number2text.lst\n"
+            "  wlf num2text --range 0-9999 --lang en -o numbers.lst\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -3124,12 +3124,12 @@ def build_parser() -> argparse.ArgumentParser:
     # ── default-creds ─────────────────────────────────────────────────────────
     p_dc = sub.add_parser(
         "default-creds",
-        help="Query default credentials database for IoT, routers, printers, ICS/SCADA",
+        help="Query local default credentials corpus (IoT/routers/printers/ICS)",
         description=(
-            "Query the consolidated default credentials database.\n\n"
-            "Contains factory-default user:password pairs from 25+ vendors,\n"
-            "SNMP community strings and SNMPv3 defaults.\n\n"
-            "Sources: RouterXPL-Forge, routersploit, MikrotikAPI-BF.\n\n"
+            "Query the local default-credentials corpus under generated/\n"
+            "(gitignored; not shipped in the public tree).\n\n"
+            "Place or build: generated/default-creds.json\n"
+            "  python3 update_wordlists.py\n\n"
             "Examples:\n"
             "  wlf.py default-creds -o all_defaults.lst\n"
             "  wlf.py default-creds --vendor mikrotik -o mikrotik.lst\n"
@@ -3137,7 +3137,8 @@ def build_parser() -> argparse.ArgumentParser:
             "  wlf.py default-creds --snmp -o snmp_communities.lst\n"
             "  wlf.py default-creds --snmp --snmp-version v3 -o snmpv3.lst\n"
             "  wlf.py default-creds --format user -o usernames.lst\n"
-            "  wlf.py default-creds --list-vendors"
+            "  wlf.py default-creds --list-vendors\n"
+            "  wlf.py default-creds --db /path/to/default-creds.json -o out.lst"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -3157,6 +3158,10 @@ def build_parser() -> argparse.ArgumentParser:
                        help="List all vendors in the database and exit")
     p_dc.add_argument("--list-protocols", dest="list_protocols", action="store_true",
                        help="List all protocols in the database and exit")
+    p_dc.add_argument(
+        "--db",
+        help="Path to default-creds JSON (default: generated/default-creds.json)",
+    )
     p_dc.add_argument("-o", "--output", help="Output file")
 
     # ── isp-keygen ─────────────────────────────────────────────────────────────
@@ -3291,7 +3296,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  wlf.py train --seclists\n"
             "  wlf.py train --seclists /path/to/SecLists --seclists-categories password frequency\n"
             "  wlf.py train --auto --seclists\n"
-            "  wlf.py train --csv users.csv --wordlist labs/labs_passwords.lst --usernames username_br.lst\n"
+            "  wlf.py train --csv users.csv --wordlist passwords.lst --usernames users.lst\n"
             "  wlf.py train --csv export.csv --uid-col samaccountname --mail-col mail"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -3310,7 +3315,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_tr.add_argument(
         "--auto", action="store_true",
-        help="Auto-discover and train from known local wordlists (labs/labs_passwords.lst, username_br.lst, etc.)",
+        help="Auto-discover and train from local generated/ corpora (passwords.lst, default-creds.lst, users.lst)",
     )
     p_tr.add_argument(
         "--uid-col", dest="uid_col", default="userid",
@@ -3603,7 +3608,7 @@ def build_parser() -> argparse.ArgumentParser:
             "IsolationForest-lite and HBOS-lite algorithms. No external\n"
             "ML library required. Higher score = more anomalous.\n\n"
             "Examples:\n"
-            "  wlf.py anomaly-score labs/labs_passwords.lst --top 50\n"
+            "  wlf.py anomaly-score wordlist.lst --top 50\n"
             "  wlf.py anomaly-score leak.txt --top 100 -o rare.txt\n"
             "  wlf.py anomaly-score corpus.lst --max-lines 200000"
         ),
@@ -4375,9 +4380,9 @@ def cmd_train(args: argparse.Namespace) -> None:
     if getattr(args, "auto", False):
         wfh_root = _resolve_path(".")
         auto_sources = [
-            ("labs/labs_passwords.lst",       "password", 300_000),
-            ("passwords/default-creds-combo.lst", "password", 50_000),
-            ("usernames/username_br.lst",          "username", 10_000),
+            ("generated/passwords.lst", "password", 300_000),
+            ("generated/default-creds.lst", "password", 50_000),
+            ("generated/users.lst", "username", 10_000),
         ]
         for rel, mode, limit in auto_sources:
             p = wfh_root / rel if wfh_root else None
@@ -4559,7 +4564,7 @@ def cmd_anomaly_score(args: argparse.Namespace) -> None:
     reimplemented without any external ML dependency.
 
     Example:
-        wlf anomaly-score labs/labs_passwords.lst --top 50
+        wlf anomaly-score wordlist.lst --top 50
         wlf anomaly-score leak.txt --top 100 --output rare_passwords.txt
     """
     from wfh_modules.anomaly_scorer import score_wordlist

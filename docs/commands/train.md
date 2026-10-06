@@ -33,7 +33,7 @@ Examples:
   wlf.py train --seclists
   wlf.py train --seclists /path/to/SecLists --seclists-categories password frequency
   wlf.py train --auto --seclists
-  wlf.py train --csv users.csv --wordlist labs/labs_passwords.lst --usernames username_br.lst
+  wlf.py train --csv users.csv --wordlist passwords.lst --usernames users.lst
   wlf.py train --csv export.csv --uid-col samaccountname --mail-col mail
 
 options:
@@ -43,7 +43,7 @@ options:
   --wordlist FILE       Password wordlist file(s) to train from
   --usernames FILE      Username list file(s) to train from
   --auto                Auto-discover and train from known local wordlists
-                        (labs/labs_passwords.lst, username_br.lst, etc.)
+                        (generated/passwords.lst, users.lst, etc.)
   --uid-col UID_COL     CSV column name for username/samaccountname (default:
                         userid)
   --eid-col EID_COL     CSV column name for employee ID (default: employeeid)
@@ -66,7 +66,7 @@ options:
 | `--csv` | [] | no | AD export CSV file(s) to train from (can repeat for multiple files) |
 | `--wordlist` | [] | no | Password wordlist file(s) to train from |
 | `--usernames` | [] | no | Username list file(s) to train from |
-| `--auto` | False | no | Auto-discover and train from known local wordlists (labs/labs_passwords.lst, username_br.lst, etc.) |
+| `--auto` | False | no | Auto-discover and train from local generated/ corpora (passwords.lst, default-creds.lst, users.lst) |
 | `--uid-col` | 'userid' | no | CSV column name for username/samaccountname (default: userid) |
 | `--eid-col` | 'employeeid' | no | CSV column name for employee ID (default: employeeid) |
 | `--mail-col` | 'workemail' | no | CSV column name for work email (default: workemail) |

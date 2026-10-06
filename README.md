@@ -60,13 +60,9 @@ pip show wordlistxpl-forge
 git clone https://github.com/mrhenrike/WordlistXPL-Forge.git
 cd WordlistXPL-Forge
 
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt pyyaml
-
-# Linux / macOS / Termux (optional venv)
-chmod +x setup_venv.sh && ./setup_venv.sh && source .venv/bin/activate
-
-# Windows PowerShell
-.\setup_venv.ps1; .\.venv\Scripts\Activate.ps1
 ```
 
 ### Run
@@ -261,24 +257,7 @@ python wlf.py iwlgen --keywords admin,router,2026 --connectors @. --leet -o iwl.
 
 Chain per-component CamelCase and linguistic connectors (combiner) with composite
 date/special affixes (affix), then let hashcat apply the affix rule set on the GPU
-so the large expansion never has to be written to disk. The consolidated helper
-scripts run the whole flow in one command:
-
-```bash
-# Linux/macOS
-./scripts/targeted-crack.sh --keywords alpha,bravo,charlie --dates '0724,1988' \
-    --hashfile hashes.txt --hashmode 1000 --run
-```
-
-```powershell
-# Windows
-./scripts/targeted-crack.ps1 -Keywords alpha,bravo,charlie -Dates '0724,1988' `
-    -HashFile hashes.txt -HashMode 1000 -Run
-```
-
-Without `--run` (or `-Run`) the scripts build `generated/targeted_bases.lst` and
-`generated/targeted_affix.rule` and print the ready hashcat command. The
-equivalent manual steps are:
+so the large expansion never has to be written to disk:
 
 ```bash
 python wlf.py combiner alpha bravo charlie --titlecase --link-lang pt --assume-yes \
@@ -359,7 +338,7 @@ Measure the effectiveness of a generated wordlist against a reference set. Repor
 python wlf.py benchmark --wordlist generated.lst --reference rockyou_sample.txt
 python wlf.py benchmark --wordlist output.lst --reference test_set.txt --json report.json
 python wlf.py maya-rank generated.lst --top 1000 -o ranked.lst
-python wlf.py anomaly-score labs/labs_passwords.lst --top 50
+python wlf.py anomaly-score wordlist.lst --top 50
 python wlf.py pattern-rank passwords.lst --layout qwerty
 ```
 
@@ -515,17 +494,14 @@ python wlf.py --min-len 10 mutate "admin" -o long_variants.lst
 
 ## What this tree ships
 
-| File | Description | Entries |
-|------|-------------|---------|
-| `data/default_credentials.json` | Structured default credentials (1,506 entries, 88 vendors, SNMP) | n/a |
-| `passwords/default-creds-combo.lst` | Default credential `user:password` combos (routers, printers, ICS/SCADA) | ~3.1K |
-| `usernames/username_br.lst` | Brazilian and global username patterns | ~1.7K |
-| `fuzzing/discovery_br.lst` | Brazilian web discovery and API fuzzing paths | ~900 |
-| `labs/*.lst` | Workshop and training wordlists | small |
-| `data/behavior_patterns.json` | Structural generation patterns (not a company list) | n/a |
-| `data/corp_prefix_patterns.json` | Generic corporate username prefix templates | n/a |
+| File | Description |
+|------|-------------|
+| `data/behavior_patterns.json` | Structural generation patterns (generator config) |
+| `data/corp_prefix_patterns.json` | Generic corporate username prefix templates |
+| `data/seclists_corpus.json` | SecLists path index for optional `train` (no raw passwords) |
+| `data/isp_words_5.txt` / `isp_words_6.txt` | Word banks for `isp-keygen` |
 
-**Not in this tree:** `passwords/wlist_brasil.lst` (Brazilian password corpus) and any operator-supplied corporate OSINT lists. The CLI still **generates** those pattern families from the flags you pass.
+**Not in this tree (local only under `generated/`, gitignored):** offline corpora for authorized pentests — `users.lst`, `passwords.lst`, `default-creds.json` / `default-creds.lst`, `fuzzing/`, `labs/`, and related lists. Build or refresh with `python3 update_wordlists.py` on a machine that has the source corpora. The CLI **generates** pattern families from the flags you pass; it does not ship credential dumps.
 
 `br-names` can load an optional local BRWordList directory if you provide `--brwordlist-path`. That corpus is not bundled here.
 
@@ -533,17 +509,14 @@ python wlf.py --min-len 10 mutate "admin" -o long_variants.lst
 
 ## Is a password in these lists?
 
-This repository does not ship `wlist_brasil`. You can still check shipped defaults, lab samples, or **your** generated output:
+This repository does not ship large password corpora. Check **your** local `generated/` output or any list you generated:
 
 ```bash
-# Linux/macOS: shipped factory defaults
-grep -qxF 'admin:admin' passwords/default-creds-combo.lst && echo "FOUND" || echo "Not found"
-
-# Your generated list
-grep -qxF 'YourPassword' generated/output.lst && echo "FOUND" || echo "Not found"
+# Your generated / local corpus
+grep -qxF 'YourPassword' generated/passwords.lst && echo "FOUND" || echo "Not found"
 
 # Windows PowerShell
-Select-String -Path passwords\default-creds-combo.lst -Pattern '^admin:admin$' -SimpleMatch -Quiet
+Select-String -Path generated\passwords.lst -Pattern '^YourPassword$' -SimpleMatch -Quiet
 ```
 
 If a **real** secret matches a generated candidate, change it, enable MFA, and use a password manager. That hit is predictable construction, not a dump from this repo.

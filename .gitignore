@@ -40,8 +40,8 @@ update_wordlists.py
 *.tmp.lst
 temp/
 .model/
-generated/*.lst
-generated/*.txt
+# Entire offline corpora tree — never publish to public GitHub
+generated/**
 !generated/.gitkeep
 
 # PyPI build artifacts and public-git packaging block
@@ -62,11 +62,29 @@ packages/**/build.ps1
 *.example
 *.sample
 
-# Lab YAML profiles stay local
-labs/*/
-labs/*.yaml
-labs/*.yml
-labs/labs_number2text.lst
+# Legacy corpora dirs (content lives in generated/)
+fuzzing/
+labs/
+passwords/
+usernames/
+
+# Credential / payload corpora — local generated/ only
+data/default_credentials.json
+data/default-creds/
+data/waf_bypass_patterns.lst
+data/examples/
+
+# Local-only tooling / non-runtime
+tests/
+setup_venv.sh
+setup_venv.ps1
+tools/
+scripts/
+third_party_manifest.json
+THIRD_PARTY_COMPONENTS.md
+.githooks/
+docs/training/
+docs/wordlist-sources-audit.md
 
 # CI/CD and contributor metadata stay local
 .github/workflows/

@@ -5,11 +5,11 @@ Loads a consolidated JSON database of factory-default user:password pairs,
 SNMP community strings, and SNMPv3 credentials. Supports filtering by vendor,
 protocol, category, and output format.
 
-Config file: data/default_credentials.json
-Sources: RouterXPL-Forge, routersploit, MikrotikAPI-BF, PrinterReaper, ISF
+Local corpus (gitignored): generated/default-creds.json
+Build/refresh with: python3 update_wordlists.py
 
 Author: Andre Henrique (LinkedIn/X: @mrhenrike)
-Version: 1.0.0
+Version: 1.1.0
 """
 from __future__ import annotations
 
@@ -23,28 +23,35 @@ logger = logging.getLogger(__name__)
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
 _DB: Optional[dict] = None
+_DB_PATH: Optional[Path] = None
 
 
-def _resolve_db_path() -> Path:
-    """Resolve default_credentials.json checking package data first, then repo root."""
-    pkg_path = _MODULE_DIR / "data" / "default_credentials.json"
-    if pkg_path.exists():
-        return pkg_path
-    return _REPO_ROOT / "data" / "default_credentials.json"
+def _resolve_db_path(explicit: Optional[str | Path] = None) -> Path:
+    """Resolve local default-creds JSON under generated/ (not shipped publicly)."""
+    if explicit:
+        return Path(explicit)
+    return _REPO_ROOT / "generated" / "default-creds.json"
 
 
-def _load_db() -> dict:
-    """Load and cache the credentials database."""
-    global _DB
-    if _DB is not None:
+def _load_db(explicit: Optional[str | Path] = None) -> dict:
+    """Load and cache the credentials database from generated/."""
+    global _DB, _DB_PATH
+    db_path = _resolve_db_path(explicit)
+    if _DB is not None and _DB_PATH == db_path:
         return _DB
-    db_path = _resolve_db_path()
     if not db_path.exists():
-        logger.error("Default credentials database not found: %s", db_path)
+        logger.error(
+            "Default credentials database not found: %s\n"
+            "  Local corpus only (not in the public tree). Place the file at\n"
+            "  generated/default-creds.json or run: python3 update_wordlists.py",
+            db_path,
+        )
         _DB = {"credentials": [], "snmp_communities": [], "snmpv3_defaults": []}
+        _DB_PATH = db_path
         return _DB
     with open(db_path, "r", encoding="utf-8") as f:
         _DB = json.load(f)
+    _DB_PATH = db_path
     logger.info(
         "Loaded %d credentials, %d SNMP communities, %d SNMPv3 from %s",
         len(_DB.get("credentials", [])),
@@ -144,6 +151,26 @@ def generate_snmp(version: str = "v2") -> Generator[str, None, None]:
 def handle_default_creds(args: object, _ctx: dict) -> None:
     """CLI handler for the default-creds subcommand."""
     import sys
+
+    db_override = getattr(args, "db", None)
+    # Prime cache from generated/ (or --db) before any query
+    db = _load_db(db_override)
+    db_path = _resolve_db_path(db_override)
+    if not db_path.exists() and not any(
+        (
+            db.get("credentials"),
+            db.get("snmp_communities"),
+            db.get("snmpv3_defaults"),
+        )
+    ):
+        print(
+            f"[!] Local default-creds corpus missing: {db_path}\n"
+            "    Not shipped in the public tree. Build with:\n"
+            "      python3 update_wordlists.py\n"
+            "    Or pass --db /path/to/default-creds.json",
+            file=sys.stderr,
+        )
+        return
 
     if getattr(args, "list_vendors", False):
         vendors = list_vendors()
