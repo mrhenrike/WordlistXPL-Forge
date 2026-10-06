@@ -4632,6 +4632,219 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Max reference entries (0 = all)")
     p_cur.add_argument("-o", "--output", help="Merged output file")
 
+    # ── v2.0 Aurora commands ──────────────────────────────────────────────
+    p_pipe = sub.add_parser(
+        "pipeline",
+        help="Run a YAML multi-engine pipeline (async merge by score)",
+        description=(
+            "Compose engines via YAML DSL and emit ranked candidates.\n\n"
+            "Examples:\n"
+            "  wlf.py pipeline my_pipeline.yaml\n"
+            "  wlf.py --limit 50000 pipeline attack.yaml -o out.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_pipe.add_argument("pipeline_file", metavar="PIPELINE_FILE",
+                        help="Path to pipeline YAML/JSON file")
+    p_pipe.add_argument("-o", "--output", help="Output file (omit = stdout)")
+
+    p_sess = sub.add_parser(
+        "session",
+        help="Save/list/resume generation sessions",
+        description=(
+            "Manage generation session checkpoints under ~/.wlf/sessions/.\n\n"
+            "Examples:\n"
+            "  wlf.py session list\n"
+            "  wlf.py session show 1710000000-abcdef\n"
+            "  wlf.py session resume 1710000000-abcdef"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_sess.add_argument(
+        "session_sub", nargs="?", default="list",
+        choices=["list", "show", "resume"],
+        help="Sub-command (default: list)",
+    )
+    p_sess.add_argument("session_id", nargs="?", default=None,
+                        help="Session id for show/resume")
+
+    p_score = sub.add_parser(
+        "score",
+        help="Explain and score a candidate password",
+        description=(
+            "Heuristic structure/entropy score breakdown.\n\n"
+            "Examples:\n"
+            "  wlf.py score 'Admin2024!'\n"
+            "  wlf.py score P@ssw0rd"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_score.add_argument("password", help="Password candidate to score")
+
+    p_explain = sub.add_parser(
+        "explain",
+        help="Alias for score — explain a candidate",
+        description="Same as 'score'.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_explain.add_argument("password", help="Password candidate to explain")
+
+    p_serve = sub.add_parser(
+        "serve",
+        help="REST API server (FastAPI/aiohttp) for generation streams",
+        description=(
+            "Start local API (AUTHORIZED USE ONLY).\n\n"
+            "Examples:\n"
+            "  wlf.py serve --port 8771\n"
+            "  wlf.py serve --host 127.0.0.1 --port 7777 --api-key SECRET"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_serve.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)")
+    p_serve.add_argument("--port", type=int, default=8771, help="Bind port (default: 8771)")
+    p_serve.add_argument("--api-key", dest="api_key", default="",
+                         help="Optional API key (or env WLF_API_KEY)")
+
+    p_brd = sub.add_parser(
+        "br-deep",
+        help="Brazilian deep patterns (CPF/CNPJ/CEP + PT-BR vocabulary)",
+        description=(
+            "Generate BR-centric candidates (synthetic structural patterns only).\n\n"
+            "Examples:\n"
+            "  wlf.py --limit 5000 br-deep --sector corporate -o br_corp.lst\n"
+            "  wlf.py br-deep --profile-file alvo.yaml --no-cpf -o br_alvo.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_brd.add_argument("--profile-file", dest="profile_file", metavar="FILE",
+                       help="JSON/YAML profile file")
+    p_brd.add_argument(
+        "--sector",
+        choices=["generic", "corporate", "finance", "gov", "healthcare", "ecommerce"],
+        default="generic",
+        help="Sector prior (default: generic)",
+    )
+    p_brd.add_argument("--no-cpf", action="store_true", help="Skip CPF structural patterns")
+    p_brd.add_argument("--no-cnpj", action="store_true", help="Skip CNPJ structural patterns")
+    p_brd.add_argument("--no-cep", action="store_true", help="Skip CEP region tokens")
+    p_brd.add_argument("--cep-prefix", dest="cep_prefix", metavar="XX",
+                       help="Focus on CEP prefix (e.g. 01)")
+    p_brd.add_argument("-o", "--output", help="Output file")
+
+    p_pbmp = sub.add_parser(
+        "pbmp",
+        help="Full PBMP strategy distribution for a profile",
+        description=(
+            "Print weighted engine plan (History/Context/Behavior/Population).\n\n"
+            "Examples:\n"
+            "  wlf.py pbmp --n-engines 8\n"
+            "  wlf.py pbmp --profile-file alvo.yaml"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_pbmp.add_argument("--profile-file", dest="profile_file", metavar="FILE",
+                        help="JSON/YAML profile")
+    p_pbmp.add_argument("--n-engines", dest="n_engines", type=int, default=5,
+                        help="Top strategies to show (default: 5)")
+
+    p_evl = sub.add_parser(
+        "evolve",
+        help="Evolutionary generation (genetic / MAP-Elites)",
+        description=(
+            "Population-based candidate search.\n\n"
+            "Examples:\n"
+            "  wlf.py --limit 2000 evolve --mode genetic -o ga.lst\n"
+            "  wlf.py evolve --mode map-elites --seed-file seeds.txt --limit 5000"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_evl.add_argument("--mode", choices=["genetic", "map-elites"], default="genetic")
+    p_evl.add_argument("--seed-file", dest="seed_file", metavar="FILE",
+                       help="Seed wordlist to initialize population")
+    p_evl.add_argument("-o", "--output", help="Output file")
+
+    p_ge = sub.add_parser(
+        "graph-expand",
+        help="Graph neighbourhood expansion from a seed corpus",
+        description=(
+            "Expand transformations around seed passwords.\n\n"
+            "Examples:\n"
+            "  wlf.py --limit 5000 graph-expand seeds.txt -o graph.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_ge.add_argument("corpus_file", metavar="CORPUS", help="Seed corpus file")
+    p_ge.add_argument("-o", "--output", help="Output file")
+
+    p_tm = sub.add_parser(
+        "temporal-model",
+        help="Temporal drift generation across years",
+        description=(
+            "Evolve seed styles from base_year toward target_year.\n\n"
+            "Examples:\n"
+            "  wlf.py temporal-model --seed-file seeds.txt --base-year 2019 --target-year 2026"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_tm.add_argument("--seed-file", dest="seed_file", metavar="FILE")
+    p_tm.add_argument("--base-year", dest="base_year", type=int, default=2019)
+    p_tm.add_argument("--target-year", dest="target_year", type=int, default=2026)
+    p_tm.add_argument("-o", "--output", help="Output file")
+
+    p_dpc = sub.add_parser(
+        "domain-pcfg",
+        help="Domain-specific PCFG (corporate/healthcare/finance/...)",
+        description=(
+            "Sector-biased PCFG-style expansion.\n\n"
+            "Examples:\n"
+            "  wlf.py --limit 5000 domain-pcfg --sector healthcare -o hc.lst\n"
+            "  wlf.py domain-pcfg --sector finance --corpus-file corp.txt"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_dpc.add_argument(
+        "--sector",
+        default="generic",
+        help="Sector label (default: generic)",
+    )
+    p_dpc.add_argument("--corpus-file", dest="corpus_file", metavar="FILE",
+                       help="Optional domain corpus for terminals")
+    p_dpc.add_argument("-o", "--output", help="Output file")
+
+    p_plg = sub.add_parser(
+        "plugin",
+        help="List/run user plugins (~/.wlf/plugins/)",
+        description=(
+            "Plugin discovery and execution.\n\n"
+            "Examples:\n"
+            "  wlf.py plugin list\n"
+            "  wlf.py --limit 1000 plugin run myplugin -o plug.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_plg.add_argument(
+        "plugin_sub", nargs="?", default="list", choices=["list", "run"],
+        help="Sub-command (default: list)",
+    )
+    p_plg.add_argument("plugin_name", nargs="?", default=None,
+                       help="Plugin name for run")
+    p_plg.add_argument("-o", "--output", help="Output file when running a plugin")
+
+    p_vi = sub.add_parser(
+        "vae-interp",
+        help="VAE latent-space interpolation between two passwords",
+        description=(
+            "Requires optional [gpu]/neural] torch stack when using real VAE weights.\n\n"
+            "Examples:\n"
+            "  wlf.py vae-interp senha1 senha2 --steps 10"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_vi.add_argument("pw_from", help="Start password")
+    p_vi.add_argument("pw_to", help="End password")
+    p_vi.add_argument("--steps", type=int, default=10, help="Interpolation steps")
+    p_vi.add_argument("-o", "--output", help="Output file")
+
     return parser
 
 
@@ -5495,40 +5708,96 @@ def main() -> None:
 
 def cmd_pipeline(args) -> None:
     """Run a YAML pipeline spec file."""
-    pipeline_file = getattr(args, "pipeline_file", None) or (args.args[0] if hasattr(args, "args") and args.args else None)
+    pipeline_file = getattr(args, "pipeline_file", None)
     if not pipeline_file:
         _warn("Usage: wlf pipeline <pipeline.yaml> [-o output.txt]")
         return
     try:
         from wfh_modules.pipeline_dsl import execute_pipeline
         gen = execute_pipeline(pipeline_file, _GLOBAL_CTX)
-        _write_output(gen, _GLOBAL_CTX)
+        count = _write_output(gen, getattr(args, "output", None), stream=True)
+        _ok(f"Pipeline wrote {count:,} candidates")
     except Exception as exc:
-        _error(f"Pipeline error: {exc}")
+        _err(f"Pipeline error: {exc}")
 
 
 def cmd_session(args) -> None:
     """Manage sessions: list / show / resume."""
     from wfh_modules.session_manager import SessionManager
+    import time as _time
+
     mgr = SessionManager()
-    sub = getattr(args, "session_sub", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
-    if sub == "list" or sub is None:
+    sub = getattr(args, "session_sub", None) or "list"
+    if sub == "list":
         sessions = mgr.list_sessions()
         if not sessions:
             _info("No saved sessions.")
+            return
         for s in sessions:
-            print(f"  {s.session_id}  emitted={s.emitted:,}  updated={s.updated_at[:19]}")
+            updated = getattr(s, "updated_at", 0) or 0
+            try:
+                stamp = _time.strftime("%Y-%m-%dT%H:%M:%S", _time.localtime(float(updated)))
+            except (TypeError, ValueError, OSError):
+                stamp = str(updated)
+            print(f"  {s.session_id}  emitted={s.emitted:,}  updated={stamp}")
+    elif sub == "show":
+        sid = getattr(args, "session_id", None)
+        if not sid:
+            _warn("Usage: wlf session show <session_id>")
+            return
+        try:
+            st = mgr.load(sid)
+            print(f"session_id : {st.session_id}")
+            print(f"label      : {st.label!r}")
+            print(f"emitted    : {st.emitted:,}")
+            print(f"bytes      : {st.bytes_written:,}")
+            print(f"chunk      : {st.chunk_index}")
+            print(f"created_at : {st.created_at}")
+            print(f"updated_at : {st.updated_at}")
+            if st.pipeline_config:
+                print(f"pipeline   : {st.pipeline_config}")
+            if st.pbmp_weights:
+                print(f"pbmp       : {st.pbmp_weights}")
+        except FileNotFoundError as exc:
+            _err(str(exc))
     elif sub == "resume":
-        sid = getattr(args, "session_id", None) or (getattr(args, "args", [None, None])[1] if hasattr(args, "args") else None)
+        sid = getattr(args, "session_id", None)
         if not sid:
             _warn("Usage: wlf session resume <session_id>")
             return
         try:
             ctx = mgr.resume_ctx(sid)
             _GLOBAL_CTX.update(ctx)
-            _info(f"Session {sid} resumed ({ctx.get('emitted', 0):,} candidates previously emitted)")
-        except KeyError as exc:
-            _error(str(exc))
+            _info(
+                f"Session {sid} resumed "
+                f"({ctx.get('_resume_emitted', ctx.get('emitted', 0)):,} candidates previously emitted)"
+            )
+        except FileNotFoundError as exc:
+            _err(str(exc))
+    else:
+        _warn(f"Unknown session sub-command: {sub}. Use list, show, or resume.")
+
+
+def _load_profile_file(path: str) -> dict:
+    """Load a profile from JSON or YAML."""
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Profile not found: {path}")
+    text = p.read_text(encoding="utf-8")
+    suffix = p.suffix.lower()
+    if suffix in (".yaml", ".yml"):
+        try:
+            import yaml  # type: ignore
+            data = yaml.safe_load(text) or {}
+        except ImportError:
+            from wfh_modules.profiler import load_profile_yaml
+            data = load_profile_yaml(path)
+    else:
+        import json as _json
+        data = _json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"Profile must be a mapping: {path}")
+    return data
 
 
 def cmd_score(args) -> None:
@@ -5558,44 +5827,45 @@ def cmd_serve(args) -> None:
         from wfh_modules.api_server import run_server
         run_server(host=host, port=port, api_key=api_key)
     except Exception as exc:
-        _error(f"API server error: {exc}")
+        _err(f"API server error: {exc}")
 
 
 def cmd_br_deep(args) -> None:
     """Brazilian deep profile wordlist generation."""
     try:
         from wfh_modules.br_deep_engine import BRDeepEngine
-        profile = {}
+        profile: dict = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
-            import json as _json
-            with open(profile_file, encoding="utf-8") as f:
-                profile = _json.load(f)
+            profile = _load_profile_file(profile_file)
         sector = getattr(args, "sector", None) or profile.get("sector", "generic")
         include_cpf = not getattr(args, "no_cpf", False)
         include_cnpj = not getattr(args, "no_cnpj", False)
+        include_cep = not getattr(args, "no_cep", False)
         eng = BRDeepEngine(
             profile=profile,
             sector=sector,
             include_cpf_patterns=include_cpf,
             include_cnpj_patterns=include_cnpj,
+            include_cep_patterns=include_cep,
+            cep_prefix=getattr(args, "cep_prefix", None),
         )
-        gen = (pw for pw, _ in eng.generate(max_candidates=_GLOBAL_CTX.get("limit") or 100_000))
-        _write_output(gen, _GLOBAL_CTX)
+        limit = int(_GLOBAL_CTX.get("limit") or 100_000)
+        gen = (pw for pw, _ in eng.generate(max_candidates=limit))
+        count = _write_output(gen, getattr(args, "output", None), stream=True)
+        _ok(f"br-deep: {count:,} candidates")
     except Exception as exc:
-        _error(f"br-deep error: {exc}")
+        _err(f"br-deep error: {exc}")
 
 
 def cmd_pbmp(args) -> None:
     """Show PBMP strategy distribution for a profile."""
     try:
         from wfh_modules.pbmp_full import PBMPFull
-        profile = {}
+        profile: dict = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
-            import json as _json
-            with open(profile_file, encoding="utf-8") as f:
-                profile = _json.load(f)
+            profile = _load_profile_file(profile_file)
         n = int(getattr(args, "n_engines", None) or 5)
         controller = PBMPFull(profile=profile, sector=profile.get("sector"))
         print(controller.describe())
@@ -5604,7 +5874,7 @@ def cmd_pbmp(args) -> None:
         for step in plan:
             print(f"  {step['strategy']:<22s}  weight={step['weight']:.3f}  limit={step['limit']:,}")
     except Exception as exc:
-        _error(f"PBMP error: {exc}")
+        _err(f"PBMP error: {exc}")
 
 
 def cmd_evolve(args) -> None:
@@ -5628,9 +5898,9 @@ def cmd_evolve(args) -> None:
             gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
 
         gen = (pw for pw, _ in gen_raw)
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
     except Exception as exc:
-        _error(f"evolve error: {exc}")
+        _err(f"evolve error: {exc}")
 
 
 def cmd_graph_expand(args) -> None:
@@ -5646,10 +5916,10 @@ def cmd_graph_expand(args) -> None:
         limit = _GLOBAL_CTX.get("limit") or 100_000
         eng = PasswordGraphEngine()
         gen = (pw for pw, _ in eng.generate(seed_corpus=corpus, max_candidates=limit))
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
         _info(eng.describe())
     except Exception as exc:
-        _error(f"graph-expand error: {exc}")
+        _err(f"graph-expand error: {exc}")
 
 
 def cmd_temporal_model(args) -> None:
@@ -5666,10 +5936,10 @@ def cmd_temporal_model(args) -> None:
         limit = _GLOBAL_CTX.get("limit") or 200_000
         eng = TemporalDriftEngine(base_year=base_year, target_year=target_year)
         gen = (pw for pw, _ in eng.generate(seed_words=seed_words or None, max_candidates=limit))
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
         _info(eng.describe())
     except Exception as exc:
-        _error(f"temporal-model error: {exc}")
+        _err(f"temporal-model error: {exc}")
 
 
 def cmd_domain_pcfg(args) -> None:
@@ -5685,10 +5955,10 @@ def cmd_domain_pcfg(args) -> None:
         limit = _GLOBAL_CTX.get("limit") or 100_000
         eng = DomainPCFG(sector=sector)
         gen = (pw for pw, _ in eng.generate(corpus=corpus or None, max_candidates=limit))
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
         _info(eng.describe())
     except Exception as exc:
-        _error(f"domain-pcfg error: {exc}")
+        _err(f"domain-pcfg error: {exc}")
 
 
 def cmd_plugin(args) -> None:
@@ -5708,7 +5978,7 @@ def cmd_plugin(args) -> None:
         profile = {}
         limit = _GLOBAL_CTX.get("limit") or 10_000
         gen = (pw for pw, _ in run_plugin(name, profile, {**_GLOBAL_CTX, "limit": limit}))
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
     else:
         _warn(f"Unknown plugin sub-command: {sub}. Use list or run.")
 
@@ -5725,9 +5995,9 @@ def cmd_vae_interp(args) -> None:
         steps = int(getattr(args, "steps", None) or 10)
         eng = VAEPasswordEngine()
         gen = (pw for pw, _ in eng.interpolate(pw_from, pw_to, steps=steps))
-        _write_output(gen, _GLOBAL_CTX)
+        _write_output(gen, getattr(args, "output", None), stream=True)
     except Exception as exc:
-        _error(f"vae-interp error: {exc}")
+        _err(f"vae-interp error: {exc}")
 
 
 if __name__ == "__main__":
