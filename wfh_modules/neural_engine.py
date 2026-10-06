@@ -28,8 +28,9 @@ from typing import Generator, Optional
 logger = logging.getLogger(__name__)
 
 _INSTALL_HINT = (
-    "Neural generation requires the optional 'neural' extra. Install it with:\n"
-    "  pip install wordlistxpl-forge[neural]\n"
+    "Neural generation requires the optional 'gpu'/'neural' extra. Install with:\n"
+    "  pip install -r requirements-gpu.txt\n"
+    "  # or: pip install wordlistxpl-forge[gpu]\n"
     "or:\n"
     "  pip install torch  (and 'transformers' for PassGPT adapters)"
 )
@@ -65,11 +66,49 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _select_device(torch, compute_mode: str):
-    """Pick a torch device honoring the requested compute mode."""
+def _vram_free_mb():
+    """Best-effort free VRAM in MiB (nvidia-smi), or None."""
+    try:
+        import subprocess
+        out = subprocess.check_output(
+            [
+                "nvidia-smi",
+                "--query-gpu=memory.free",
+                "--format=csv,noheader,nounits",
+            ],
+            text=True,
+            timeout=3,
+        )
+        vals = [int(x.strip()) for x in out.strip().splitlines() if x.strip().isdigit()]
+        return min(vals) if vals else None
+    except Exception:
+        return None
+
+
+def _select_device(torch, compute_mode: str, vram_budget_mb: int = 4096):
+    """Pick a torch device honoring compute mode and soft VRAM budget.
+
+    Falls back to CPU when free VRAM is below a safety floor (~512 MiB).
+    """
     if compute_mode == "cpu":
         return torch.device("cpu")
-    if torch.cuda.is_available() and compute_mode in ("auto", "gpu", "cuda", "hybrid"):
+    want_gpu = compute_mode in ("auto", "gpu", "cuda", "hybrid")
+    if torch.cuda.is_available() and want_gpu:
+        free = _vram_free_mb()
+        floor = 512
+        if free is not None and free < floor:
+            logger.warning(
+                "VRAM free=%s MiB below floor — neural on CPU (budget=%s)",
+                free, vram_budget_mb,
+            )
+            return torch.device("cpu")
+        try:
+            usable = free if free is not None else vram_budget_mb
+            frac = min(0.9, max(0.1, float(vram_budget_mb) / max(float(usable), 1.0)))
+            if hasattr(torch.cuda, "set_per_process_memory_fraction"):
+                torch.cuda.set_per_process_memory_fraction(frac, 0)
+        except Exception as exc:
+            logger.debug("VRAM fraction set skipped: %s", exc)
         return torch.device("cuda")
     if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() \
             and compute_mode in ("auto", "gpu", "mps", "hybrid"):
@@ -158,6 +197,7 @@ def train_model(
     layers: int = 2,
     lr: float = 2e-3,
     compute_mode: str = "auto",
+    vram_budget_mb: int = 4096,
     seed: int = 0,
 ) -> dict:
     """Train a character-level LSTM and save it.
@@ -189,7 +229,7 @@ def train_model(
         raise ValueError("no training data")
 
     vocab = CharVocab.from_words(words)
-    device = _select_device(torch, compute_mode)
+    device = _select_device(torch, compute_mode, vram_budget_mb)
     cfg = {"embed": embed, "hidden": hidden, "layers": layers, "max_len": max_len}
     model = _build_model(torch, len(vocab), cfg).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -249,12 +289,12 @@ def train_model(
     }
 
 
-def _load_model(torch, model_path: str, compute_mode: str):
+def _load_model(torch, model_path: str, compute_mode: str, vram_budget_mb: int = 4096):
     """Load a trained LSTM model and its vocabulary."""
     ckpt = torch.load(model_path, map_location="cpu", weights_only=False)
     vocab = CharVocab.from_dict(ckpt["vocab"])
     cfg = ckpt["config"]
-    device = _select_device(torch, compute_mode)
+    device = _select_device(torch, compute_mode, vram_budget_mb)
     model = _build_model(torch, len(vocab), cfg).to(device)
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
@@ -278,6 +318,7 @@ def generate(
     mask: str = "",
     max_len: int = 32,
     compute_mode: str = "auto",
+    vram_budget_mb: int = 4096,
     seed: int = 0,
     dedupe: bool = True,
 ) -> Generator[str, None, None]:
@@ -300,7 +341,7 @@ def generate(
     torch = _require_torch()
     if seed:
         torch.manual_seed(seed)
-    model, vocab, device, cfg = _load_model(torch, model_path, compute_mode)
+    model, vocab, device, cfg = _load_model(torch, model_path, compute_mode, vram_budget_mb)
 
     mask_tokens: list[str] = []
     if mask:
@@ -396,6 +437,7 @@ def dpg_adapt(
     steps: int = 200,
     lr: float = 1e-3,
     compute_mode: str = "auto",
+    vram_budget_mb: int = 4096,
 ) -> dict:
     """Adapt a model toward a set of recovered passwords (Dynamic Password Guessing).
 
@@ -416,7 +458,7 @@ def dpg_adapt(
     torch = _require_torch()
     import torch.nn as nn
 
-    model, vocab, device, cfg = _load_model(torch, model_path, compute_mode)
+    model, vocab, device, cfg = _load_model(torch, model_path, compute_mode, vram_budget_mb)
     recovered = [w[: cfg.get("max_len", 32)] for w in recovered if w]
     if not recovered:
         raise ValueError("no recovered passwords for adaptation")
@@ -471,6 +513,7 @@ def generate_hf(
     prefix: str = "",
     max_len: int = 32,
     compute_mode: str = "auto",
+    vram_budget_mb: int = 4096,
 ) -> Generator[str, None, None]:
     """Generate candidates from a HuggingFace causal LM adapter (for example PassGPT).
 
@@ -494,7 +537,7 @@ def generate_hf(
             "pip install wordlistxpl-forge[neural]"
         ) from exc
 
-    device = _select_device(torch, compute_mode)
+    device = _select_device(torch, compute_mode, vram_budget_mb)
     tok = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     model.eval()
@@ -537,6 +580,7 @@ def handle_neural(args, ctx: dict):
     """
     action = getattr(args, "neural_action", "generate")
     compute_mode = ctx.get("compute_mode", "auto")
+    vram_budget_mb = int(ctx.get("vram_budget_mb", 4096) or 4096)
 
     try:
         if action == "train":
@@ -568,6 +612,7 @@ def handle_neural(args, ctx: dict):
                 hidden=int(getattr(args, "hidden", 256) or 256),
                 layers=int(getattr(args, "layers", 2) or 2),
                 compute_mode=compute_mode,
+                vram_budget_mb=vram_budget_mb,
                 seed=int(getattr(args, "seed", 0) or 0),
             )
             lines = [
@@ -597,7 +642,7 @@ def handle_neural(args, ctx: dict):
                 logger.error("adapter requires --model NAME_OR_PATH")
                 return None
             gen = generate_hf(model_name, count, temperature, prefix, max_len,
-                              compute_mode)
+                              compute_mode, vram_budget_mb)
             return ("stream", gen)
 
         model_path = getattr(args, "model", ".model/neural_lstm.pt")
@@ -619,11 +664,15 @@ def handle_neural(args, ctx: dict):
             adapted_path = str(Path(model_path).with_suffix(".dpg.pt"))
             dpg_adapt(model_path, recovered, adapted_path,
                       steps=int(getattr(args, "dpg_steps", 200) or 200),
-                      compute_mode=compute_mode)
+                      compute_mode=compute_mode,
+                      vram_budget_mb=vram_budget_mb)
             model_path = adapted_path
 
-        gen = generate(model_path, count, temperature, prefix, mask, max_len,
-                       compute_mode, seed, dedupe=not getattr(args, "no_dedupe", False))
+        gen = generate(
+            model_path, count, temperature, prefix, mask, max_len,
+            compute_mode, vram_budget_mb, seed,
+            dedupe=not getattr(args, "no_dedupe", False),
+        )
         return ("stream", gen)
 
     except RuntimeError as exc:

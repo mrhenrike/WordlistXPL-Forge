@@ -23,7 +23,7 @@ CLI: `wlf` / `python wlf.py`.
 
 Author: André Henrique (`mrhenrike`) | União Geek | https://uniaogeek.com.br/
 
-> **Full documentation:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) (every subcommand, flag, input and output) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
+> **Full documentation:** [docs/COMMAND-COVERAGE.md](docs/COMMAND-COVERAGE.md) (every subcommand, flag, input and output) · [docs/MODELS.md](docs/MODELS.md) (generation models + GPU/governor) · [Wiki](https://github.com/mrhenrike/WordlistXPL-Forge/wiki)
 
 ---
 

@@ -1,0 +1,12 @@
+# Optional GPU / neural extras for WordlistXPL-Forge
+# Install: pip install -r requirements-gpu.txt
+# Or:      pip install wordlistxpl-forge[gpu]
+#
+# Torch wheels are platform-specific — if CUDA is needed, prefer the
+# selector at https://pytorch.org/get-started/locally/ then install
+# transformers. CPU-only torch still enables the neural path.
+
+torch>=2.0
+transformers>=4.40
+# Optional: cupy-cuda12x  # only if you want CuPy-backed mask expand
+psutil>=5.9.0

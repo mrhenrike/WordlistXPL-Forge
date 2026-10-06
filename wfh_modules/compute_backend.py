@@ -86,6 +86,28 @@ class ComputeBackend(ABC):
         ranked = sorted(zip(candidates, scores), key=lambda x: -x[1])
         return ranked
 
+    def generate_mask_chunk(
+        self,
+        mask: str,
+        start: int,
+        count: int,
+        custom1: Optional[str] = None,
+    ) -> list[str]:
+        """Generate a linear slice of a hashcat-style mask keyspace."""
+        from wfh_modules.gpu_expand import generate_mask_chunk as _gen
+        return _gen(mask, start, count, custom1)
+
+    def expand_leet_batch(
+        self,
+        words: list[str],
+        mode: str = "basic",
+        max_per_word: int = 64,
+    ) -> list[str]:
+        """Expand leet variants for a batch of words (CPU default)."""
+        from wfh_modules.gpu_expand import expand_leet_batch as _exp
+        use_gpu = self.name in ("cuda", "rocm", "mps")
+        return list(_exp(words, mode=mode, max_per_word=max_per_word, use_gpu=use_gpu))
+
 
 # ── CPU Backend ───────────────────────────────────────────────────────────────
 

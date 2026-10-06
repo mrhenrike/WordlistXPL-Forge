@@ -9,7 +9,7 @@ __pycache__/
 .venv/
 venv/
 
-# Secrets
+# Secrets / keys
 .env
 .env.*
 *.pem
@@ -23,30 +23,44 @@ id_rsa.*
 *.credentials
 credentials.json
 secrets.json
-**/secrets/
 
-# Not distributed in this public tree
-passwords/wlist_brasil.lst
-# Operator-supplied personal wordlists stay local
+# Operator-local notes and personal lists
 personal_profile.lst
 target_profile.lst
 HANDOFF.md
 HANDOFF-AUDIT.md
 docs/competitive-gaps.md
+docs/training/
+docs/wordlist-sources-audit.md
 
-
-# Internal local tooling
+# Local offline tooling (never publish)
 update_wordlists.py
 
-# Temp / generated
+# Offline corpora (local only; public tree keeps generated/.gitkeep)
+generated/**
+!generated/.gitkeep
 *.tmp.lst
 temp/
 .model/
-# Entire offline corpora tree — never publish to public GitHub
-generated/**
-!generated/.gitkeep
 
-# PyPI build artifacts and public-git packaging block
+# Relocated / legacy paths — never reintroduce into this repo
+fuzzing/
+labs/
+passwords/
+usernames/
+**/secrets/
+data/default_credentials.json
+data/default-creds/
+data/waf_bypass_patterns.lst
+data/isp_words_*.txt
+
+# Generic profile/pattern templates only under data/examples/
+data/examples/**
+!data/examples/profile-template.yaml
+!data/examples/patterns-complex.txt
+!data/examples/.gitkeep
+
+# Packaging / PyPI / local tooling (not part of the public generator tree)
 dist/
 build/
 *.egg-info/
@@ -57,30 +71,8 @@ setup.cfg
 MANIFEST.in
 tox.ini
 .pypirc
-scripts/publish*
-scripts/release*
-packages/**/build.sh
-packages/**/build.ps1
 *.example
 *.sample
-
-# Legacy corpora dirs (content lives in generated/)
-fuzzing/
-labs/
-passwords/
-usernames/
-
-# Credential / payload corpora — local generated/ only
-data/default_credentials.json
-data/default-creds/
-data/waf_bypass_patterns.lst
-# Keep only generic templates under data/examples/ (no client profiles)
-data/examples/**
-!data/examples/profile-template.yaml
-!data/examples/patterns-complex.txt
-!data/examples/.gitkeep
-
-# Local-only tooling / non-runtime
 tests/
 setup_venv.sh
 setup_venv.ps1
@@ -89,8 +81,6 @@ scripts/
 third_party_manifest.json
 THIRD_PARTY_COMPONENTS.md
 .githooks/
-docs/training/
-docs/wordlist-sources-audit.md
 
 # CI/CD and contributor metadata stay local
 .github/workflows/
