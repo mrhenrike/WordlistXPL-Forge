@@ -5,7 +5,7 @@
 # Use only in systems you own or have written permission to test.
 # See: docs/malware-research/DISCLAIMER.md for full terms.
 """
-wlf.py - WordlistXPL-Forge v1.2.0
+wlf.py - WordlistXPL-Forge v2.0.0
 
 Unified wordlist generation tool for pentest and red team operations.
 Supports: charset, pattern, profile, corp, phone, scrape, ocr, extract,
@@ -38,7 +38,7 @@ Usage:
   python wlf.py reverse list.lst            # reverse line order (tac)
 
 Author: André Henrique (@mrhenrike)
-Version: 1.2.0
+Version: 2.0.0
 """
 from __future__ import annotations
 
@@ -88,7 +88,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("wfh")
 
-VERSION = "1.2.0"
+VERSION = "2.0.0"
 
 # ── Graceful shutdown ──────────────────────────────────────────────────────────
 _SHUTDOWN_REQUESTED = False
@@ -120,6 +120,15 @@ _GLOBAL_CTX: dict = {
     "start_time":   0.0,    # epoch when execution started
     "min_len":      0,      # global minimum entry length (0=no filter)
     "max_len":      0,      # global maximum entry length (0=no filter)
+    "ram_budget_pct": 50.0,
+    "min_available_ram_mb": 512,
+    "vram_budget_mb": 4096,
+    "chunk_lines": 0,
+    "chunk_bytes": 0,
+    "gov_poll_every": 10_000,
+    "enforce_safe_default": False,
+    "safe_default_max": 5_000_000,
+    "stream": False,
 }
 
 _BANNER_ART = (
@@ -203,27 +212,22 @@ def _write_output(
     """
     Write generator output to file or stdout with optional progress bar.
 
-    Respects global --limit (max entries), --timeout (max seconds),
+    Respects global --limit / --timeout / ResourceGovernor (RAM/chunk),
     and graceful Ctrl+C shutdown.
-
-    Args:
-        generator: String generator.
-        output: Output file path or None for stdout.
-        estimate: Entry count estimate for progress bar.
-        min_len: Minimum length filter.
-        max_len: Maximum length filter.
-        append: If True, open file in append mode (for --resume).
-        stream: If True, flush after each write (real-time output).
-
-    Returns:
-        Total entries written.
     """
-    count = 0
-    limit = _GLOBAL_CTX.get("limit", 0)
-    timeout = _GLOBAL_CTX.get("timeout", 0)
-    start = _GLOBAL_CTX.get("start_time", 0.0) or time.time()
+    from wfh_modules.resource_governor import (
+        STOP_OK,
+        STOP_LIMIT,
+        STOP_TIMEOUT,
+        STOP_RAM,
+        STOP_SHUTDOWN,
+        governor_from_ctx,
+    )
 
-    # Global min/max override: take the most restrictive bound
+    count = 0
+    stream = stream or bool(_GLOBAL_CTX.get("stream"))
+    gov = governor_from_ctx(_GLOBAL_CTX)
+
     g_min = _GLOBAL_CTX.get("min_len", 0) or 0
     g_max = _GLOBAL_CTX.get("max_len", 0) or 0
     if g_min > 0:
@@ -231,17 +235,27 @@ def _write_output(
     if g_max > 0:
         max_len = min(max_len, g_max) if max_len > 0 else g_max
 
-    if output:
-        out_path = Path(output)
+    base_output = output
+    current_output = output
+    f = None
+    if current_output:
+        out_path = Path(current_output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        if not _check_disk_space(output, estimate=estimate, avg_entry_len=avg_entry_len):
+        if not _check_disk_space(current_output, estimate=estimate, avg_entry_len=avg_entry_len):
             _warn("Cancelled by user - no file written.")
             return 0
         mode = "a" if append else "w"
         f = out_path.open(mode, encoding="utf-8")
-        _info(f"Writing to: {output}" + (" (append)" if append else ""))
-    else:
-        f = None  # type: ignore
+        _info(f"Writing to: {current_output}" + (" (append)" if append else ""))
+
+    def _open_chunk() -> None:
+        nonlocal f, current_output
+        if f:
+            f.close()
+        current_output = gov.next_chunk_path(base_output or "out.lst")
+        Path(current_output).parent.mkdir(parents=True, exist_ok=True)
+        f = Path(current_output).open("w", encoding="utf-8")
+        _info(f"Chunk rotate → {current_output}")
 
     try:
         if _TQDM and estimate and estimate > 0:
@@ -250,16 +264,19 @@ def _write_output(
             pbar = None
 
         for word in generator:
-            if _SHUTDOWN_REQUESTED:
-                _warn(f"Graceful shutdown - wrote {count:,} entries before stopping.")
-                break
-
-            if limit and count >= limit:
-                _warn(f"Reached --limit {limit:,}. Stopping.")
-                break
-
-            if timeout and (time.time() - start) > timeout:
-                _warn(f"Reached --timeout {timeout}s. Stopping at {count:,} entries.")
+            reason = gov.check(shutdown_flag=_SHUTDOWN_REQUESTED)
+            if reason != STOP_OK:
+                if reason == STOP_SHUTDOWN:
+                    _warn(f"Graceful shutdown - wrote {count:,} entries before stopping.")
+                elif reason == STOP_LIMIT:
+                    _warn(f"Reached --limit {gov.cfg.max_candidates:,}. Stopping.")
+                elif reason == STOP_TIMEOUT:
+                    _warn(f"Reached --timeout {gov.cfg.timeout_secs}s. Stopping at {count:,} entries.")
+                elif reason == STOP_RAM:
+                    _warn(
+                        f"RAM guard tripped (available≈{gov.state.last_ram_mb}MB). "
+                        f"Stopped at {count:,} entries to protect the host."
+                    )
                 break
 
             if not word:
@@ -268,7 +285,12 @@ def _write_output(
                 continue
             if max_len and len(word) > max_len:
                 continue
+
+            if base_output and gov.need_chunk_rotate() and count > 0:
+                _open_chunk()
+
             line = word + "\n"
+            nbytes = len(line.encode("utf-8"))
             if f:
                 f.write(line)
                 if stream:
@@ -278,6 +300,7 @@ def _write_output(
                 if stream:
                     sys.stdout.flush()
             count += 1
+            gov.note_emit(1, nbytes)
             if pbar:
                 pbar.update(1)
 
@@ -1298,15 +1321,27 @@ def cmd_phrase(args: argparse.Namespace) -> None:
 
 def cmd_leet(args: argparse.Namespace) -> None:
     """Handler for leet speak mode."""
-    from wfh_modules.leet_permuter import generate_all_variations
-
-    _info(f"Generating leet variants [{args.mode}] for: {args.word}")
-    gen = generate_all_variations(
-        args.word,
-        leet_mode=args.mode,
-        custom_mapping=getattr(args, "custom_map", "") or "",
-        max_leet=args.max_results,
+    use_gpu = bool(getattr(args, "gpu", False)) or (
+        _GLOBAL_CTX.get("compute_mode", "auto") in ("gpu", "cuda", "hybrid")
     )
+    _info(f"Generating leet variants [{args.mode}] for: {args.word}"
+          + (" [gpu]" if use_gpu else ""))
+    if use_gpu:
+        from wfh_modules.gpu_expand import expand_leet_batch
+        gen = expand_leet_batch(
+            [args.word],
+            mode=args.mode,
+            max_per_word=args.max_results,
+            use_gpu=True,
+        )
+    else:
+        from wfh_modules.leet_permuter import generate_all_variations
+        gen = generate_all_variations(
+            args.word,
+            leet_mode=args.mode,
+            custom_mapping=getattr(args, "custom_map", "") or "",
+            max_leet=args.max_results,
+        )
     count = _write_output(gen, args.output)
     _ok(f"Generated: {count:,} variants")
 
@@ -1758,6 +1793,186 @@ def cmd_isp_keygen(args: argparse.Namespace) -> None:
     """Handler for ISP default WiFi password keyspace generation."""
     from wfh_modules.isp_keygen import handle_isp_keygen
     handle_isp_keygen(args, {})
+
+
+def cmd_emit(args: argparse.Namespace) -> None:
+    """Stream ordered candidates from a named engine to stdout/file."""
+    engine = (getattr(args, "engine", "pcfg") or "pcfg").lower()
+    limit = int(getattr(args, "limit", 0) or _GLOBAL_CTX.get("limit") or 0)
+    _GLOBAL_CTX["stream"] = True
+    gen = None
+    if engine == "markov":
+        from wfh_modules.markov_engine import MarkovModel
+        m = MarkovModel()
+        path = getattr(args, "model", None) or ".model/markov_model.json"
+        if not Path(path).exists():
+            _err(f"Model not found: {path}")
+            return
+        m.load(path)
+        gen = m.generate(
+            max_candidates=limit,
+            min_length=getattr(args, "min_len", 4),
+            max_length=getattr(args, "max_len", 16),
+            beam_width=getattr(args, "beam_width", 0) or 100_000,
+        )
+    elif engine == "pcfg":
+        from wfh_modules.pcfg_engine import PCFGGrammar
+        g = PCFGGrammar()
+        path = getattr(args, "model", None) or ".model/pcfg_grammar.json"
+        if not Path(path).exists():
+            _err(f"Grammar not found: {path}")
+            return
+        g.load(path)
+        gen = g.generate(
+            max_candidates=limit,
+            top_structures=getattr(args, "top_structures", 50) or 50,
+            top_terminals=getattr(args, "top_terminals", 80) or 80,
+            beam_width=getattr(args, "beam_width", 0) or 250_000,
+            zipf_s=float(getattr(args, "zipf_s", 0) or 0),
+        )
+    elif engine == "mask":
+        from wfh_modules.gpu_expand import iter_mask
+        from wfh_modules.resource_governor import governor_from_ctx
+        gov = governor_from_ctx(_GLOBAL_CTX)
+        chunk = gov.gpu_batch_size(65536)
+        gen = iter_mask(
+            getattr(args, "mask", "?l?l?l?d?d") or "?l?l?l?d?d",
+            chunk_size=chunk,
+            max_candidates=limit or 100_000,
+        )
+    elif engine == "semantic":
+        from wfh_modules.profiler import load_profile_yaml
+        from wfh_modules.semantic_pcfg import generate_semantic
+        pf = getattr(args, "profile_file", None)
+        if not pf:
+            _err("semantic emit requires --profile-file")
+            return
+        profile = load_profile_yaml(pf)
+        gen = generate_semantic(profile, max_candidates=limit or 50_000)
+    else:
+        _err(f"Unknown engine: {engine}")
+        return
+    count = _write_output(gen, getattr(args, "output", None), stream=True)
+    _ok(f"Emitted: {count:,} candidates via {engine}")
+
+
+def cmd_maskgen(args: argparse.Namespace) -> None:
+    """Hashcat-style mask generation with chunked/GPU-aware batching."""
+    from wfh_modules.gpu_expand import iter_mask, mask_keyspace, parse_mask
+    from wfh_modules.resource_governor import governor_from_ctx
+
+    mask = getattr(args, "mask", None) or "?l?l?d?d"
+    slots = parse_mask(mask, getattr(args, "custom_charset1", None))
+    total = mask_keyspace(slots)
+    _info(f"Mask {mask} keyspace≈{total:,}")
+    gov = governor_from_ctx(_GLOBAL_CTX)
+    chunk = gov.gpu_batch_size(int(getattr(args, "chunk", 65536) or 65536))
+    limit = int(getattr(args, "limit", 0) or _GLOBAL_CTX.get("limit") or 0)
+    if not limit and total > 5_000_000 and not getattr(args, "force", False):
+        _warn("Keyspace >5M — capping at 5M (pass --force or --limit).")
+        limit = 5_000_000
+    gen = iter_mask(mask, getattr(args, "custom_charset1", None), chunk, limit)
+    count = _write_output(gen, getattr(args, "output", None), stream=True)
+    _ok(f"Maskgen wrote {count:,} entries")
+
+
+def cmd_strategy(args: argparse.Namespace) -> None:
+    """Plan mutation strategies (PBMP-lite) from a profile."""
+    from wfh_modules.profiler import load_profile_yaml
+    from wfh_modules.strategy_engine import (
+        bayesian_structure_priors,
+        format_plan,
+        models_on_disk,
+        plan_from_profile,
+    )
+
+    pf = getattr(args, "profile_file", None)
+    if not pf:
+        _err("--profile-file required")
+        return
+    profile = load_profile_yaml(pf)
+    mods = models_on_disk(Path("."))
+    plan = plan_from_profile(
+        profile,
+        has_model_markov=mods["markov"],
+        has_model_pcfg=mods["pcfg"],
+        has_neural=mods["neural"],
+    )
+    priors = bayesian_structure_priors(profile)
+    text = format_plan(plan, priors)
+    print(text)
+    out = getattr(args, "output", None)
+    if out:
+        Path(out).write_text(text + "\n", encoding="utf-8")
+        _ok(f"Wrote plan: {out}")
+
+    if getattr(args, "run", False):
+        # Execute top engines that we can without heavy deps
+        from wfh_modules.semantic_pcfg import generate_semantic
+        from wfh_modules.pattern_engine import expand_variable, render_template
+
+        for eng in plan.engines[:3]:
+            name = eng["strategy"]
+            lim = int(eng.get("limit", 10_000))
+            _info(f"Running strategy={name} limit={lim}")
+            if name == "semantic_pcfg":
+                gen = generate_semantic(profile, max_candidates=lim)
+                n = _write_output(gen, getattr(args, "output_wordlist", None), stream=True)
+                _ok(f"{name}: {n:,}")
+            elif name == "pattern_templates":
+                vars_ = eng.get("vars") or {}
+                tmpls = eng.get("templates") or ["{company}#{pet}{yy}"]
+
+                def _g():
+                    for t in tmpls:
+                        mapping = {
+                            k: expand_variable(k, str(v))
+                            for k, v in vars_.items()
+                        }
+                        mapping = {
+                            k: (v if isinstance(v, list) else [str(v)])
+                            for k, v in mapping.items()
+                        }
+                        yield from render_template(t, mapping)
+
+                n = _write_output(_g(), getattr(args, "output_wordlist", None), stream=True)
+                _ok(f"{name}: {n:,}")
+
+
+def cmd_bandit(args: argparse.Namespace) -> None:
+    """UCB1 router over engines with proxy rewards."""
+    from wfh_modules.bandit_router import BanditRouter, proxy_reward
+    from wfh_modules.gpu_expand import expand_leet_batch
+    from wfh_modules.semantic_pcfg import generate_semantic
+
+    rounds = int(getattr(args, "rounds", 5) or 5)
+    seeds = list(getattr(args, "seeds", None) or ["BrandX", "OzZY", "2026"])
+    router = BanditRouter(c=float(getattr(args, "ucb_c", 1.414) or 1.414))
+    profile = {
+        "company_name": seeds[0] if seeds else "BrandX",
+        "pets": [{"name": seeds[1] if len(seeds) > 1 else "PetX", "year": 2026}],
+        "keywords": seeds,
+        "special_dates": ["2026", "2025"],
+        "leet_mode": "medium",
+    }
+    for r in range(rounds):
+        arm = router.select()
+        cands: list[str] = []
+        if arm in ("pcfg", "pattern", "rules"):
+            cands = list(generate_semantic(profile, max_candidates=2000))
+            if arm == "rules":
+                cands = list(expand_leet_batch(cands[:200], mode="basic", max_per_word=8))
+        elif arm == "markov":
+            cands = [s + str(i) for i, s in enumerate(seeds * 100)]
+        elif arm == "prince":
+            from itertools import product
+            cands = ["".join(p) for p in product(seeds, ["@", "#", ""], ["2024", "2025", "2026"])]
+        reward = proxy_reward(cands, seeds)
+        router.update(arm, reward)
+        _info(f"round {r+1}/{rounds} arm={arm} reward={reward:.4f} n={len(cands)}")
+    print(router.describe())
+    best = max(router.stats.items(), key=lambda kv: kv[1].mean)
+    _ok(f"Preferred arm: {best[0]} (mean={best[1].mean:.4f})")
 
 
 def cmd_password_dna(args: argparse.Namespace) -> None:
@@ -2452,6 +2667,30 @@ def build_parser() -> argparse.ArgumentParser:
             "Example: --max-len 16 discards entries longer than 16 characters."
         ),
     )
+    parser.add_argument(
+        "--ram-budget-pct", dest="ram_budget_pct", type=float, default=50.0,
+        help="Stop generation when free RAM falls below (100-PCT)%% of total (default: 50).",
+    )
+    parser.add_argument(
+        "--vram-budget-mb", dest="vram_budget_mb", type=int, default=4096,
+        help="Soft VRAM budget for GPU batch sizing (default: 4096).",
+    )
+    parser.add_argument(
+        "--chunk-lines", dest="chunk_lines", type=int, default=0,
+        help="Rotate -o file every N lines (0 = off).",
+    )
+    parser.add_argument(
+        "--chunk-bytes", dest="chunk_bytes", type=int, default=0,
+        help="Rotate -o file every N bytes (0 = off).",
+    )
+    parser.add_argument(
+        "--stream", dest="stream_global", action="store_true",
+        help="Flush each line (stdout/file) for real-time piping to hashcat/etc.",
+    )
+    parser.add_argument(
+        "--safe-default-limit", dest="safe_default_limit", action="store_true",
+        help="If --limit is 0, cap at 5,000,000 candidates (nuclear-safe default).",
+    )
 
     sub = parser.add_subparsers(dest="command", help="Operation mode")
 
@@ -2797,6 +3036,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_lt.add_argument("--custom-map", dest="custom_map", default="",
                        help="Custom mapping (e.g. a=@,4;t=7;s=$;l=1,|)")
     p_lt.add_argument("--max-results", type=int, default=10000, dest="max_results")
+    p_lt.add_argument("--gpu", action="store_true",
+                       help="Prefer GPU-assisted leet expansion via compute_backend")
     p_lt.add_argument("-o", "--output", help="Output file")
 
     p_lp = sub.add_parser(
@@ -3494,6 +3735,98 @@ def build_parser() -> argparse.ArgumentParser:
     p_rp.add_argument("--depth", choices=["quick", "normal", "deep"], default="quick")
     p_rp.add_argument("-o", "--output", help="Write hit examples")
 
+    # ── emit (ordered stream) ─────────────────────────────────────────────
+    p_em = sub.add_parser(
+        "emit",
+        help="Stream ordered candidates from an engine (stdout by default)",
+        description=(
+            "Pipe ranked candidates without materializing a giant set.\n\n"
+            "Examples:\n"
+            "  wlf.py --stream emit --engine markov --limit 10000\n"
+            "  wlf.py emit --engine pcfg --model .model/pcfg_grammar.json -o out.lst\n"
+            "  wlf.py emit --engine mask --mask '?l?l?d?d' --limit 50000\n"
+            "  wlf.py emit --engine semantic --profile-file target.yaml --limit 20000"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_em.add_argument(
+        "--engine", choices=["markov", "pcfg", "mask", "semantic"], default="pcfg",
+        help="Generator engine (default: pcfg)",
+    )
+    p_em.add_argument("--model", metavar="FILE", help="Markov/PCFG model path")
+    p_em.add_argument("--mask", metavar="MASK", help="Hashcat-style mask (engine=mask)")
+    p_em.add_argument("--profile-file", dest="profile_file", metavar="FILE",
+                      help="Profile YAML (engine=semantic)")
+    p_em.add_argument("--min-len", dest="min_len", type=int, default=4)
+    p_em.add_argument("--max-len", dest="max_len", type=int, default=16)
+    p_em.add_argument("--limit", type=int, default=0, help="Max candidates (0 = engine default)")
+    p_em.add_argument("--beam-width", dest="beam_width", type=int, default=0,
+                      help="Heap/beam cap for markov/pcfg")
+    p_em.add_argument("--top-structures", dest="top_structures", type=int, default=50)
+    p_em.add_argument("--top-terminals", dest="top_terminals", type=int, default=80)
+    p_em.add_argument("--zipf-s", dest="zipf_s", type=float, default=0.0,
+                      help="Optional Zipf reweight on emission rank")
+    p_em.add_argument("-o", "--output", help="Output file (omit = stdout)")
+
+    # ── maskgen ───────────────────────────────────────────────────────────
+    p_mg = sub.add_parser(
+        "maskgen",
+        help="Chunked hashcat-style mask cartesian (GPU-aware batching)",
+        description=(
+            "Expand a mask keyspace in ordered chunks under ResourceGovernor.\n\n"
+            "Examples:\n"
+            "  wlf.py --compute gpu maskgen --mask '?l?l?d?d' --limit 100000\n"
+            "  wlf.py maskgen --mask '?u?l?l?l?d?d' --chunk 65536 -o masks.lst\n"
+            "  wlf.py maskgen --mask '?1?1?d' --custom-charset1 'ab@#' --force"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_mg.add_argument("--mask", metavar="MASK", required=True,
+                      help="Hashcat-style mask (?l ?u ?d ?s ?a ?h ?H ?1)")
+    p_mg.add_argument("--custom-charset1", dest="custom_charset1", metavar="CHARS",
+                      help="Charset for ?1")
+    p_mg.add_argument("--chunk", type=int, default=65536, help="Batch size hint")
+    p_mg.add_argument("--limit", type=int, default=0, help="Max candidates (0 = full/cap)")
+    p_mg.add_argument("--force", action="store_true",
+                      help="Allow keyspaces >5M without --limit")
+    p_mg.add_argument("-o", "--output", help="Output file (omit = stdout)")
+
+    # ── strategy (PBMP-lite) ──────────────────────────────────────────────
+    p_st = sub.add_parser(
+        "strategy",
+        help="Plan mutation engines from a profile (PBMP-lite)",
+        description=(
+            "Print a weighted engine plan; optionally run top strategies.\n\n"
+            "Examples:\n"
+            "  wlf.py strategy --profile-file target.yaml\n"
+            "  wlf.py strategy --profile-file target.yaml --run -o plan.txt\n"
+            "  wlf.py strategy --profile-file target.yaml --run --output-wordlist cands.lst"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_st.add_argument("--profile-file", dest="profile_file", metavar="FILE", required=True)
+    p_st.add_argument("--run", action="store_true", help="Execute top engines under governor")
+    p_st.add_argument("-o", "--output", help="Write plan text")
+    p_st.add_argument("--output-wordlist", dest="output_wordlist", metavar="FILE",
+                      help="Candidate output when --run")
+
+    # ── bandit ────────────────────────────────────────────────────────────
+    p_bd = sub.add_parser(
+        "bandit",
+        help="Multi-armed bandit router over generation engines (UCB1)",
+        description=(
+            "Sample arms (markov/pcfg/prince/rules/pattern) with proxy rewards.\n\n"
+            "Examples:\n"
+            "  wlf.py bandit --rounds 8 --seeds BrandX OzZY 2026\n"
+            "  wlf.py bandit --rounds 5 --ucb-c 1.2"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_bd.add_argument("--rounds", type=int, default=5, help="Bandit rounds (default: 5)")
+    p_bd.add_argument("--seeds", nargs="*", help="Seed tokens for proxy reward")
+    p_bd.add_argument("--ucb-c", dest="ucb_c", type=float, default=1.414,
+                      help="UCB1 exploration constant")
+
     # ── combiner ──────────────────────────────────────────────────────────
     p_cb = sub.add_parser(
         "combiner",
@@ -3581,6 +3914,10 @@ def build_parser() -> argparse.ArgumentParser:
                          help="Max password length (default: 64)")
     p_pcfg.add_argument("--limit", type=int, default=0,
                          help="Max candidates to generate (0 = unlimited)")
+    p_pcfg.add_argument("--beam-width", dest="beam_width", type=int, default=250_000,
+                         help="Max pending heap nodes (RAM guard, default: 250000)")
+    p_pcfg.add_argument("--zipf-s", dest="zipf_s", type=float, default=0.0,
+                         help="Zipf reweight exponent s (0 = off)")
     p_pcfg.add_argument("-o", "--output", help="Output file")
 
     # ── markov ───────────────────────────────────────────────────────────
@@ -3620,6 +3957,8 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Max password length (default: 16)")
     p_mk.add_argument("--limit", type=int, default=0,
                        help="Max candidates (0 = unlimited)")
+    p_mk.add_argument("--beam-width", dest="beam_width", type=int, default=100_000,
+                       help="Max live heap nodes (RAM guard, default: 100000)")
     p_mk.add_argument("-o", "--output", help="Output file")
 
     # ── kwalk ────────────────────────────────────────────────────────────
@@ -5021,6 +5360,12 @@ def main() -> None:
     _GLOBAL_CTX["start_time"]   = time.time()
     _GLOBAL_CTX["min_len"]      = global_min_len
     _GLOBAL_CTX["max_len"]      = global_max_len
+    _GLOBAL_CTX["ram_budget_pct"] = float(getattr(args, "ram_budget_pct", 50) or 50)
+    _GLOBAL_CTX["vram_budget_mb"] = int(getattr(args, "vram_budget_mb", 4096) or 4096)
+    _GLOBAL_CTX["chunk_lines"] = int(getattr(args, "chunk_lines", 0) or 0)
+    _GLOBAL_CTX["chunk_bytes"] = int(getattr(args, "chunk_bytes", 0) or 0)
+    _GLOBAL_CTX["stream"] = bool(getattr(args, "stream_global", False))
+    _GLOBAL_CTX["enforce_safe_default"] = bool(getattr(args, "safe_default_limit", False))
 
     if global_min_len or global_max_len:
         parts = []
@@ -5082,6 +5427,10 @@ def main() -> None:
         "dna-extract":   cmd_dna_extract,
         "cover":         cmd_cover,
         "replay":        cmd_replay,
+        "emit":          cmd_emit,
+        "maskgen":       cmd_maskgen,
+        "strategy":      cmd_strategy,
+        "bandit":        cmd_bandit,
         "combiner":      cmd_combiner,
         "pcfg":          cmd_pcfg,
         "markov":        cmd_markov,
@@ -5116,6 +5465,21 @@ def main() -> None:
         "curate":        cmd_curate,
     }
 
+    # ── v2.0 new commands ──────────────────────────────────────────────────
+    handlers["pipeline"]      = cmd_pipeline
+    handlers["session"]       = cmd_session
+    handlers["score"]         = cmd_score
+    handlers["explain"]       = cmd_explain_cmd
+    handlers["serve"]         = cmd_serve
+    handlers["br-deep"]       = cmd_br_deep
+    handlers["pbmp"]          = cmd_pbmp
+    handlers["evolve"]        = cmd_evolve
+    handlers["graph-expand"]  = cmd_graph_expand
+    handlers["temporal-model"] = cmd_temporal_model
+    handlers["domain-pcfg"]   = cmd_domain_pcfg
+    handlers["plugin"]        = cmd_plugin
+    handlers["vae-interp"]    = cmd_vae_interp
+
     handler = handlers.get(args.command)
     if handler:
         try:
@@ -5125,6 +5489,245 @@ def main() -> None:
             _warn("Interrupted by user.")
     else:
         parser.print_help()
+
+
+# ── v2.0 command handlers ─────────────────────────────────────────────────────
+
+def cmd_pipeline(args) -> None:
+    """Run a YAML pipeline spec file."""
+    pipeline_file = getattr(args, "pipeline_file", None) or (args.args[0] if hasattr(args, "args") and args.args else None)
+    if not pipeline_file:
+        _warn("Usage: wlf pipeline <pipeline.yaml> [-o output.txt]")
+        return
+    try:
+        from wfh_modules.pipeline_dsl import execute_pipeline
+        gen = execute_pipeline(pipeline_file, _GLOBAL_CTX)
+        _write_output(gen, _GLOBAL_CTX)
+    except Exception as exc:
+        _error(f"Pipeline error: {exc}")
+
+
+def cmd_session(args) -> None:
+    """Manage sessions: list / show / resume."""
+    from wfh_modules.session_manager import SessionManager
+    mgr = SessionManager()
+    sub = getattr(args, "session_sub", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
+    if sub == "list" or sub is None:
+        sessions = mgr.list_sessions()
+        if not sessions:
+            _info("No saved sessions.")
+        for s in sessions:
+            print(f"  {s.session_id}  emitted={s.emitted:,}  updated={s.updated_at[:19]}")
+    elif sub == "resume":
+        sid = getattr(args, "session_id", None) or (getattr(args, "args", [None, None])[1] if hasattr(args, "args") else None)
+        if not sid:
+            _warn("Usage: wlf session resume <session_id>")
+            return
+        try:
+            ctx = mgr.resume_ctx(sid)
+            _GLOBAL_CTX.update(ctx)
+            _info(f"Session {sid} resumed ({ctx.get('emitted', 0):,} candidates previously emitted)")
+        except KeyError as exc:
+            _error(str(exc))
+
+
+def cmd_score(args) -> None:
+    """Score and explain a password."""
+    pw = getattr(args, "password", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
+    if not pw:
+        _warn("Usage: wlf score <password>")
+        return
+    from wfh_modules.explainer import explain
+    exp = explain(pw, engine="heuristic", raw_score=0.0)
+    print(exp.format(verbose=True))
+
+
+def cmd_explain_cmd(args) -> None:
+    """Alias for score — explain a password."""
+    cmd_score(args)
+
+
+def cmd_serve(args) -> None:
+    """Start the REST API server."""
+    host = getattr(args, "host", None) or "127.0.0.1"
+    port = int(getattr(args, "port", None) or 8771)
+    api_key = getattr(args, "api_key", None) or ""
+    _info(f"WordlistXPL-Forge API starting on http://{host}:{port}")
+    _info("AUTHORIZED USE ONLY")
+    try:
+        from wfh_modules.api_server import run_server
+        run_server(host=host, port=port, api_key=api_key)
+    except Exception as exc:
+        _error(f"API server error: {exc}")
+
+
+def cmd_br_deep(args) -> None:
+    """Brazilian deep profile wordlist generation."""
+    try:
+        from wfh_modules.br_deep_engine import BRDeepEngine
+        profile = {}
+        profile_file = getattr(args, "profile_file", None)
+        if profile_file:
+            import json as _json
+            with open(profile_file, encoding="utf-8") as f:
+                profile = _json.load(f)
+        sector = getattr(args, "sector", None) or profile.get("sector", "generic")
+        include_cpf = not getattr(args, "no_cpf", False)
+        include_cnpj = not getattr(args, "no_cnpj", False)
+        eng = BRDeepEngine(
+            profile=profile,
+            sector=sector,
+            include_cpf_patterns=include_cpf,
+            include_cnpj_patterns=include_cnpj,
+        )
+        gen = (pw for pw, _ in eng.generate(max_candidates=_GLOBAL_CTX.get("limit") or 100_000))
+        _write_output(gen, _GLOBAL_CTX)
+    except Exception as exc:
+        _error(f"br-deep error: {exc}")
+
+
+def cmd_pbmp(args) -> None:
+    """Show PBMP strategy distribution for a profile."""
+    try:
+        from wfh_modules.pbmp_full import PBMPFull
+        profile = {}
+        profile_file = getattr(args, "profile_file", None)
+        if profile_file:
+            import json as _json
+            with open(profile_file, encoding="utf-8") as f:
+                profile = _json.load(f)
+        n = int(getattr(args, "n_engines", None) or 5)
+        controller = PBMPFull(profile=profile, sector=profile.get("sector"))
+        print(controller.describe())
+        plan = controller.plan(n_engines=n)
+        print("\nGeneration plan:")
+        for step in plan:
+            print(f"  {step['strategy']:<22s}  weight={step['weight']:.3f}  limit={step['limit']:,}")
+    except Exception as exc:
+        _error(f"PBMP error: {exc}")
+
+
+def cmd_evolve(args) -> None:
+    """Evolutionary password generation (genetic / MAP-Elites)."""
+    try:
+        mode = getattr(args, "mode", None) or "genetic"
+        limit = _GLOBAL_CTX.get("limit") or 50_000
+        seed_file = getattr(args, "seed_file", None)
+        seed_words: list[str] = []
+        if seed_file:
+            with open(seed_file, encoding="utf-8", errors="replace") as f:
+                seed_words = [line.strip() for line in f if line.strip()]
+
+        if mode == "map-elites":
+            from wfh_modules.map_elites import MAPElites
+            eng = MAPElites()
+            gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
+        else:
+            from wfh_modules.genetic_engine import GeneticPasswordEngine
+            eng = GeneticPasswordEngine()
+            gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
+
+        gen = (pw for pw, _ in gen_raw)
+        _write_output(gen, _GLOBAL_CTX)
+    except Exception as exc:
+        _error(f"evolve error: {exc}")
+
+
+def cmd_graph_expand(args) -> None:
+    """Graph-based wordlist expansion from a seed corpus."""
+    try:
+        from wfh_modules.password_graph import PasswordGraphEngine
+        corpus_file = getattr(args, "corpus_file", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
+        if not corpus_file:
+            _warn("Usage: wlf graph-expand <corpus.txt> [-o out.txt]")
+            return
+        with open(corpus_file, encoding="utf-8", errors="replace") as f:
+            corpus = [line.strip() for line in f if line.strip()]
+        limit = _GLOBAL_CTX.get("limit") or 100_000
+        eng = PasswordGraphEngine()
+        gen = (pw for pw, _ in eng.generate(seed_corpus=corpus, max_candidates=limit))
+        _write_output(gen, _GLOBAL_CTX)
+        _info(eng.describe())
+    except Exception as exc:
+        _error(f"graph-expand error: {exc}")
+
+
+def cmd_temporal_model(args) -> None:
+    """Temporal drift wordlist — evolve seeds across years."""
+    try:
+        from wfh_modules.temporal_drift import TemporalDriftEngine
+        seed_file = getattr(args, "seed_file", None)
+        seed_words: list[str] = []
+        if seed_file:
+            with open(seed_file, encoding="utf-8", errors="replace") as f:
+                seed_words = [line.strip() for line in f if line.strip()]
+        base_year  = int(getattr(args, "base_year", None)   or 2019)
+        target_year = int(getattr(args, "target_year", None) or 2026)
+        limit = _GLOBAL_CTX.get("limit") or 200_000
+        eng = TemporalDriftEngine(base_year=base_year, target_year=target_year)
+        gen = (pw for pw, _ in eng.generate(seed_words=seed_words or None, max_candidates=limit))
+        _write_output(gen, _GLOBAL_CTX)
+        _info(eng.describe())
+    except Exception as exc:
+        _error(f"temporal-model error: {exc}")
+
+
+def cmd_domain_pcfg(args) -> None:
+    """Domain-specific PCFG generation (corporate, healthcare, finance, etc.)."""
+    try:
+        from wfh_modules.domain_pcfg import DomainPCFG
+        sector = getattr(args, "sector", None) or "generic"
+        corpus_file = getattr(args, "corpus_file", None)
+        corpus: list[str] = []
+        if corpus_file:
+            with open(corpus_file, encoding="utf-8", errors="replace") as f:
+                corpus = [line.strip() for line in f if line.strip()]
+        limit = _GLOBAL_CTX.get("limit") or 100_000
+        eng = DomainPCFG(sector=sector)
+        gen = (pw for pw, _ in eng.generate(corpus=corpus or None, max_candidates=limit))
+        _write_output(gen, _GLOBAL_CTX)
+        _info(eng.describe())
+    except Exception as exc:
+        _error(f"domain-pcfg error: {exc}")
+
+
+def cmd_plugin(args) -> None:
+    """Plugin management: list, run, discover."""
+    from wfh_modules.plugin_manager import auto_discover, describe_all, run_plugin, list_plugins
+    sub = getattr(args, "plugin_sub", None) or "list"
+    if sub == "list":
+        auto_discover()
+        desc = describe_all()
+        print(desc if desc else "No plugins loaded.")
+    elif sub == "run":
+        name = getattr(args, "plugin_name", None)
+        if not name:
+            _warn("Usage: wlf plugin run <name>")
+            return
+        auto_discover()
+        profile = {}
+        limit = _GLOBAL_CTX.get("limit") or 10_000
+        gen = (pw for pw, _ in run_plugin(name, profile, {**_GLOBAL_CTX, "limit": limit}))
+        _write_output(gen, _GLOBAL_CTX)
+    else:
+        _warn(f"Unknown plugin sub-command: {sub}. Use list or run.")
+
+
+def cmd_vae_interp(args) -> None:
+    """VAE latent space interpolation between two passwords."""
+    try:
+        from wfh_modules.vae_engine import VAEPasswordEngine
+        pw_from = getattr(args, "pw_from", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
+        pw_to   = getattr(args, "pw_to",   None) or (getattr(args, "args", [None, None])[1] if hasattr(args, "args") else None)
+        if not pw_from or not pw_to:
+            _warn("Usage: wlf vae-interp <pw_from> <pw_to> [--steps N]")
+            return
+        steps = int(getattr(args, "steps", None) or 10)
+        eng = VAEPasswordEngine()
+        gen = (pw for pw, _ in eng.interpolate(pw_from, pw_to, steps=steps))
+        _write_output(gen, _GLOBAL_CTX)
+    except Exception as exc:
+        _error(f"vae-interp error: {exc}")
 
 
 if __name__ == "__main__":
