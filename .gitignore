@@ -76,6 +76,7 @@ tox.ini
 tests/*
 !tests/test_coverage_gate2.py
 !tests/test_manifest.py
+!tests/test_credential_tester.py
 !tests/conftest.py
 setup_venv.sh
 setup_venv.ps1
