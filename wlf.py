@@ -4845,6 +4845,28 @@ def build_parser() -> argparse.ArgumentParser:
     p_vi.add_argument("--steps", type=int, default=10, help="Interpolation steps")
     p_vi.add_argument("-o", "--output", help="Output file")
 
+    # ── test (credential testing pipeline) ──────────────────────────────────
+    p_te = sub.add_parser(
+        "test",
+        help="Credential testing: generate wordlist + hashcat cracking",
+        description=(
+            "Generate a targeted wordlist and test it against a hash file.\n\n"
+            "Examples:\n"
+            "  wlf.py test --target hashes.txt\n"
+            "  wlf.py test --target hashes.txt --model M2 --mode ntlm\n"
+            "  wlf.py test --target hashes.txt --max-words 500000 --timeout 600"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_te.add_argument("--target", "-t", required=True, help="Hash file to crack")
+    p_te.add_argument("--model", default="M2", help="Generation model (default: M2)")
+    p_te.add_argument("--mode", help="Hash mode name or number (auto-detect if omitted)")
+    p_te.add_argument("--max-words", dest="max_words", type=int, default=100000,
+                      help="Max wordlist size (default: 100000)")
+    p_te.add_argument("--timeout", type=int, default=300,
+                      help="Hashcat timeout in seconds (default: 300)")
+    p_te.add_argument("-o", "--output", default=".", help="Output directory for report")
+
     return parser
 
 
@@ -5518,6 +5540,31 @@ def cmd_curate(args: argparse.Namespace) -> None:
         _ok(f"Curated wordlist: {count:,} entries -> {output}")
 
 
+def cmd_test(args: argparse.Namespace) -> None:
+    """Credential testing pipeline — generate wordlist + hashcat cracking."""
+    from wfh_modules.credential_tester import run_test, HASH_MODES
+
+    hash_mode = None
+    if args.mode:
+        if args.mode.isdigit():
+            hash_mode = int(args.mode)
+        else:
+            hash_mode = HASH_MODES.get(args.mode.lower())
+            if hash_mode is None:
+                _err(f"Unknown hash mode: {args.mode}")
+                _info(f"Available: {', '.join(sorted(HASH_MODES.keys()))}")
+                return
+
+    run_test(
+        hash_file=args.target,
+        model=args.model,
+        hash_mode=hash_mode,
+        output_dir=args.output,
+        timeout=args.timeout,
+        max_words=args.max_words,
+    )
+
+
 def _resolve_path(p: str):
     """Resolve a path relative to wlf.py location or cwd."""
     from pathlib import Path
@@ -5692,6 +5739,7 @@ def main() -> None:
     handlers["domain-pcfg"]   = cmd_domain_pcfg
     handlers["plugin"]        = cmd_plugin
     handlers["vae-interp"]    = cmd_vae_interp
+    handlers["test"]          = cmd_test
 
     handler = handlers.get(args.command)
     if handler:
