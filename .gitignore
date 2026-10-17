@@ -104,3 +104,8 @@ Jenkinsfile
 .circleci/
 appveyor.yml
 .coverage
+
+# === Secrets & credentials — NEVER commit ===
+*.env
+.netrc
+*.cer
