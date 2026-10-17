@@ -88,7 +88,7 @@ wlf = "wlf:main"
 py-modules = ["wlf"]
 
 [tool.setuptools.packages.find]
-include = ["wlf_modules*"]
+include = ["wlf*", "wlf_modules*"]
 
 [tool.setuptools.package-data]
 "wlf_modules" = ["data/*.json"]
