@@ -103,3 +103,4 @@ azure-pipelines.yml
 Jenkinsfile
 .circleci/
 appveyor.yml
+.coverage
