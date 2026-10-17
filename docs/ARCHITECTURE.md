@@ -146,7 +146,7 @@ python wlf.py session resume abc123
 
 ```python
 # ~/.wlf/plugins/my_engine.py
-from wfh_modules.plugin_manager import WLFPlugin, register_plugin
+from wlf_modules.plugin_manager import WLFPlugin, register_plugin
 
 @register_plugin
 class MyEngine(WLFPlugin):

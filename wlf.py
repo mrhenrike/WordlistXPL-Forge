@@ -215,7 +215,7 @@ def _write_output(
     Respects global --limit / --timeout / ResourceGovernor (RAM/chunk),
     and graceful Ctrl+C shutdown.
     """
-    from wfh_modules.resource_governor import (
+    from wlf_modules.resource_governor import (
         STOP_OK,
         STOP_LIMIT,
         STOP_TIMEOUT,
@@ -363,7 +363,7 @@ def _profile_preview_and_confirm(
     Returns:
         (count, avg_line_bytes) if user proceeds, None if cancelled.
     """
-    from wfh_modules.profiler import generate_from_profile
+    from wlf_modules.profiler import generate_from_profile
 
     min_len = int(profile.get("min_len", 6) or 0)
     max_len = int(profile.get("max_len", 32) or 0) or 9999
@@ -510,7 +510,7 @@ def _confirm_large(estimate: int, threshold: int = 10_000_000) -> bool:
 
 def cmd_charset(args: argparse.Namespace) -> None:
     """Handler for charset mode."""
-    from wfh_modules.charset_gen import (
+    from wlf_modules.charset_gen import (
         get_charset, generate_by_charset, generate_by_pattern,
         estimate_size, create_charset_wizard, PLACEHOLDER_MAP,
         generate_by_mask, estimate_mask_size,
@@ -586,7 +586,7 @@ def cmd_charset(args: argparse.Namespace) -> None:
 
 def cmd_pattern(args: argparse.Namespace) -> None:
     """Handler for pattern mode."""
-    from wfh_modules.pattern_engine import (
+    from wlf_modules.pattern_engine import (
         render_template, generate_from_template_file, expand_variable,
         generate_company_patterns,
     )
@@ -611,17 +611,17 @@ def cmd_pattern(args: argparse.Namespace) -> None:
 
 def cmd_profile(args: argparse.Namespace) -> None:
     """Handler for personal profiling mode."""
-    from wfh_modules.profiler import interactive_profile, resolve_profile_output
+    from wlf_modules.profiler import interactive_profile, resolve_profile_output
 
     # ── Resolve locale: CLI --lang > YAML locale > session default ────────────
-    from wfh_modules.i18n import set_session_locale as _set_locale
+    from wlf_modules.i18n import set_session_locale as _set_locale
     _cli_lang = getattr(args, "lang", None)
     if _cli_lang:
         _set_locale(_cli_lang)
 
     # ── Load from YAML file ──────────────────────────────────────────────────
     if getattr(args, "profile_file", None):
-        from wfh_modules.profiler import load_profile_yaml
+        from wlf_modules.profiler import load_profile_yaml
         try:
             profile = load_profile_yaml(args.profile_file)
             if not _cli_lang and profile.get("locale"):
@@ -631,7 +631,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
             _err(str(exc))
             return
     elif hasattr(args, "name") and args.name:
-        from wfh_modules.profiler import parse_date_input
+        from wlf_modules.profiler import parse_date_input
         birth_parsed = parse_date_input(getattr(args, "birth", "") or "") or (0, 0, 0)
         profile = {
             "full_name": args.name,
@@ -712,7 +712,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
     # Validate engine selection before expensive preview/pipeline
     if profile.get("engines") or profile.get("_engine_ids"):
         try:
-            from wfh_modules.generation_engines import resolve_engines
+            from wlf_modules.generation_engines import resolve_engines
             raw_eng = profile.get("engines") or ",".join(
                 str(i) for i in profile.get("_engine_ids", [])
             )
@@ -726,7 +726,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
 
     # ── Pipeline execution ───────────────────────────────────────────────────
     try:
-        from wfh_modules.pipeline_engine import run_profile_pipeline, ProfilePipeline, PipelineConfig
+        from wlf_modules.pipeline_engine import run_profile_pipeline, ProfilePipeline, PipelineConfig
         _use_pipeline = True
     except ImportError:
         _use_pipeline = False
@@ -737,7 +737,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
             # Quick preview using legacy generator before the heavy pipeline runs
             _preview_ok = True
             if profile.get("interactive_mode"):
-                from wfh_modules.profiler import generate_from_profile
+                from wlf_modules.profiler import generate_from_profile
                 preview = _profile_preview_and_confirm(profile, leet_mode, output)
                 if preview is None:
                     return
@@ -771,7 +771,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
                 _err(f"Pipeline error: {exc}")
     else:
         # Fallback to legacy generator when pipeline_engine is unavailable
-        from wfh_modules.profiler import generate_from_profile
+        from wlf_modules.profiler import generate_from_profile
         if output:
             preview = _profile_preview_and_confirm(profile, leet_mode, output)
             if preview is None:
@@ -799,7 +799,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
 
 def cmd_corp(args: argparse.Namespace) -> None:
     """Handler for corporate profiling mode."""
-    from wfh_modules.corp_profiler import interactive_corp_profile, generate_from_corp_profile
+    from wlf_modules.corp_profiler import interactive_corp_profile, generate_from_corp_profile
 
     profile = interactive_corp_profile()
     leet_mode = getattr(args, "leet", "basic") or profile.get("leet_mode", "basic")
@@ -811,7 +811,7 @@ def cmd_corp(args: argparse.Namespace) -> None:
 
 def cmd_corp_users(args: argparse.Namespace) -> None:
     """Handler for corporate domain user/password generation."""
-    from wfh_modules.domain_users import (
+    from wlf_modules.domain_users import (
         interactive_domain_users_wizard,
         run_domain_users,
         collect_names_from_file,
@@ -923,7 +923,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
     ml_model = None
     if use_ml:
         try:
-            from wfh_modules.ml_patterns import get_model, DEFAULT_MODEL_FILE
+            from wlf_modules.ml_patterns import get_model, DEFAULT_MODEL_FILE
             if DEFAULT_MODEL_FILE.exists():
                 ml_model = get_model()
                 if ml_model.is_trained():
@@ -936,7 +936,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
     # ── Parallel generation across multiple names ──────────────────────────────
     names_list = params.get("names", [])
     if threads > 1 and len(names_list) > 1:
-        from wfh_modules.thread_pool import parallel_generate
+        from wlf_modules.thread_pool import parallel_generate
 
         _info(f"Parallel generation: {threads} threads × {len(names_list)} names")
 
@@ -966,7 +966,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
 
 def cmd_phone(args: argparse.Namespace) -> None:
     """Handler for phone number wordlist generation."""
-    from wfh_modules.phone_gen import (
+    from wlf_modules.phone_gen import (
         generate_phones, interactive_phone_wizard, estimate_count, COUNTRIES,
     )
 
@@ -995,7 +995,7 @@ def cmd_phone(args: argparse.Namespace) -> None:
     digit_length = getattr(args, "digit_length", None)
 
     if prefix_file:
-        from wfh_modules.dns_wordlist import load_words_from_file
+        from wlf_modules.dns_wordlist import load_words_from_file
         prefixes = load_words_from_file(prefix_file)
         _info(f"Loaded {len(prefixes)} prefixes from {prefix_file}")
         pattern = "X" * (digit_length or 7)
@@ -1032,7 +1032,7 @@ def cmd_phone(args: argparse.Namespace) -> None:
 
 def cmd_scrape(args: argparse.Namespace) -> None:
     """Handler for web scraping mode."""
-    from wfh_modules.web_scraper import WebScraper, DEFAULT_STOPWORDS
+    from wlf_modules.web_scraper import WebScraper, DEFAULT_STOPWORDS
 
     auth = None
     if args.auth:
@@ -1151,7 +1151,7 @@ def cmd_scrape(args: argparse.Namespace) -> None:
 
 def cmd_ocr(args: argparse.Namespace) -> None:
     """Handler for OCR mode."""
-    from wfh_modules.ocr_extractor import extract_from_image
+    from wlf_modules.ocr_extractor import extract_from_image
 
     _info(f"Processing OCR: {args.image}")
     try:
@@ -1174,7 +1174,7 @@ def cmd_ocr(args: argparse.Namespace) -> None:
 
 def cmd_extract(args: argparse.Namespace) -> None:
     """Handler for file extraction mode."""
-    from wfh_modules.file_extractor import extract_wordlist_from_files
+    from wlf_modules.file_extractor import extract_wordlist_from_files
 
     _info(f"Extracting from {len(args.files)} file(s)...")
     gen = extract_wordlist_from_files(
@@ -1186,7 +1186,7 @@ def cmd_extract(args: argparse.Namespace) -> None:
 
 def cmd_mutate(args: argparse.Namespace) -> None:
     """Handler for existing-password mutation generator."""
-    from wfh_modules.profiler import password_variants
+    from wlf_modules.profiler import password_variants
 
     password = getattr(args, "password", "") or ""
     if not password:
@@ -1215,7 +1215,7 @@ def cmd_mutate(args: argparse.Namespace) -> None:
     # human pattern the mutation engine does not derive on its own.
     base_passwords = [password]
     if getattr(args, "titlecase", False):
-        from wfh_modules.affix_engine import titlecase_word
+        from wlf_modules.affix_engine import titlecase_word
         tc = titlecase_word(password)
         if tc and tc != password:
             base_passwords.append(tc)
@@ -1242,7 +1242,7 @@ def cmd_mutate(args: argparse.Namespace) -> None:
 
 def cmd_num2text(args: argparse.Namespace) -> None:
     """Convert digits to text words and generate case/leet/separator variations."""
-    from wfh_modules.num2text import num2text_variants, num2text_range, _normalise_lang
+    from wlf_modules.num2text import num2text_variants, num2text_range, _normalise_lang
 
     lang     = _normalise_lang(getattr(args, "lang", "en") or "en")
     raw_seps = getattr(args, "separators", None)
@@ -1285,7 +1285,7 @@ def cmd_num2text(args: argparse.Namespace) -> None:
 
 def cmd_phrase(args: argparse.Namespace) -> None:
     """Handler for phrase-initials password generation."""
-    from wfh_modules.profiler import phrase_initials_variants
+    from wlf_modules.profiler import phrase_initials_variants
 
     phrase = getattr(args, "phrase", "") or ""
     if not phrase:
@@ -1327,7 +1327,7 @@ def cmd_leet(args: argparse.Namespace) -> None:
     _info(f"Generating leet variants [{args.mode}] for: {args.word}"
           + (" [gpu]" if use_gpu else ""))
     if use_gpu:
-        from wfh_modules.gpu_expand import expand_leet_batch
+        from wlf_modules.gpu_expand import expand_leet_batch
         gen = expand_leet_batch(
             [args.word],
             mode=args.mode,
@@ -1335,7 +1335,7 @@ def cmd_leet(args: argparse.Namespace) -> None:
             use_gpu=True,
         )
     else:
-        from wfh_modules.leet_permuter import generate_all_variations
+        from wlf_modules.leet_permuter import generate_all_variations
         gen = generate_all_variations(
             args.word,
             leet_mode=args.mode,
@@ -1348,7 +1348,7 @@ def cmd_leet(args: argparse.Namespace) -> None:
 
 def cmd_leet_perm(args: argparse.Namespace) -> None:
     """Handler for cartesian leet permutation over a wordlist (elpscrk-style)."""
-    from wfh_modules.leet_permuter import leet_perm_wordlist, parse_custom_mapping, LEET_MEDIUM
+    from wlf_modules.leet_permuter import leet_perm_wordlist, parse_custom_mapping, LEET_MEDIUM
 
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:
@@ -1395,7 +1395,7 @@ def cmd_leet_perm(args: argparse.Namespace) -> None:
 
 def cmd_xor(args: argparse.Namespace) -> None:
     """Handler for XOR mode."""
-    from wfh_modules.xor_crypto import (
+    from wlf_modules.xor_crypto import (
         brute_force_display, xor_encrypt_str, xor_decrypt_str,
     )
 
@@ -1416,7 +1416,7 @@ def cmd_xor(args: argparse.Namespace) -> None:
 
 def cmd_analyze(args: argparse.Namespace) -> None:
     """Handler for wordlist analysis."""
-    from wfh_modules.analyzer import (
+    from wlf_modules.analyzer import (
         analyze_wordlist, format_report,
         analyze_masks, format_mask_report,
         export_stats_json, export_stats_csv,
@@ -1441,7 +1441,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
             _warn(f"Mask analysis failed: {exc}")
 
     if getattr(args, "mask_optindex", False):
-        from wfh_modules.analyzer import (
+        from wlf_modules.analyzer import (
             maskgen_optindex,
             format_maskgen_report,
             export_masks_csv_pack,
@@ -1522,7 +1522,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
 
 def cmd_merge(args: argparse.Namespace) -> None:
     """Handler for wordlist merge."""
-    from wfh_modules.merger import merge_to_file, stream_merged
+    from wlf_modules.merger import merge_to_file, stream_merged
 
     if not args.output:
         gen = stream_merged(
@@ -1551,7 +1551,7 @@ def cmd_merge(args: argparse.Namespace) -> None:
 
 def cmd_dns(args: argparse.Namespace) -> None:
     """Handler for DNS wordlist generation (alterx + DNSCewl parity)."""
-    from wfh_modules.dns_wordlist import (
+    from wlf_modules.dns_wordlist import (
         generate_subdomain_permutations, generate_from_template, load_words_from_file,
         load_templates_from_yaml, generate_from_yaml_templates,
         generate_multi_domain, filter_dns_output, clusterbomb_generate,
@@ -1682,7 +1682,7 @@ def cmd_dns(args: argparse.Namespace) -> None:
 
 def cmd_pharma(args: argparse.Namespace) -> None:
     """Generate passwords and usernames for retail/pharmacy chain patterns."""
-    from wfh_modules.pharma_gen import (
+    from wlf_modules.pharma_gen import (
         gen_passwords, gen_usernames, gen_both, _expand_id_range,
     )
 
@@ -1732,7 +1732,7 @@ def cmd_pharma(args: argparse.Namespace) -> None:
 
 def cmd_sanitize(args: argparse.Namespace) -> None:
     """Handler for wordlist sanitization."""
-    from wfh_modules.sanitizer import sanitize, format_sanitize_stats
+    from wlf_modules.sanitizer import sanitize, format_sanitize_stats
 
     inplace = getattr(args, "inplace", False)
     output = getattr(args, "output", None)
@@ -1765,7 +1765,7 @@ def cmd_sanitize(args: argparse.Namespace) -> None:
 
 def cmd_reverse(args: argparse.Namespace) -> None:
     """Handler for wordlist line reversal (tac)."""
-    from wfh_modules.sanitizer import reverse_file
+    from wlf_modules.sanitizer import reverse_file
 
     inplace = getattr(args, "inplace", False)
     output = getattr(args, "output", None)
@@ -1785,13 +1785,13 @@ def cmd_reverse(args: argparse.Namespace) -> None:
 
 def cmd_default_creds(args: argparse.Namespace) -> None:
     """Handler for the default-creds subcommand - query IoT/router default credentials."""
-    from wfh_modules.default_creds import handle_default_creds
+    from wlf_modules.default_creds import handle_default_creds
     handle_default_creds(args, {})
 
 
 def cmd_isp_keygen(args: argparse.Namespace) -> None:
     """Handler for ISP default WiFi password keyspace generation."""
-    from wfh_modules.isp_keygen import handle_isp_keygen
+    from wlf_modules.isp_keygen import handle_isp_keygen
     handle_isp_keygen(args, {})
 
 
@@ -1802,7 +1802,7 @@ def cmd_emit(args: argparse.Namespace) -> None:
     _GLOBAL_CTX["stream"] = True
     gen = None
     if engine == "markov":
-        from wfh_modules.markov_engine import MarkovModel
+        from wlf_modules.markov_engine import MarkovModel
         m = MarkovModel()
         path = getattr(args, "model", None) or ".model/markov_model.json"
         if not Path(path).exists():
@@ -1816,7 +1816,7 @@ def cmd_emit(args: argparse.Namespace) -> None:
             beam_width=getattr(args, "beam_width", 0) or 100_000,
         )
     elif engine == "pcfg":
-        from wfh_modules.pcfg_engine import PCFGGrammar
+        from wlf_modules.pcfg_engine import PCFGGrammar
         g = PCFGGrammar()
         path = getattr(args, "model", None) or ".model/pcfg_grammar.json"
         if not Path(path).exists():
@@ -1831,8 +1831,8 @@ def cmd_emit(args: argparse.Namespace) -> None:
             zipf_s=float(getattr(args, "zipf_s", 0) or 0),
         )
     elif engine == "mask":
-        from wfh_modules.gpu_expand import iter_mask
-        from wfh_modules.resource_governor import governor_from_ctx
+        from wlf_modules.gpu_expand import iter_mask
+        from wlf_modules.resource_governor import governor_from_ctx
         gov = governor_from_ctx(_GLOBAL_CTX)
         chunk = gov.gpu_batch_size(65536)
         gen = iter_mask(
@@ -1841,8 +1841,8 @@ def cmd_emit(args: argparse.Namespace) -> None:
             max_candidates=limit or 100_000,
         )
     elif engine == "semantic":
-        from wfh_modules.profiler import load_profile_yaml
-        from wfh_modules.semantic_pcfg import generate_semantic
+        from wlf_modules.profiler import load_profile_yaml
+        from wlf_modules.semantic_pcfg import generate_semantic
         pf = getattr(args, "profile_file", None)
         if not pf:
             _err("semantic emit requires --profile-file")
@@ -1858,8 +1858,8 @@ def cmd_emit(args: argparse.Namespace) -> None:
 
 def cmd_maskgen(args: argparse.Namespace) -> None:
     """Hashcat-style mask generation with chunked/GPU-aware batching."""
-    from wfh_modules.gpu_expand import iter_mask, mask_keyspace, parse_mask
-    from wfh_modules.resource_governor import governor_from_ctx
+    from wlf_modules.gpu_expand import iter_mask, mask_keyspace, parse_mask
+    from wlf_modules.resource_governor import governor_from_ctx
 
     mask = getattr(args, "mask", None) or "?l?l?d?d"
     slots = parse_mask(mask, getattr(args, "custom_charset1", None))
@@ -1878,8 +1878,8 @@ def cmd_maskgen(args: argparse.Namespace) -> None:
 
 def cmd_strategy(args: argparse.Namespace) -> None:
     """Plan mutation strategies (PBMP-lite) from a profile."""
-    from wfh_modules.profiler import load_profile_yaml
-    from wfh_modules.strategy_engine import (
+    from wlf_modules.profiler import load_profile_yaml
+    from wlf_modules.strategy_engine import (
         bayesian_structure_priors,
         format_plan,
         models_on_disk,
@@ -1908,8 +1908,8 @@ def cmd_strategy(args: argparse.Namespace) -> None:
 
     if getattr(args, "run", False):
         # Execute top engines that we can without heavy deps
-        from wfh_modules.semantic_pcfg import generate_semantic
-        from wfh_modules.pattern_engine import expand_variable, render_template
+        from wlf_modules.semantic_pcfg import generate_semantic
+        from wlf_modules.pattern_engine import expand_variable, render_template
 
         for eng in plan.engines[:3]:
             name = eng["strategy"]
@@ -1941,9 +1941,9 @@ def cmd_strategy(args: argparse.Namespace) -> None:
 
 def cmd_bandit(args: argparse.Namespace) -> None:
     """UCB1 router over engines with proxy rewards."""
-    from wfh_modules.bandit_router import BanditRouter, proxy_reward
-    from wfh_modules.gpu_expand import expand_leet_batch
-    from wfh_modules.semantic_pcfg import generate_semantic
+    from wlf_modules.bandit_router import BanditRouter, proxy_reward
+    from wlf_modules.gpu_expand import expand_leet_batch
+    from wlf_modules.semantic_pcfg import generate_semantic
 
     rounds = int(getattr(args, "rounds", 5) or 5)
     seeds = list(getattr(args, "seeds", None) or ["BrandX", "OzZY", "2026"])
@@ -1977,7 +1977,7 @@ def cmd_bandit(args: argparse.Namespace) -> None:
 
 def cmd_password_dna(args: argparse.Namespace) -> None:
     """Handler for password DNA analysis and variant generation."""
-    from wfh_modules.password_dna import handle_password_dna
+    from wlf_modules.password_dna import handle_password_dna
 
     dna, gen = handle_password_dna(args, {})
     if not dna or not gen:
@@ -1998,8 +1998,8 @@ def cmd_password_dna(args: argparse.Namespace) -> None:
 
 def cmd_dna_extract(args: argparse.Namespace) -> None:
     """Extract DNA profile + hashcat masks without full candidate explosion."""
-    from wfh_modules.password_dna import PasswordDNA
-    from wfh_modules.coverage_analyzer import hashcat_mask, structure_mask
+    from wlf_modules.password_dna import PasswordDNA
+    from wlf_modules.coverage_analyzer import hashcat_mask, structure_mask
 
     passwords: list[str] = list(getattr(args, "passwords", None) or [])
     if getattr(args, "file", None):
@@ -2035,19 +2035,19 @@ def cmd_dna_extract(args: argparse.Namespace) -> None:
 
 def cmd_cover(args: argparse.Namespace) -> None:
     """Sample local corpus and report structural coverage / engine hints."""
-    from wfh_modules.coverage_analyzer import handle_cover
+    from wlf_modules.coverage_analyzer import handle_cover
     handle_cover(args, {})
 
 
 def cmd_replay(args: argparse.Namespace) -> None:
     """Replay generated candidates against a bloom sample of the corpus."""
-    from wfh_modules.coverage_analyzer import handle_replay
+    from wlf_modules.coverage_analyzer import handle_replay
     handle_replay(args, {})
 
 
 def cmd_combiner(args: argparse.Namespace) -> None:
     """Handler for keyword combiner wordlist generation."""
-    from wfh_modules.combiner import handle_combiner
+    from wlf_modules.combiner import handle_combiner
     gen = handle_combiner(args, {})
     if gen:
         count = _write_output(gen, args.output)
@@ -2056,7 +2056,7 @@ def cmd_combiner(args: argparse.Namespace) -> None:
 
 def cmd_pcfg(args: argparse.Namespace) -> None:
     """Handler for PCFG grammar training and generation."""
-    from wfh_modules.pcfg_engine import handle_pcfg
+    from wlf_modules.pcfg_engine import handle_pcfg
     gen = handle_pcfg(args, _GLOBAL_CTX)
     if gen:
         action = getattr(args, "pcfg_action", "generate")
@@ -2074,7 +2074,7 @@ def cmd_pcfg(args: argparse.Namespace) -> None:
 
 def cmd_markov(args: argparse.Namespace) -> None:
     """Handler for Markov model training and generation."""
-    from wfh_modules.markov_engine import handle_markov
+    from wlf_modules.markov_engine import handle_markov
     gen = handle_markov(args, _GLOBAL_CTX)
     if gen:
         action = getattr(args, "markov_action", "generate")
@@ -2092,7 +2092,7 @@ def cmd_markov(args: argparse.Namespace) -> None:
 
 def cmd_kwalk(args: argparse.Namespace) -> None:
     """Handler for keyboard walk generation."""
-    from wfh_modules.kwalk_gen import handle_kwalk
+    from wlf_modules.kwalk_gen import handle_kwalk
     gen = handle_kwalk(args, _GLOBAL_CTX)
     if gen:
         if getattr(args, "list_layouts", False):
@@ -2105,7 +2105,7 @@ def cmd_kwalk(args: argparse.Namespace) -> None:
 
 def cmd_rulegen(args: argparse.Namespace) -> None:
     """Handler for hashcat rule auto-generation."""
-    from wfh_modules.rulegen_engine import handle_rulegen
+    from wlf_modules.rulegen_engine import handle_rulegen
     gen = handle_rulegen(args, _GLOBAL_CTX)
     if gen:
         output = getattr(args, "output", None)
@@ -2119,7 +2119,7 @@ def cmd_rulegen(args: argparse.Namespace) -> None:
 
 def cmd_benchmark(args: argparse.Namespace) -> None:
     """Handler for wordlist quality benchmarking."""
-    from wfh_modules.benchmark_suite import handle_benchmark
+    from wlf_modules.benchmark_suite import handle_benchmark
     gen = handle_benchmark(args, _GLOBAL_CTX)
     if gen:
         output = getattr(args, "output", None)
@@ -2135,7 +2135,7 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
 
 def cmd_prince(args: argparse.Namespace) -> None:
     """Handler for PRINCE attack mode."""
-    from wfh_modules.prince_engine import handle_prince
+    from wlf_modules.prince_engine import handle_prince
     gen = handle_prince(args, _GLOBAL_CTX)
     if gen:
         count = _write_output(gen, args.output)
@@ -2144,7 +2144,7 @@ def cmd_prince(args: argparse.Namespace) -> None:
 
 def cmd_mangle(args: argparse.Namespace) -> None:
     """Handler for hashcat-style mangling rules on wordlists."""
-    from wfh_modules.mangler import apply_rules, BUILTIN_RULES
+    from wlf_modules.mangler import apply_rules, BUILTIN_RULES
 
     list_rules = getattr(args, "list_rules", False)
     if list_rules:
@@ -2168,7 +2168,7 @@ def cmd_mangle(args: argparse.Namespace) -> None:
         lines = [ln.rstrip("\n\r") for ln in f if ln.strip()]
 
     if getattr(args, "overseer", False):
-        from wfh_modules.mangler import overseer_expand, OverseerConfig
+        from wlf_modules.mangler import overseer_expand, OverseerConfig
         cfg = OverseerConfig(
             pps=int(getattr(args, "pps", 0) or 0),
             target_time_hrs=float(getattr(args, "time_budget", 1.0) or 1.0),
@@ -2198,7 +2198,7 @@ def cmd_mangle(args: argparse.Namespace) -> None:
 
 def cmd_improve(args: argparse.Namespace) -> None:
     """Enrich an existing wordlist (CUPP -w parity)."""
-    from wfh_modules.profiler import improve_wordlist
+    from wlf_modules.profiler import improve_wordlist
 
     source = getattr(args, "wordlist", None)
     if not source:
@@ -2227,7 +2227,7 @@ def cmd_improve(args: argparse.Namespace) -> None:
 
 def cmd_maya_rank(args: argparse.Namespace) -> None:
     """Rank a wordlist by MAYA-inspired cracking probability."""
-    from wfh_modules.maya_ranker import rank_wordlist, format_rank_report
+    from wlf_modules.maya_ranker import rank_wordlist, format_rank_report
 
     source = getattr(args, "wordlist", None)
     if not source:
@@ -2257,7 +2257,7 @@ def cmd_br_names(args: argparse.Namespace) -> None:
 
     Generates a username list from BRWordList Brazilian name files.
     """
-    from wfh_modules.brwordlist_loader import BRWordListLoader, generate_usernames_from_br_names
+    from wlf_modules.brwordlist_loader import BRWordListLoader, generate_usernames_from_br_names
     from pathlib import Path as _Path
 
     explicit_path: Optional[str] = getattr(args, "brwordlist_path", None)
@@ -2294,7 +2294,7 @@ def cmd_iwlgen(args: argparse.Namespace) -> None:
 
     Generates keyword permutation wordlists using the IwlgenEngine.
     """
-    from wfh_modules.iwlgen import IwlgenEngine
+    from wlf_modules.iwlgen import IwlgenEngine
 
     raw_keywords: Optional[str] = getattr(args, "keywords", None)
     if not raw_keywords:
@@ -4874,9 +4874,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def cmd_sysinfo(args: argparse.Namespace) -> None:
     """Show hardware profile and compute backend status."""
-    from wfh_modules.hw_profiler import get_hw_profile
-    from wfh_modules.compute_backend import auto_select_backend
-    from wfh_modules.thread_pool import (
+    from wlf_modules.hw_profiler import get_hw_profile
+    from wlf_modules.compute_backend import auto_select_backend
+    from wlf_modules.thread_pool import (
         DEFAULT_THREADS, MIN_THREADS, MAX_THREADS,
         WARN_THRESHOLD, ALERT_THRESHOLD,
     )
@@ -4915,7 +4915,7 @@ def cmd_sysinfo(args: argparse.Namespace) -> None:
 
     stress_n = getattr(args, "crc32_stress", 0) or 0
     if stress_n > 0:
-        from wfh_modules.benchmark_suite import stress_crc32_dedup, format_crc32_stress_report
+        from wlf_modules.benchmark_suite import stress_crc32_dedup, format_crc32_stress_report
         _info(f"Running CRC32 dedup stress test ({stress_n:,} lines)...")
         result = stress_crc32_dedup(stress_n)
         print(format_crc32_stress_report(result))
@@ -4923,7 +4923,7 @@ def cmd_sysinfo(args: argparse.Namespace) -> None:
 
 def cmd_corp_prefixes(args: argparse.Namespace) -> None:
     """Handler for corporate username prefix generation."""
-    from wfh_modules.corp_prefixes import (
+    from wlf_modules.corp_prefixes import (
         load_prefix_config,
         generate_from_name,
         get_all_prefixes,
@@ -4950,7 +4950,7 @@ def cmd_corp_prefixes(args: argparse.Namespace) -> None:
         names = [n.strip() for n in raw.split(",") if n.strip()]
 
     if getattr(args, "file", None):
-        from wfh_modules.domain_users import collect_names_from_file
+        from wlf_modules.domain_users import collect_names_from_file
         try:
             names += collect_names_from_file(args.file)
         except FileNotFoundError as exc:
@@ -5011,7 +5011,7 @@ def cmd_train(args: argparse.Namespace) -> None:
     Privacy: only structural patterns are extracted - no raw usernames,
     passwords, company names, or personal data are ever stored in the model.
     """
-    from wfh_modules.ml_patterns import PatternModel, DEFAULT_MODEL_FILE
+    from wlf_modules.ml_patterns import PatternModel, DEFAULT_MODEL_FILE
 
     model = PatternModel()
     trained_any = False
@@ -5085,7 +5085,7 @@ def cmd_train(args: argparse.Namespace) -> None:
     # ── SecLists corpus ──────────────────────────────────────────────────────────
     seclists_flag = getattr(args, "seclists", None)
     if seclists_flag:
-        from wfh_modules.seclists_trainer import find_seclists_root, train_from_seclists
+        from wlf_modules.seclists_trainer import find_seclists_root, train_from_seclists
 
         hint = None if seclists_flag == "auto" else seclists_flag
         sl_root = find_seclists_root(hint)
@@ -5127,7 +5127,7 @@ def cmd_train(args: argparse.Namespace) -> None:
 
 def cmd_osint_perm(args: argparse.Namespace) -> None:
     """Generate OSINT-based password candidates from target profile."""
-    from wfh_modules.osint_perm import OsintProfile, OsintPermGenerator
+    from wlf_modules.osint_perm import OsintProfile, OsintPermGenerator
 
     profile = OsintProfile(
         first_name=getattr(args, "first_name", "") or "",
@@ -5157,7 +5157,7 @@ def cmd_osint_perm(args: argparse.Namespace) -> None:
 
 def cmd_cupp(args: argparse.Namespace) -> None:
     """Generate target-specific passwords from user profile (CUPP-style)."""
-    from wfh_modules.cupp_engine import CuppEngine, CuppProfile
+    from wlf_modules.cupp_engine import CuppEngine, CuppProfile
 
     profile = CuppProfile(
         first_name=getattr(args, "first_name", "") or "",
@@ -5186,7 +5186,7 @@ def cmd_cupp(args: argparse.Namespace) -> None:
 
 def cmd_pattern_rank(args: argparse.Namespace) -> None:
     """Analyze wordlist patterns: keyboard walks, Hashcat masks, PTBR months."""
-    from wfh_modules.pattern_ranker import analyze_wordlist, score_keyboard_walk, build_hashcat_mask
+    from wlf_modules.pattern_ranker import analyze_wordlist, score_keyboard_walk, build_hashcat_mask
 
     path = getattr(args, "wordlist", None)
     if not path:
@@ -5211,7 +5211,7 @@ def cmd_pattern_rank(args: argparse.Namespace) -> None:
 
 def cmd_scrape_target(args: argparse.Namespace) -> None:
     """Crawl a target URL and extract words for wordlist generation."""
-    from wfh_modules.target_spider import TargetSpider
+    from wlf_modules.target_spider import TargetSpider
 
     url = getattr(args, "url", None)
     if not url:
@@ -5253,7 +5253,7 @@ def cmd_anomaly_score(args: argparse.Namespace) -> None:
         wlf anomaly-score wordlist.lst --top 50
         wlf anomaly-score leak.txt --top 100 --output rare_passwords.txt
     """
-    from wfh_modules.anomaly_scorer import score_wordlist
+    from wlf_modules.anomaly_scorer import score_wordlist
 
     path = getattr(args, "wordlist", None)
     if not path:
@@ -5288,7 +5288,7 @@ def cmd_anomaly_score(args: argparse.Namespace) -> None:
 
 def cmd_rules(args: argparse.Namespace) -> None:
     """Handler for the rule engine (apply, convert, optimize)."""
-    from wfh_modules.rule_engine import handle_rules
+    from wlf_modules.rule_engine import handle_rules
 
     gen = handle_rules(args, _GLOBAL_CTX)
     if gen is None:
@@ -5304,7 +5304,7 @@ def cmd_rules(args: argparse.Namespace) -> None:
 
 def cmd_affix(args: argparse.Namespace) -> None:
     """Handler for the composite-affix mutation layer."""
-    from wfh_modules.affix_engine import handle_affix
+    from wlf_modules.affix_engine import handle_affix
 
     gen = handle_affix(args, _GLOBAL_CTX)
     if gen is None:
@@ -5318,7 +5318,7 @@ def cmd_affix(args: argparse.Namespace) -> None:
 
 def cmd_dedup(args: argparse.Namespace) -> None:
     """Handler for order-preserving deduplication."""
-    from wfh_modules.list_ops import handle_dedup
+    from wlf_modules.list_ops import handle_dedup
     gen = handle_dedup(args, _GLOBAL_CTX)
     if gen is None:
         return
@@ -5328,7 +5328,7 @@ def cmd_dedup(args: argparse.Namespace) -> None:
 
 def cmd_subtract(args: argparse.Namespace) -> None:
     """Handler for set subtraction between wordlists."""
-    from wfh_modules.list_ops import handle_subtract
+    from wlf_modules.list_ops import handle_subtract
 
     gen = handle_subtract(args, _GLOBAL_CTX)
     if gen is None:
@@ -5339,7 +5339,7 @@ def cmd_subtract(args: argparse.Namespace) -> None:
 
 def cmd_split(args: argparse.Namespace) -> None:
     """Handler for splitting a wordlist by count, size or entry length."""
-    from wfh_modules.list_ops import split_file
+    from wlf_modules.list_ops import split_file
 
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:
@@ -5369,7 +5369,7 @@ def cmd_split(args: argparse.Namespace) -> None:
 
 def cmd_keyspace(args: argparse.Namespace) -> None:
     """Handler for keyspace and time-to-exhaust estimation."""
-    from wfh_modules.list_ops import (
+    from wlf_modules.list_ops import (
         mask_keyspace, charset_keyspace, keyspace_report, _count_lines,
     )
 
@@ -5401,7 +5401,7 @@ def cmd_keyspace(args: argparse.Namespace) -> None:
 
 def cmd_neural(args: argparse.Namespace) -> None:
     """Handler for neural password generation (optional [neural] extra)."""
-    from wfh_modules.neural_engine import handle_neural
+    from wlf_modules.neural_engine import handle_neural
 
     res = handle_neural(args, _GLOBAL_CTX)
     if not res:
@@ -5417,7 +5417,7 @@ def cmd_neural(args: argparse.Namespace) -> None:
 
 def cmd_strength(args: argparse.Namespace) -> None:
     """Handler for zxcvbn-style password strength estimation."""
-    from wfh_modules.entropy_strength import handle_strength
+    from wlf_modules.entropy_strength import handle_strength
 
     res = handle_strength(args, _GLOBAL_CTX)
     if not res:
@@ -5435,7 +5435,7 @@ def cmd_strength(args: argparse.Namespace) -> None:
 
 def cmd_hash_id(args: argparse.Namespace) -> None:
     """Handler for hash identification."""
-    from wfh_modules.hash_tools import handle_hash_id
+    from wlf_modules.hash_tools import handle_hash_id
 
     gen = handle_hash_id(args, _GLOBAL_CTX)
     if gen is None:
@@ -5451,7 +5451,7 @@ def cmd_hash_id(args: argparse.Namespace) -> None:
 
 def cmd_hash_gen(args: argparse.Namespace) -> None:
     """Handler for hash generation over a wordlist."""
-    from wfh_modules.hash_tools import handle_hash_gen
+    from wlf_modules.hash_tools import handle_hash_gen
 
     gen = handle_hash_gen(args, _GLOBAL_CTX)
     if gen is None:
@@ -5462,7 +5462,7 @@ def cmd_hash_gen(args: argparse.Namespace) -> None:
 
 def cmd_hcmask(args: argparse.Namespace) -> None:
     """Handler for hashcat .hcmask export."""
-    from wfh_modules.hash_tools import export_hcmask
+    from wlf_modules.hash_tools import export_hcmask
 
     wordlist = getattr(args, "wordlist", None)
     output = getattr(args, "output", None)
@@ -5486,7 +5486,7 @@ def cmd_hcmask(args: argparse.Namespace) -> None:
 
 def cmd_osint(args: argparse.Namespace) -> None:
     """Handler for advanced OSINT wordlist collection."""
-    from wfh_modules.osint_advanced import handle_osint
+    from wlf_modules.osint_advanced import handle_osint
 
     gen = handle_osint(args, _GLOBAL_CTX)
     if gen is None:
@@ -5497,7 +5497,7 @@ def cmd_osint(args: argparse.Namespace) -> None:
 
 def cmd_passphrase(args: argparse.Namespace) -> None:
     """Handler for diceware/mnemonic passphrase generation."""
-    from wfh_modules.passphrase_gen import handle_passphrase
+    from wlf_modules.passphrase_gen import handle_passphrase
 
     gen = handle_passphrase(args, _GLOBAL_CTX)
     if gen is None:
@@ -5508,7 +5508,7 @@ def cmd_passphrase(args: argparse.Namespace) -> None:
 
 def cmd_evaluate(args: argparse.Namespace) -> None:
     """Handler for guess-number and coverage evaluation."""
-    from wfh_modules.eval_harness import handle_evaluate
+    from wlf_modules.eval_harness import handle_evaluate
 
     res = handle_evaluate(args, _GLOBAL_CTX)
     if not res:
@@ -5525,7 +5525,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
 
 def cmd_curate(args: argparse.Namespace) -> None:
     """Handler for crack-rate list curation and merging."""
-    from wfh_modules.eval_harness import handle_curate
+    from wlf_modules.eval_harness import handle_curate
 
     res = handle_curate(args, _GLOBAL_CTX)
     if not res:
@@ -5542,7 +5542,7 @@ def cmd_curate(args: argparse.Namespace) -> None:
 
 def cmd_test(args: argparse.Namespace) -> None:
     """Credential testing pipeline — generate wordlist + hashcat cracking."""
-    from wfh_modules.credential_tester import run_test, HASH_MODES
+    from wlf_modules.credential_tester import run_test, HASH_MODES
 
     hash_mode = None
     if args.mode:
@@ -5592,15 +5592,15 @@ def main() -> None:
     # ── Apply locale ──────────────────────────────────────────────────────────
     _raw_lang = getattr(args, "lang", None)
     if _raw_lang:
-        from wfh_modules.i18n import set_session_locale as _set_locale
+        from wlf_modules.i18n import set_session_locale as _set_locale
         _active_locale = _set_locale(_raw_lang)
         _GLOBAL_CTX["locale"] = _active_locale
     else:
         _GLOBAL_CTX.setdefault("locale", "en")
 
     # ── Apply global execution context ────────────────────────────────────────
-    from wfh_modules.thread_pool import validate_thread_count, DEFAULT_THREADS
-    from wfh_modules.compute_backend import set_backend
+    from wlf_modules.thread_pool import validate_thread_count, DEFAULT_THREADS
+    from wlf_modules.compute_backend import set_backend
 
     raw_threads    = getattr(args, "threads", DEFAULT_THREADS) or DEFAULT_THREADS
     compute_mode   = getattr(args, "compute", "auto") or "auto"
@@ -5761,7 +5761,7 @@ def cmd_pipeline(args) -> None:
         _warn("Usage: wlf pipeline <pipeline.yaml> [-o output.txt]")
         return
     try:
-        from wfh_modules.pipeline_dsl import execute_pipeline
+        from wlf_modules.pipeline_dsl import execute_pipeline
         gen = execute_pipeline(pipeline_file, _GLOBAL_CTX)
         count = _write_output(gen, getattr(args, "output", None), stream=True)
         _ok(f"Pipeline wrote {count:,} candidates")
@@ -5771,7 +5771,7 @@ def cmd_pipeline(args) -> None:
 
 def cmd_session(args) -> None:
     """Manage sessions: list / show / resume."""
-    from wfh_modules.session_manager import SessionManager
+    from wlf_modules.session_manager import SessionManager
     import time as _time
 
     mgr = SessionManager()
@@ -5838,7 +5838,7 @@ def _load_profile_file(path: str) -> dict:
             import yaml  # type: ignore
             data = yaml.safe_load(text) or {}
         except ImportError:
-            from wfh_modules.profiler import load_profile_yaml
+            from wlf_modules.profiler import load_profile_yaml
             data = load_profile_yaml(path)
     else:
         import json as _json
@@ -5854,7 +5854,7 @@ def cmd_score(args) -> None:
     if not pw:
         _warn("Usage: wlf score <password>")
         return
-    from wfh_modules.explainer import explain
+    from wlf_modules.explainer import explain
     exp = explain(pw, engine="heuristic", raw_score=0.0)
     print(exp.format(verbose=True))
 
@@ -5872,7 +5872,7 @@ def cmd_serve(args) -> None:
     _info(f"WordlistXPL-Forge API starting on http://{host}:{port}")
     _info("AUTHORIZED USE ONLY")
     try:
-        from wfh_modules.api_server import run_server
+        from wlf_modules.api_server import run_server
         run_server(host=host, port=port, api_key=api_key)
     except Exception as exc:
         _err(f"API server error: {exc}")
@@ -5881,7 +5881,7 @@ def cmd_serve(args) -> None:
 def cmd_br_deep(args) -> None:
     """Brazilian deep profile wordlist generation."""
     try:
-        from wfh_modules.br_deep_engine import BRDeepEngine
+        from wlf_modules.br_deep_engine import BRDeepEngine
         profile: dict = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
@@ -5909,7 +5909,7 @@ def cmd_br_deep(args) -> None:
 def cmd_pbmp(args) -> None:
     """Show PBMP strategy distribution for a profile."""
     try:
-        from wfh_modules.pbmp_full import PBMPFull
+        from wlf_modules.pbmp_full import PBMPFull
         profile: dict = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
@@ -5937,11 +5937,11 @@ def cmd_evolve(args) -> None:
                 seed_words = [line.strip() for line in f if line.strip()]
 
         if mode == "map-elites":
-            from wfh_modules.map_elites import MAPElites
+            from wlf_modules.map_elites import MAPElites
             eng = MAPElites()
             gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
         else:
-            from wfh_modules.genetic_engine import GeneticPasswordEngine
+            from wlf_modules.genetic_engine import GeneticPasswordEngine
             eng = GeneticPasswordEngine()
             gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
 
@@ -5954,7 +5954,7 @@ def cmd_evolve(args) -> None:
 def cmd_graph_expand(args) -> None:
     """Graph-based wordlist expansion from a seed corpus."""
     try:
-        from wfh_modules.password_graph import PasswordGraphEngine
+        from wlf_modules.password_graph import PasswordGraphEngine
         corpus_file = getattr(args, "corpus_file", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
         if not corpus_file:
             _warn("Usage: wlf graph-expand <corpus.txt> [-o out.txt]")
@@ -5973,7 +5973,7 @@ def cmd_graph_expand(args) -> None:
 def cmd_temporal_model(args) -> None:
     """Temporal drift wordlist — evolve seeds across years."""
     try:
-        from wfh_modules.temporal_drift import TemporalDriftEngine
+        from wlf_modules.temporal_drift import TemporalDriftEngine
         seed_file = getattr(args, "seed_file", None)
         seed_words: list[str] = []
         if seed_file:
@@ -5993,7 +5993,7 @@ def cmd_temporal_model(args) -> None:
 def cmd_domain_pcfg(args) -> None:
     """Domain-specific PCFG generation (corporate, healthcare, finance, etc.)."""
     try:
-        from wfh_modules.domain_pcfg import DomainPCFG
+        from wlf_modules.domain_pcfg import DomainPCFG
         sector = getattr(args, "sector", None) or "generic"
         corpus_file = getattr(args, "corpus_file", None)
         corpus: list[str] = []
@@ -6011,7 +6011,7 @@ def cmd_domain_pcfg(args) -> None:
 
 def cmd_plugin(args) -> None:
     """Plugin management: list, run, discover."""
-    from wfh_modules.plugin_manager import auto_discover, describe_all, run_plugin, list_plugins
+    from wlf_modules.plugin_manager import auto_discover, describe_all, run_plugin, list_plugins
     sub = getattr(args, "plugin_sub", None) or "list"
     if sub == "list":
         auto_discover()
@@ -6034,7 +6034,7 @@ def cmd_plugin(args) -> None:
 def cmd_vae_interp(args) -> None:
     """VAE latent space interpolation between two passwords."""
     try:
-        from wfh_modules.vae_engine import VAEPasswordEngine
+        from wlf_modules.vae_engine import VAEPasswordEngine
         pw_from = getattr(args, "pw_from", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
         pw_to   = getattr(args, "pw_to",   None) or (getattr(args, "args", [None, None])[1] if hasattr(args, "args") else None)
         if not pw_from or not pw_to:
