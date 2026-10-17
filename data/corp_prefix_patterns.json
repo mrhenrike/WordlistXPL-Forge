@@ -4,7 +4,7 @@
     "description": "Corporate username prefix patterns - generic, no company-specific data. Covers MSP, MSSP, SOC, DevOps, startup, enterprise, and international environments (US, EU, LATAM, APAC, MENA).",
     "author": "André Henrique (@mrhenrike)",
     "privacy": "No real company names or identifiable data. All patterns are generic.",
-    "usage": "Loaded by wfh_modules/corp_prefixes.py - never hardcoded in source."
+    "usage": "Loaded by wlf_modules/corp_prefixes.py - never hardcoded in source."
   },
 
   "separators": [".", "_", "-", ""],
