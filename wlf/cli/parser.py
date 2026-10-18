@@ -1431,6 +1431,14 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Explicit extra linking words to use as connectors (comma-separated)")
     p_cb.add_argument("--assume-yes", dest="assume_yes", action="store_true",
                        help="Skip the linking-words confirmation prompt (for automation)")
+    p_cb.add_argument("--theme", metavar="NAME",
+                       help="Inject keywords from a theme pack (starwars, marvel, gaming, sports, anime, music, hacking, ctf)")
+    p_cb.add_argument("--nouns", metavar="LANG",
+                       help="Inject nouns from built-in dictionary (en, pt, all)")
+    p_cb.add_argument("--fixed-suffix", dest="fixed_suffix", metavar="STR",
+                       help="Append fixed string to each keyword (bypasses permutation)")
+    p_cb.add_argument("--fixed-prefix", dest="fixed_prefix", metavar="STR",
+                       help="Prepend fixed string to each keyword (bypasses permutation)")
     p_cb.add_argument("--min-len", dest="min_len", type=int, default=1,
                        help="Minimum output length (default: 1)")
     p_cb.add_argument("--max-len", dest="max_len", type=int, default=64,
