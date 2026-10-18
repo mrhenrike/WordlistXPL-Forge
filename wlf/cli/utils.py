@@ -26,6 +26,24 @@ def _warn(msg: str) -> None:
 def _err(msg: str) -> None:
     print(f"{Fore.RED}[-]{Style.RESET_ALL} {msg}", file=sys.stderr)
 
+_CKPT_INTERVAL = 100_000
+
+
+def _save_checkpoint(session_id: str, emitted: int, bytes_written: int, chunk_index: int) -> None:
+    try:
+        from wlf_modules.session_manager import get_manager
+        mgr = get_manager()
+        mgr.save_from_parts(
+            session_id=session_id,
+            emitted=emitted,
+            bytes_written=bytes_written,
+            chunk_index=chunk_index,
+            global_ctx=dict(_GLOBAL_CTX),
+        )
+    except Exception as exc:
+        logger.debug("Checkpoint save failed: %s", exc)
+
+
 def _write_output(
     generator: Generator[str, None, None],
     output: Optional[str],
@@ -54,6 +72,15 @@ def _write_output(
     count = 0
     stream = stream or bool(_GLOBAL_CTX.get("stream"))
     gov = governor_from_ctx(_GLOBAL_CTX)
+
+    _ckpt_enabled = bool(_GLOBAL_CTX.get("checkpoint"))
+    _ckpt_sid = str(_GLOBAL_CTX.get("_checkpoint_sid", ""))
+    if _ckpt_enabled and not _ckpt_sid:
+        from wlf_modules.session_manager import SessionManager
+        _ckpt_sid = SessionManager.new_id(label=str(_GLOBAL_CTX.get("command", "")))
+        _GLOBAL_CTX["_checkpoint_sid"] = _ckpt_sid
+
+    resume_skip = int(_GLOBAL_CTX.get("_resume_emitted", 0))
 
     g_min = _GLOBAL_CTX.get("min_len", 0) or 0
     g_max = _GLOBAL_CTX.get("max_len", 0) or 0
@@ -90,7 +117,11 @@ def _write_output(
         else:
             pbar = None
 
+        _skipped = 0
         for word in generator:
+            if resume_skip > 0 and _skipped < resume_skip:
+                _skipped += 1
+                continue
             reason = gov.check(shutdown_flag=is_shutdown())
             if reason != STOP_OK:
                 if reason == STOP_SHUTDOWN:
@@ -131,12 +162,17 @@ def _write_output(
             if pbar:
                 pbar.update(1)
 
+            if _ckpt_enabled and count % _CKPT_INTERVAL == 0:
+                _save_checkpoint(_ckpt_sid, count, gov.state.bytes_written, gov.state.chunk_index)
+
         if pbar:
             pbar.close()
 
     finally:
         if f:
             f.close()
+        if _ckpt_enabled and count > 0:
+            _save_checkpoint(_ckpt_sid, count, gov.state.bytes_written, gov.state.chunk_index)
 
     return count
 
