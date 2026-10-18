@@ -488,6 +488,30 @@ def cmd_hibp(args: argparse.Namespace) -> None:
             print(line)
 
 
+def cmd_entropy(args: argparse.Namespace) -> None:
+    """Handler for entropy distribution visualization."""
+    from wlf_modules.entropy_viz import handle_entropy
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf entropy <wordlist>")
+        return
+
+    _info(f"Entropy analysis: {wordlist}")
+    gen = handle_entropy(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Entropy analysis failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
 def cmd_cluster(args: argparse.Namespace) -> None:
     """Handler for password clustering / classification."""
     from wlf_modules.cluster_engine import handle_cluster

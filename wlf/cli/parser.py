@@ -622,6 +622,17 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Save clean (not breached) passwords to file")
     p_hb.add_argument("-o", "--output", help="Save report to file")
 
+    # ── entropy ──────────────────────────────────────────────────────────
+    p_ent = sub.add_parser("entropy", help="Entropy distribution analysis and visualization")
+    p_ent.add_argument("wordlist", help="Wordlist to analyze")
+    p_ent.add_argument("--bins", type=int, default=20,
+                        help="Histogram bins (default: 20)")
+    p_ent.add_argument("--classify", action="store_true",
+                        help="Show per-password classification by strength band")
+    p_ent.add_argument("--format", choices=["text", "json", "csv"],
+                        default="text", help="Output format (default: text)")
+    p_ent.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")
