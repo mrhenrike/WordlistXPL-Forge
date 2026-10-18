@@ -2638,6 +2638,12 @@ def build_parser() -> argparse.ArgumentParser:
                       help="Hashcat timeout in seconds (default: 300)")
     p_te.add_argument("-o", "--output", default=".", help="Output directory for report")
 
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
+
     return parser
 
 
