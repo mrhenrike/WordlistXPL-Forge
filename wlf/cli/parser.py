@@ -1467,6 +1467,39 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Max candidates (0 = unlimited)")
     p_kw.add_argument("-o", "--output", help="Output file")
 
+    # ── phonetic ────────────────────────────────────────────────────────
+    p_ph = sub.add_parser(
+        "phonetic",
+        help="Phonetic similarity password generator (Soundex/Metaphone)",
+        description=(
+            "Generate passwords based on phonetic similarity to seed words.\n"
+            "Uses Soundex, Metaphone and visual substitutions.\n\n"
+            "Examples:\n"
+            "  wlf.py phonetic --seed password,company\n"
+            "  wlf.py phonetic --seed john --min-len 6 --limit 5000\n"
+            "  wlf.py phonetic --profile target.json\n"
+            "  wlf.py phonetic --seed admin --analyze"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_ph.add_argument("--seed", metavar="WORDS",
+                       help="Comma-separated seed words")
+    p_ph.add_argument("--wordlist", metavar="FILE",
+                       help="File with seed words (one per line)")
+    p_ph.add_argument("--profile", metavar="FILE",
+                       help="JSON profile with target info (name, keywords, pets)")
+    p_ph.add_argument("--min-len", dest="min_len", type=int, default=4,
+                       help="Min candidate length (default: 4)")
+    p_ph.add_argument("--max-len", dest="max_len", type=int, default=32,
+                       help="Max candidate length (default: 32)")
+    p_ph.add_argument("--max-subs", dest="max_subs", type=int, default=30,
+                       help="Max substitution variants per word (default: 30)")
+    p_ph.add_argument("--analyze", action="store_true",
+                       help="Show Soundex/Metaphone grouping analysis instead of generating")
+    p_ph.add_argument("--limit", type=int, default=10000,
+                       help="Max candidates (default: 10000)")
+    p_ph.add_argument("-o", "--output", help="Output file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",

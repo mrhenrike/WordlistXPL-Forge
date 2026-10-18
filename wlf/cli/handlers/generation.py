@@ -396,6 +396,19 @@ def cmd_kwalk(args: argparse.Namespace) -> None:
 
 
 
+def cmd_phonetic(args: argparse.Namespace) -> None:
+    """Handler for phonetic similarity generation."""
+    from wlf_modules.phonetic_engine import handle_phonetic
+    gen = handle_phonetic(args, _GLOBAL_CTX)
+    if gen:
+        if getattr(args, "analyze", False):
+            for line in gen:
+                print(line)
+        else:
+            count = _write_output(gen, args.output)
+            _ok(f"Phonetic variants generated: {count:,} candidates")
+
+
 def cmd_prince(args: argparse.Namespace) -> None:
     """Handler for PRINCE attack mode."""
     from wlf_modules.prince_engine import handle_prince
