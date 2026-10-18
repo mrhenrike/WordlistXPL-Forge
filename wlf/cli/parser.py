@@ -1552,6 +1552,43 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Random seed for reproducibility (default: 42)")
     p_ft.add_argument("-o", "--output", help="Output JSONL file")
 
+    # ── nflow ────────────────────────────────────────────────────────────
+    p_nf = sub.add_parser(
+        "nflow",
+        help="Generate passwords via normalizing flow (RealNVP)",
+        description=(
+            "Learn password distributions with a RealNVP normalizing flow\n"
+            "and generate new candidates by sampling from the latent space.\n"
+            "Supports interpolation between passwords in latent space.\n\n"
+            "Examples:\n"
+            "  wlf.py nflow --wordlist rockyou.txt -o generated.txt --limit 5000\n"
+            "  wlf.py nflow --wordlist leaked.txt --epochs 20 --temperature 0.8\n"
+            "  wlf.py nflow --wordlist pw.txt --interpolate-a Password1 --interpolate-b Summer2024"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_nf.add_argument("--wordlist", required=True, metavar="FILE",
+                       help="Training wordlist")
+    p_nf.add_argument("--limit", type=int, default=1000,
+                       help="Number of passwords to generate (default: 1000)")
+    p_nf.add_argument("--max-len", dest="max_len", type=int, default=16,
+                       help="Max password length for encoding (default: 16)")
+    p_nf.add_argument("--layers", type=int, default=4,
+                       help="Number of coupling layers (default: 4)")
+    p_nf.add_argument("--epochs", type=int, default=10,
+                       help="Training epochs (default: 10)")
+    p_nf.add_argument("--lr", type=float, default=0.01,
+                       help="Learning rate (default: 0.01)")
+    p_nf.add_argument("--temperature", type=float, default=1.0,
+                       help="Sampling temperature (default: 1.0)")
+    p_nf.add_argument("--interpolate-a", dest="interpolate_a", metavar="PW",
+                       help="First password for interpolation")
+    p_nf.add_argument("--interpolate-b", dest="interpolate_b", metavar="PW",
+                       help="Second password for interpolation")
+    p_nf.add_argument("--interpolate-steps", dest="interpolate_steps", type=int,
+                       default=10, help="Interpolation steps (default: 10)")
+    p_nf.add_argument("-o", "--output", help="Output file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",

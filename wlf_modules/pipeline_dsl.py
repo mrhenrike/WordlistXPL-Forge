@@ -272,6 +272,27 @@ def _rule_miner_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return (rule for rule, _count in rules)
 
 
+@register_engine("nflow")
+def _nflow_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.nflow_engine import NFlowEngine
+    p = stage.get("params") or {}
+    passwords = [str(w) for w in (p.get("passwords") or [])]
+    engine = NFlowEngine(
+        passwords=passwords,
+        max_len=int(p.get("max_len", 16)),
+        n_layers=int(p.get("layers", 4)),
+        epochs=int(p.get("epochs", 10)),
+        lr=float(p.get("lr", 0.01)),
+        seed=int(p.get("seed", 42)),
+    )
+    return engine.generate(
+        n=stage.get("limit", 1000),
+        temperature=float(p.get("temperature", 1.0)),
+        min_len=gcfg.get("min_len", 4),
+        max_len=gcfg.get("max_len", 32),
+    )
+
+
 @register_engine("finetune")
 def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.finetune_engine import FinetuneEngine, load_passwords
