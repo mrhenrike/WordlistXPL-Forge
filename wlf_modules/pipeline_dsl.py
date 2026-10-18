@@ -328,6 +328,29 @@ def _combo_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return engine.generate(limit=stage.get("limit", 0))
 
 
+@register_engine("compare")
+def _compare_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.compare_engine import CompareEngine
+    p = stage.get("params") or {}
+    file_a = str(p.get("file_a", ""))
+    file_b = str(p.get("file_b", ""))
+    if not file_a or not file_b:
+        logger.error("compare engine requires params.file_a and params.file_b")
+        return iter([])
+    engine = CompareEngine(
+        path_a=file_a,
+        path_b=file_b,
+        case_insensitive=bool(p.get("case_insensitive", False)),
+        sample=int(p.get("sample", 0)),
+    )
+    output = str(p.get("output", "common"))
+    if output == "only_a":
+        return engine.iter_only_a()
+    if output == "only_b":
+        return engine.iter_only_b()
+    return engine.iter_common()
+
+
 @register_engine("finetune")
 def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.finetune_engine import FinetuneEngine, load_passwords
