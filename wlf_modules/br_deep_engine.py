@@ -47,6 +47,23 @@ _GIRIAS = [
     "hue","bixo","nave","top","bala","show","mito","master","trampo",
 ]
 
+_GIRIAS_VERBOS = [
+    "hackear", "sniffar", "esnifar", "crackear", "bruteforcear",
+    "pivotar", "escalar", "exploitar", "dumpar", "scanear",
+    "enumerar", "exfiltrar", "bypassar", "rootar", "ownar",
+    "deface", "invadir", "quebrar", "roubar", "vazar",
+    "migrar", "deployar", "commitar", "pushar", "mergar",
+    "buildar", "debugar", "logar", "startar", "parar",
+]
+
+_DIMINUTIVE_RULES: list[tuple[str, str]] = [
+    ("a", "inha"),
+    ("o", "inho"),
+    ("e", "inha"),
+    ("", "zinho"),
+    ("", "zinha"),
+]
+
 _BR_SPECIAL_DATES = [
     "07set","sete_set","sete09","carnaval","natal","pascoa","junina",
     "copa","tetra","penta","hexa","verde_amarelo","verde_amarela",
@@ -267,6 +284,57 @@ class BRDeepEngine:
             for sfx in _SUFIXES[:3]:
                 yield f"{sd}{sfx}"
 
+    def _diminutives(self) -> Generator[str, None, None]:
+        """Generate diminutive forms of names (G4)."""
+        for name in _NAMES_BR:
+            lower = name.lower()
+            for suffix_strip, suffix_add in _DIMINUTIVE_RULES:
+                if suffix_strip and lower.endswith(suffix_strip):
+                    dim = lower[:-len(suffix_strip)] + suffix_add
+                elif not suffix_strip:
+                    dim = lower + suffix_add
+                else:
+                    continue
+                yield dim
+                for yr in _YEARS[:6]:
+                    yield f"{dim}{yr}"
+                for sfx in _SUFIXES[:4]:
+                    yield f"{dim}{sfx}"
+
+    def _verb_conjugations(self) -> Generator[str, None, None]:
+        """Generate common conjugations of slang verbs (G5)."""
+        for verb in _GIRIAS_VERBOS:
+            stem = verb
+            if verb.endswith("ar"):
+                stem = verb[:-2]
+                yield verb
+                yield f"{stem}ando"
+                yield f"{stem}ei"
+                yield f"{stem}ou"
+                yield f"{stem}amos"
+                yield f"{stem}aram"
+                yield f"{stem}ava"
+            elif verb.endswith("er"):
+                stem = verb[:-2]
+                yield verb
+                yield f"{stem}endo"
+                yield f"{stem}eu"
+                yield f"{stem}emos"
+                yield f"{stem}eram"
+            elif verb.endswith("ir"):
+                stem = verb[:-2]
+                yield verb
+                yield f"{stem}indo"
+                yield f"{stem}iu"
+                yield f"{stem}imos"
+                yield f"{stem}iram"
+            else:
+                yield verb
+            for yr in _YEARS[:4]:
+                yield f"{verb}{yr}"
+                if stem != verb:
+                    yield f"{stem}ando{yr}"
+
     def generate(self, max_candidates: int = 0) -> Generator[tuple[str, float], None, None]:
         """Yield (candidate, score) tuples.  score is a heuristic in [0,1]."""
         seen: set[str] = set()
@@ -345,6 +413,20 @@ class BRDeepEngine:
 
         # Special dates
         for cand in self._special_dates():
+            if _emit(cand, 0.5):
+                yield (cand, 0.5)
+            if max_candidates and count >= max_candidates:
+                return
+
+        # Diminutive forms (G4)
+        for cand in self._diminutives():
+            if _emit(cand, 0.55):
+                yield (cand, 0.55)
+            if max_candidates and count >= max_candidates:
+                return
+
+        # Verb conjugations (G5)
+        for cand in self._verb_conjugations():
             if _emit(cand, 0.5):
                 yield (cand, 0.5)
             if max_candidates and count >= max_candidates:
