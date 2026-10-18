@@ -223,6 +223,23 @@ def _br_deep_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return eng.generate(max_candidates=stage.get("limit", 50_000))
 
 
+@register_engine("phonetic")
+def _phonetic_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.phonetic_engine import PhoneticEngine
+    p = stage.get("params") or {}
+    seeds = p.get("seeds", [])
+    eng = PhoneticEngine(
+        seeds=seeds if isinstance(seeds, list) else [seeds],
+        profile=stage.get("profile"),
+        max_subs_per_word=int(p.get("max_subs", 30)),
+    )
+    return eng.generate(
+        max_candidates=stage.get("limit", 10_000),
+        min_len=gcfg.get("min_len", 4),
+        max_len=gcfg.get("max_len", 32),
+    )
+
+
 # ── Pipeline execution ─────────────────────────────────────────────────────────
 
 class PipelineDSL:
