@@ -442,6 +442,15 @@ def cmd_combo(args: argparse.Namespace) -> None:
         _ok(f"Combo generation complete: {count:,} pairs")
 
 
+def cmd_corp_conv(args: argparse.Namespace) -> None:
+    """Handler for corporate convention password generation."""
+    from wlf_modules.corp_convention import handle_corp_conv
+    gen = handle_corp_conv(args, _GLOBAL_CTX)
+    if gen:
+        count = _write_output(gen, args.output)
+        _ok(f"Corporate convention: {count:,} candidates generated")
+
+
 def cmd_phonetic(args: argparse.Namespace) -> None:
     """Handler for phonetic similarity generation."""
     from wlf_modules.phonetic_engine import handle_phonetic

@@ -1619,6 +1619,33 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Max combos to generate (0 = all)")
     p_cb.add_argument("-o", "--output", help="Output file")
 
+    # ── corp-conv ────────────────────────────────────────────────────────
+    p_cc = sub.add_parser(
+        "corp-conv",
+        help="Generate passwords from corporate naming conventions",
+        description=(
+            "Generate passwords following common enterprise conventions:\n"
+            "  verb+sep+corp+digits, season+year+symbol, dept+project+digits,\n"
+            "  corp+year+symbol, month+year+corp.\n\n"
+            "Examples:\n"
+            "  wlf.py corp-conv --corp-names Acme XPTO -o corp_wl.txt\n"
+            "  wlf.py corp-conv --corp-names Globo --years 2024 2025\n"
+            "  wlf.py corp-conv --corp-names Corp --patterns verb_sep_corp season_year"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_cc.add_argument("--corp-names", dest="corp_names", nargs="+", required=True,
+                       metavar="NAME", help="Company/brand names to use")
+    p_cc.add_argument("--years", nargs="+", metavar="YEAR",
+                       help="Years to include (default: 2023-2026)")
+    p_cc.add_argument("--patterns", nargs="+", metavar="PATTERN",
+                       choices=["verb_sep_corp", "season_year", "dept_project",
+                                "corp_year", "month_year"],
+                       help="Specific patterns to use (default: all)")
+    p_cc.add_argument("--limit", type=int, default=0,
+                       help="Max candidates (0 = all)")
+    p_cc.add_argument("-o", "--output", help="Output file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",
