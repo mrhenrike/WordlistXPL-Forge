@@ -21,7 +21,7 @@ import time
 import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Any, Generator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class PipelineConfig:
     keyword_mutations_modes: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_profile(cls, profile: dict) -> "PipelineConfig":
+    def from_profile(cls, profile: dict[str, Any]) -> PipelineConfig:
         """Constrói PipelineConfig a partir de um dict de perfil."""
         cfg = cls()
         cfg.locale      = profile.get("locale", "en")
@@ -154,7 +154,7 @@ class ProfilePipeline:
         pipeline.finalize()       # archive export
     """
 
-    def __init__(self, profile: dict, config: Optional[PipelineConfig] = None) -> None:
+    def __init__(self, profile: dict[str, Any], config: Optional[PipelineConfig] = None) -> None:
         self.profile = profile
         self.config = config or PipelineConfig.from_profile(profile)
         self._dedup = CRC32Deduplicator()
@@ -340,7 +340,7 @@ class ProfilePipeline:
         if 10 not in engines:
             return
         try:
-            from wlf_modules.prince_engine import generate_prince_candidates
+            from wlf_modules.prince_engine import generate_prince_candidates  # type: ignore[attr-defined]
         except ImportError:
             logger.debug("prince_engine não disponível")
             return
@@ -377,7 +377,7 @@ class ProfilePipeline:
         if 17 not in engines:
             return
         try:
-            from wlf_modules.osint_perm import generate_osint_permutations
+            from wlf_modules.osint_perm import generate_osint_permutations  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
             logger.debug("osint_perm não disponível como generate_osint_permutations")
             return
@@ -449,7 +449,7 @@ class ProfilePipeline:
 
         try:
             dna = PasswordDNA(old_passwords)
-            for word in dna.generate_mutations():
+            for word in dna.generate_mutations():  # type: ignore[attr-defined]
                 if not self._within_limits():
                     return
                 result = self._emit(word)
@@ -678,7 +678,7 @@ class ProfilePipeline:
         if not old_passwords:
             return
         try:
-            from wlf_modules.rulegen_engine import generate_rule_variants
+            from wlf_modules.rulegen_engine import generate_rule_variants  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
             logger.debug("rulegen_engine.generate_rule_variants não disponível")
             return
@@ -999,7 +999,7 @@ class ProfilePipeline:
             self._dedup.count_duped,
         )
 
-    def run_to_file(self, output_path: Optional[str] = None) -> dict:
+    def run_to_file(self, output_path: Optional[str] = None) -> dict[str, Any]:
         """
         Executa o pipeline e escreve saída em arquivo.
 
@@ -1023,7 +1023,7 @@ class ProfilePipeline:
                 lines_written += 1
 
         elapsed = time.time() - self._start_time
-        result: dict = {
+        result: dict[str, Any] = {
             "output_path": str(out_path),
             "lines_written": lines_written,
             "elapsed_secs": round(elapsed, 2),
@@ -1048,7 +1048,7 @@ class ProfilePipeline:
 
         return result
 
-    def run_feedback(self, wordlist_path: Optional[str] = None) -> dict:
+    def run_feedback(self, wordlist_path: Optional[str] = None) -> dict[str, Any]:
         """
         Executa feedback loop: benchmark vs known_targets.
 
@@ -1082,10 +1082,10 @@ class ProfilePipeline:
         print(format_known_targets_report(fb))
         return fb
 
-    def _apply_post_rank(self, output_path: str) -> dict:
+    def _apply_post_rank(self, output_path: str) -> dict[str, Any]:
         """Reordena wordlist final quando motores 15 ou 16 estão ativos."""
         engines = self._active_engines()
-        info: dict = {}
+        info: dict[str, Any] = {}
 
         if 16 in engines:
             try:
@@ -1128,7 +1128,7 @@ class ProfilePipeline:
 
         return info
 
-    def _post_rank_by_pattern(self, output_path: str) -> dict:
+    def _post_rank_by_pattern(self, output_path: str) -> dict[str, Any]:
         """Ordena wordlist por score de keyboard-walk (motor 15)."""
         from wlf_modules.pattern_ranker import score_keyboard_walk
 
@@ -1157,7 +1157,7 @@ class ProfilePipeline:
             "top_walk_score": round(score_keyboard_walk(ranked[0], layout), 4),
         }
 
-    def _run_archive_export(self, wordlist_path: str) -> dict:
+    def _run_archive_export(self, wordlist_path: str) -> dict[str, Any]:
         """Pós-processa wordlist com sanitize/sort/export."""
         try:
             from wlf_modules.archive_export import ExportOptions, ExportFormat, export_wordlist
@@ -1230,10 +1230,10 @@ def _suggest_engines_for_misses(
 # ── Função de conveniência ────────────────────────────────────────────────────
 
 def run_profile_pipeline(
-    profile: dict,
+    profile: dict[str, Any],
     config: Optional[PipelineConfig] = None,
     output_path: Optional[str] = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Executa o pipeline completo para um perfil e retorna estatísticas.
 

@@ -74,7 +74,7 @@ def load_config() -> dict[str, Any]:
     if not _CONFIG_FILE.is_file():
         return cfg
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
     except ImportError:
         try:
             text = _CONFIG_FILE.read_text(encoding="utf-8")
@@ -134,7 +134,7 @@ def init_config(force: bool = False) -> Path:
     return _CONFIG_FILE
 
 
-def apply_config_to_ctx(ctx: dict, cfg: dict[str, Any]) -> None:
+def apply_config_to_ctx(ctx: dict[str, Any], cfg: dict[str, Any]) -> None:
     """Merge config values into _GLOBAL_CTX as defaults (CLI overrides later)."""
     for key in ("threads", "compute_mode", "use_ml", "limit", "timeout",
                 "min_len", "max_len", "ram_budget_pct", "vram_budget_mb",

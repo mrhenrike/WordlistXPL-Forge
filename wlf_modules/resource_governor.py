@@ -12,7 +12,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ class ResourceGovernor:
         return f"{root}.part{self.state.chunk_index:03d}{ext or '.lst'}"
 
 
-def governor_from_ctx(ctx: dict) -> ResourceGovernor:
+def governor_from_ctx(ctx: dict[str, Any]) -> ResourceGovernor:
     """Build a ResourceGovernor from wlf _GLOBAL_CTX."""
     cfg = GovernorConfig(
         ram_budget_pct=float(ctx.get("ram_budget_pct", 50) or 50),

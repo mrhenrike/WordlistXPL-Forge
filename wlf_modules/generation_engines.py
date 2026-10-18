@@ -11,7 +11,7 @@ Author: André Henrique (@mrhenrike)
 
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,7 @@ def _check_ram_gb() -> float:
     """
     try:
         import psutil
-        return psutil.virtual_memory().available / 1024 ** 3
+        return float(psutil.virtual_memory().available / 1024 ** 3)
     except ImportError:
         return 99.0
 
@@ -258,7 +258,7 @@ def resolve_engines(
 
 def print_engine_menu(
     active_ids: Optional[set[int]] = None,
-    t_func=None,
+    t_func: Callable[[str], str] | None = None,
 ) -> None:
     """Print the numbered engine selection menu to stdout.
 
@@ -298,7 +298,7 @@ def print_engine_menu(
     print()
 
 
-def ask_engine_selection(t_func=None) -> set[int]:
+def ask_engine_selection(t_func: Callable[[str], str] | None = None) -> set[int]:
     """Display the engine menu and collect a selection from the user via stdin.
 
     Args:
