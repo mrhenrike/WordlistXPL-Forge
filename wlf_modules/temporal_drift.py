@@ -113,9 +113,15 @@ def _complexity_creep(pw: str) -> list[str]:
     return results
 
 
-def _seasonal_blend(pw: str, year: int) -> list[str]:
-    tokens = _SEASONAL_TOKENS.get(year, [])
-    return [pw + tok for tok in tokens[:3]] + [tok + pw for tok in tokens[:2]]
+def _seasonal_blend(pw: str, year: int, locales: Optional[list[str]] = None) -> list[str]:
+    tokens = list(_SEASONAL_TOKENS.get(year, []))
+    if locales:
+        from wlf_modules.temporal_calendar import HOLIDAYS, SEASONS
+        for loc in locales:
+            tokens.extend(HOLIDAYS.get(loc, [])[:5])
+            tokens.extend(SEASONS.get(loc, []))
+    tokens = list(dict.fromkeys(tokens))
+    return [pw + tok for tok in tokens[:5]] + [tok + pw for tok in tokens[:3]]
 
 
 # ── Engine ────────────────────────────────────────────────────────────────────
@@ -128,6 +134,7 @@ class DriftConfig:
     include_seasonal: bool = True
     include_year_increment: bool = True
     include_complexity_creep: bool = True
+    locales: list[str] = field(default_factory=lambda: ["pt-BR"])
 
 
 class TemporalDriftEngine:
@@ -143,12 +150,14 @@ class TemporalDriftEngine:
         target_year: int = 2026,
         leet_max_level: int = 2,
         include_seasonal: bool = True,
+        locales: Optional[list[str]] = None,
     ) -> None:
         self.cfg = DriftConfig(
             base_year=base_year,
             target_year=target_year,
             leet_max_level=leet_max_level,
             include_seasonal=include_seasonal,
+            locales=locales or ["pt-BR"],
         )
         self._drift_years = _year_range(base_year, target_year)
 
@@ -183,7 +192,7 @@ class TemporalDriftEngine:
         # Seasonal
         if self.cfg.include_seasonal:
             for year in self._drift_years:
-                for variant in _seasonal_blend(seed, year):
+                for variant in _seasonal_blend(seed, year, self.cfg.locales):
                     yield (variant, 0.50)
 
     def generate(
