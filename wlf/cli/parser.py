@@ -1589,6 +1589,36 @@ def build_parser() -> argparse.ArgumentParser:
                        default=10, help="Interpolation steps (default: 10)")
     p_nf.add_argument("-o", "--output", help="Output file")
 
+    # ── combo ────────────────────────────────────────────────────────────
+    p_cb = sub.add_parser(
+        "combo",
+        help="Generate credential combos (user:password pairs)",
+        description=(
+            "Generate user:password combinations for credential testing\n"
+            "from username and password lists using multiple strategies.\n\n"
+            "Strategies: cartesian, user_as_pass, email_prefix, smart, reverse.\n\n"
+            "Examples:\n"
+            "  wlf.py combo --userlist users.txt --passlist passwords.txt -o combos.txt\n"
+            "  wlf.py combo --userlist emails.txt --strategy email_prefix\n"
+            "  wlf.py combo --userlist users.txt --strategy user_as_pass --format json"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_cb.add_argument("--userlist", required=True, metavar="FILE",
+                       help="Username/email list file")
+    p_cb.add_argument("--passlist", metavar="FILE",
+                       help="Password list file (optional for some strategies)")
+    p_cb.add_argument("--strategy", choices=["cartesian", "user_as_pass", "email_prefix",
+                       "smart", "reverse"], default="smart",
+                       help="Pairing strategy (default: smart)")
+    p_cb.add_argument("--format", choices=["colon", "tab", "json"], default="colon",
+                       help="Output format (default: colon)")
+    p_cb.add_argument("--no-dedup", dest="no_dedup", action="store_true",
+                       help="Disable deduplication of output combos")
+    p_cb.add_argument("--limit", type=int, default=0,
+                       help="Max combos to generate (0 = all)")
+    p_cb.add_argument("-o", "--output", help="Output file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",

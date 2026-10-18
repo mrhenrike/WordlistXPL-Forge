@@ -293,6 +293,22 @@ def _nflow_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     )
 
 
+@register_engine("combo")
+def _combo_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.combo_engine import ComboEngine
+    p = stage.get("params") or {}
+    users = [str(u) for u in (p.get("users") or [])]
+    passwords = [str(pw) for pw in (p.get("passwords") or [])]
+    engine = ComboEngine(
+        users=users,
+        passwords=passwords,
+        strategy=str(p.get("strategy", "smart")),
+        fmt="colon",
+        dedup=bool(p.get("dedup", True)),
+    )
+    return engine.generate(limit=stage.get("limit", 0))
+
+
 @register_engine("finetune")
 def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.finetune_engine import FinetuneEngine, load_passwords
