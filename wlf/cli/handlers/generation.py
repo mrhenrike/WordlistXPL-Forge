@@ -408,6 +408,18 @@ def cmd_rule_mine(args: argparse.Namespace) -> None:
         _ok(f"Rule mining complete: {count} rules found")
 
 
+def cmd_finetune_data(args: argparse.Namespace) -> None:
+    """Handler for LLM fine-tune dataset generation."""
+    from wlf_modules.finetune_engine import handle_finetune
+    gen = handle_finetune(args, _GLOBAL_CTX)
+    if gen:
+        count = 0
+        for line in gen:
+            print(line)
+            count += 1
+        _ok(f"Fine-tune dataset: {count:,} samples generated")
+
+
 def cmd_phonetic(args: argparse.Namespace) -> None:
     """Handler for phonetic similarity generation."""
     from wlf_modules.phonetic_engine import handle_phonetic

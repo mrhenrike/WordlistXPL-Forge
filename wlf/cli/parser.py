@@ -1524,6 +1524,34 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Min pair count for a rule to be reported (default: 2)")
     p_rm.add_argument("-o", "--output", help="Output .rule file")
 
+    # ── finetune-data ───────────────────────────────────────────────────
+    p_ft = sub.add_parser(
+        "finetune-data",
+        help="Generate LLM fine-tuning datasets from wordlists (LoRA/QLoRA)",
+        description=(
+            "Convert password wordlists into instruction-tuning JSONL datasets\n"
+            "suitable for LoRA/QLoRA fine-tuning of language models.\n\n"
+            "Supported formats: alpaca, sharegpt, completion.\n"
+            "Augmentation: partial masking, prefix completion, style transfer.\n\n"
+            "Examples:\n"
+            "  wlf.py finetune-data --wordlist rockyou.txt -o train.jsonl\n"
+            "  wlf.py finetune-data --wordlist leaked.txt --format sharegpt --no-augment\n"
+            "  wlf.py finetune-data --wordlist cracked.txt --max-samples 50000 --seed 123"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_ft.add_argument("--wordlist", required=True, metavar="FILE",
+                       help="Password wordlist to convert")
+    p_ft.add_argument("--format", choices=["alpaca", "sharegpt", "completion"],
+                       default="alpaca", help="Output format (default: alpaca)")
+    p_ft.add_argument("--no-augment", dest="no_augment", action="store_true",
+                       help="Disable data augmentation (prefix, mask, style)")
+    p_ft.add_argument("--max-samples", dest="max_samples", type=int, default=0,
+                       help="Max samples to generate (0 = all, default: 0)")
+    p_ft.add_argument("--seed", type=int, default=42,
+                       help="Random seed for reproducibility (default: 42)")
+    p_ft.add_argument("-o", "--output", help="Output JSONL file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",
