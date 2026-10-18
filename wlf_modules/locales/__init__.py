@@ -121,7 +121,7 @@ def list_locales() -> list[str]:
 def _autoload() -> None:
     """Import all locale modules so they self-register."""
     import importlib
-    for mod_name in ("en_us", "en_gb", "es", "fr", "de", "pt_pt", "pt_br"):
+    for mod_name in ("en_us", "en_gb", "es", "fr", "de", "pt_pt", "pt_br", "ja", "zh", "ar", "hi", "ko"):
         try:
             importlib.import_module(f"wlf_modules.locales.{mod_name}")
         except ImportError:
