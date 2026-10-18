@@ -488,6 +488,26 @@ def cmd_hibp(args: argparse.Namespace) -> None:
             print(line)
 
 
+def cmd_hcmon(args: argparse.Namespace) -> None:
+    """Handler for Hashcat/JtR cracking session monitoring."""
+    from wlf_modules.hashcat_monitor import handle_hcmon
+
+    tool = getattr(args, "tool", "hashcat")
+    _info(f"Cracker monitor ({tool})")
+    gen = handle_hcmon(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("No status data found. Provide --session, --status-file, or --restore-file.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
 def cmd_entropy(args: argparse.Namespace) -> None:
     """Handler for entropy distribution visualization."""
     from wlf_modules.entropy_viz import handle_entropy
