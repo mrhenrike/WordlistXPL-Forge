@@ -223,6 +223,25 @@ def _br_deep_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return eng.generate(max_candidates=stage.get("limit", 50_000))
 
 
+@register_engine("temporal_calendar")
+def _temporal_cal_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.temporal_calendar import generate_temporal_candidates
+    p = stage.get("params") or {}
+    locales = p.get("locales")
+    if isinstance(locales, str):
+        locales = [l.strip() for l in locales.split(",")]
+    return generate_temporal_candidates(
+        locales=locales,
+        max_candidates=stage.get("limit", 50_000),
+        min_len=gcfg.get("min_len", 4),
+        max_len=gcfg.get("max_len", 32),
+        include_holidays=bool(p.get("holidays", True)),
+        include_seasons=bool(p.get("seasons", True)),
+        include_months=bool(p.get("months", True)),
+        include_weekdays=bool(p.get("weekdays", False)),
+    )
+
+
 @register_engine("phonetic")
 def _phonetic_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.phonetic_engine import PhoneticEngine
