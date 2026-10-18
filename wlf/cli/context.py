@@ -4,7 +4,9 @@ from __future__ import annotations
 import logging
 import signal
 import sys
+import types
 from pathlib import Path
+from typing import Any
 
 # ── Colorama ─────────────────────────────────────────────────────────────────
 try:
@@ -24,7 +26,7 @@ try:
     _TQDM = True
 except ImportError:
     _TQDM = False
-    _tqdm = None  # type: ignore[assignment]
+    _tqdm = None
 
 # ── Path setup ───────────────────────────────────────────────────────────────
 _HERE = Path(__file__).resolve().parent.parent.parent
@@ -42,7 +44,7 @@ VERSION = "2.0.0"
 _SHUTDOWN_REQUESTED = False
 
 
-def _signal_handler(signum, frame):
+def _signal_handler(signum: int, frame: types.FrameType | None) -> None:
     """Handle SIGINT/SIGTERM for graceful shutdown."""
     global _SHUTDOWN_REQUESTED
     _SHUTDOWN_REQUESTED = True
@@ -60,7 +62,7 @@ def is_shutdown() -> bool:
 
 
 # ── Global execution context ─────────────────────────────────────────────────
-_GLOBAL_CTX: dict = {
+_GLOBAL_CTX: dict[str, Any] = {
     "threads":      5,      # thread count (1-300)
     "compute_mode": "auto", # cpu | gpu | cuda | rocm | mps | auto | hybrid
     "use_ml":       True,   # ML enabled globally
