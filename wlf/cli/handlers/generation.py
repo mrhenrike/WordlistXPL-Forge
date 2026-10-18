@@ -433,6 +433,15 @@ def cmd_nflow(args: argparse.Namespace) -> None:
             _ok(f"NFlow generation complete: {count:,} candidates")
 
 
+def cmd_combo(args: argparse.Namespace) -> None:
+    """Handler for credential combo generation."""
+    from wlf_modules.combo_engine import handle_combo
+    gen = handle_combo(args, _GLOBAL_CTX)
+    if gen:
+        count = _write_output(gen, args.output)
+        _ok(f"Combo generation complete: {count:,} pairs")
+
+
 def cmd_phonetic(args: argparse.Namespace) -> None:
     """Handler for phonetic similarity generation."""
     from wlf_modules.phonetic_engine import handle_phonetic
