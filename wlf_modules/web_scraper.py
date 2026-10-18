@@ -31,15 +31,15 @@ from urllib.parse import urljoin, urlparse
 logger = logging.getLogger(__name__)
 
 try:
-    import requests  # type: ignore[import-untyped]
-    from bs4 import BeautifulSoup  # type: ignore[import-not-found]
+    import requests
+    from bs4 import BeautifulSoup
     _DEPS_OK = True
 except ImportError:
     _DEPS_OK = False
     logger.warning("requests e beautifulsoup4 não instalados. web_scraper desativado.")
 
 try:
-    from pypdf import PdfReader  # type: ignore[import-not-found]
+    from pypdf import PdfReader
     _PDF_OK = True
 except ImportError:
     _PDF_OK = False

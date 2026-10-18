@@ -71,7 +71,7 @@ def collect_wayback(domain: str, limit: int = 5000, timeout: float = 20.0) -> se
         Set of candidate words from URL paths and query parameters.
     """
     try:
-        import requests  # type: ignore[import-untyped]
+        import requests
     except ImportError:
         logger.error("wayback collector requires 'requests'")
         return set()

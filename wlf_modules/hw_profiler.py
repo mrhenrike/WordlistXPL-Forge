@@ -272,7 +272,7 @@ class HWProfiler:
         # ── OpenCL fallback ──────────────────────────────────────────────────
         if not profile.gpus:
             try:
-                import pyopencl as cl  # type: ignore[import-not-found]
+                import pyopencl as cl
                 for i, plat in enumerate(cl.get_platforms()):
                     for dev in plat.get_devices(device_type=cl.device_type.GPU):
                         vram = getattr(dev, "global_mem_size", 0) // (1024 * 1024)

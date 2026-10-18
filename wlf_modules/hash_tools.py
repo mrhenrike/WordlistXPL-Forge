@@ -149,13 +149,13 @@ def _hash_one(pw: str, algo: str) -> Optional[str]:
         return _md4(pw.encode("utf-8")).hex()
     if a == "bcrypt":
         try:
-            import bcrypt  # type: ignore[import-not-found]
+            import bcrypt
         except ImportError:
             return None
         return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("ascii")  # type: ignore[no-any-return]
     if a in ("argon2", "argon2id"):
         try:
-            from argon2 import PasswordHasher  # type: ignore[import-not-found]
+            from argon2 import PasswordHasher
         except ImportError:
             return None
         return PasswordHasher().hash(pw)  # type: ignore[no-any-return]

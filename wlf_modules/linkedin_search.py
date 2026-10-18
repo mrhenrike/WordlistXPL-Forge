@@ -66,7 +66,7 @@ def _get_access_token() -> str:
 def _get_session() -> Any:
     """Return a configured requests.Session with LinkedIn OAuth2 headers."""
     try:
-        import requests  # type: ignore[import-untyped]
+        import requests
     except ImportError:
         raise ImportError("requests required - install with: pip install requests")
 
