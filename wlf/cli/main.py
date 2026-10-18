@@ -14,7 +14,7 @@ from wlf.cli.menu import interactive_menu
 from wlf.cli.handlers import (
     cmd_charset, cmd_pattern, cmd_profile, cmd_corp, cmd_corp_users,
     cmd_phone, cmd_scrape, cmd_ocr, cmd_extract, cmd_leet, cmd_leet_perm,
-    cmd_xor, cmd_analyze, cmd_compare, cmd_cluster, cmd_entropy, cmd_hibp, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
+    cmd_xor, cmd_analyze, cmd_compare, cmd_cluster, cmd_entropy, cmd_hcmon, cmd_hibp, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
     cmd_reverse, cmd_train, cmd_corp_prefixes, cmd_sysinfo, cmd_mangle,
     cmd_improve, cmd_maya_rank, cmd_default_creds, cmd_isp_keygen,
     cmd_password_dna, cmd_dna_extract, cmd_cover, cmd_replay, cmd_emit,
@@ -130,6 +130,7 @@ def main() -> None:
         "compare":  cmd_compare,
         "cluster":  cmd_cluster,
         "entropy":  cmd_entropy,
+        "hcmon":    cmd_hcmon,
         "hibp":     cmd_hibp,
         "merge":    cmd_merge,
         "dns":      cmd_dns,

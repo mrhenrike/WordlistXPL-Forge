@@ -633,6 +633,19 @@ def build_parser() -> argparse.ArgumentParser:
                         default="text", help="Output format (default: text)")
     p_ent.add_argument("-o", "--output", help="Save report to file")
 
+    # ── hcmon (cracker monitor) ──────────────────────────────────────────
+    p_hm = sub.add_parser("hcmon", help="Monitor Hashcat/JtR cracking sessions")
+    p_hm.add_argument("--tool", choices=["hashcat", "john"],
+                       default="hashcat", help="Cracking tool (default: hashcat)")
+    p_hm.add_argument("--session", help="Session name")
+    p_hm.add_argument("--status-file", dest="status_file", metavar="FILE",
+                       help="Status output file (text or JSON)")
+    p_hm.add_argument("--restore-file", dest="restore_file", metavar="FILE",
+                       help="Restore/rec file path")
+    p_hm.add_argument("--format", choices=["text", "json"],
+                       default="text", help="Output format (default: text)")
+    p_hm.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")
