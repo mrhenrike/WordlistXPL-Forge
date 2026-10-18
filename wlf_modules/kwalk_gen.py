@@ -2,14 +2,15 @@
 kwalk_gen.py - Keyboard walk password generator.
 
 Generates password candidates based on physical keyboard adjacency walks.
-Supports multiple layouts (QWERTY, AZERTY, QWERTZ, Dvorak, custom) and
-8-directional movement (N/S/E/W + diagonals) with configurable parameters.
+Supports multiple layouts (QWERTY, AZERTY, QWERTZ, ABNT2, Dvorak, Colemak,
+numpad) and 8-directional movement (N/S/E/W + diagonals) with configurable
+parameters.
 
 Inspired by hashcat's kwprocessor (kwp), reimplemented in pure Python with
 extended layout support.
 
 Author: André Henrique (@mrhenrike)
-Version: 1.0.0
+Version: 2.0.0
 """
 from __future__ import annotations
 
@@ -50,6 +51,36 @@ LAYOUTS: dict[str, list[list[str]]] = {
         list("aoeuidhtns-"),
         list(";qjkxbmwvz"),
     ],
+    "dvorak_shift": [
+        list("~!@#$%^&*(){}"),
+        list('"<>PYFGCRL?+|'),
+        list("AOEUIDHTNS_"),
+        list(":QJKXBMWVZ"),
+    ],
+    "abnt2": [
+        list("'1234567890-="),
+        list("qwertyuiop´["),
+        list("asdfghjklç~]"),
+        list("\\zxcvbnm,./"),
+    ],
+    "abnt2_shift": [
+        list('"!@#$%¨&*()_+'),
+        list("QWERTYUIOP`{"),
+        list('ASDFGHJKLÇ^}'),
+        list("|ZXCVBNM<>?"),
+    ],
+    "colemak": [
+        list("`1234567890-="),
+        list("qwfpgjluy;[]\\"),
+        list("arstdhneio'"),
+        list("zxcvbkm,./"),
+    ],
+    "colemak_shift": [
+        list("~!@#$%^&*()_+"),
+        list('QWFPGJLUY:{}|'),
+        list('ARSTDHNEIO"'),
+        list("ZXCVBKM<>?"),
+    ],
     "numpad": [
         list("789"),
         list("456"),
@@ -57,6 +88,10 @@ LAYOUTS: dict[str, list[list[str]]] = {
         list("0."),
     ],
 }
+
+BASE_LAYOUTS: list[str] = [
+    "qwerty", "azerty", "qwertz", "abnt2", "dvorak", "colemak", "numpad",
+]
 
 DIRECTIONS = {
     "E":  (0, 1),
@@ -338,7 +373,10 @@ def handle_kwalk(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None
         return iter(["\n".join(lines)])  # type: ignore[return-value]
 
     layout_str = getattr(args, "layout", "qwerty") or "qwerty"
-    layouts = [l.strip() for l in layout_str.split(",")]
+    if layout_str.strip().lower() == "all":
+        layouts = list(BASE_LAYOUTS)
+    else:
+        layouts = [l.strip() for l in layout_str.split(",")]
 
     route_file = getattr(args, "route_file", None)
     route_arg = getattr(args, "route", None)

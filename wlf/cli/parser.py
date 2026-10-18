@@ -1433,17 +1433,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Keyboard walk password generator (kwprocessor-style)",
         description=(
             "Generate passwords based on physical keyboard adjacency walks.\n"
-            "Supports QWERTY, AZERTY, QWERTZ, Dvorak, and numpad layouts.\n\n"
+            "Supports QWERTY, AZERTY, QWERTZ, ABNT2, Dvorak, Colemak and numpad.\n\n"
             "Examples:\n"
             "  wlf.py kwalk --min-len 6 --max-len 10\n"
-            "  wlf.py kwalk --layout qwerty,numpad --no-shift\n"
-            "  wlf.py kwalk --max-changes 2 --start-chars qaz1\n"
+            "  wlf.py kwalk --layout azerty --no-shift\n"
+            "  wlf.py kwalk --layout all\n"
+            "  wlf.py kwalk --layout abnt2,qwerty --start-chars qaz1\n"
             "  wlf.py kwalk --list-layouts"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p_kw.add_argument("--layout", default="qwerty",
-                       help="Comma-separated layout names (default: qwerty)")
+                       help="Layout name(s), comma-separated, or 'all' (default: qwerty)")
     p_kw.add_argument("--min-len", dest="min_len", type=int, default=4,
                        help="Min walk length (default: 4)")
     p_kw.add_argument("--max-len", dest="max_len", type=int, default=10,
