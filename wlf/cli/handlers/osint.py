@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 
+from typing import Any, Generator
+
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
 )
@@ -228,7 +230,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
         ALL_DOMAIN_SEPARATORS,
     )
 
-    params: dict = {}
+    params: dict[str, Any] = {}
 
     # ── Interactive mode (no --domain provided) ────────────────────────────
     if not getattr(args, "domain", None):
@@ -353,7 +355,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
             p["names"] = [name]
             single_name_params.append(p)
 
-        def _gen_for_params(p: dict):
+        def _gen_for_params(p: dict[str, Any]) -> Generator[Any, None, None]:
             return run_domain_users(p)
 
         gen = parallel_generate(_gen_for_params, single_name_params, threads=threads)
@@ -408,7 +410,7 @@ def cmd_phone(args: argparse.Namespace) -> None:
         _info(f"Loaded {len(prefixes)} prefixes from {prefix_file}")
         pattern = "X" * (digit_length or 7)
 
-        def _multi_prefix_gen():
+        def _multi_prefix_gen() -> Generator[str, None, None]:
             for px in prefixes:
                 px = px.strip().lstrip("#")
                 if not px:
@@ -430,7 +432,7 @@ def cmd_phone(args: argparse.Namespace) -> None:
 
     _info(f"Generating phone numbers [country={params.get('country') or 'custom'}]...")
 
-    def _gen_with_suffix():
+    def _gen_with_suffix() -> Generator[str, None, None]:
         for num in generate_phones(**params):
             yield num + suffix if suffix else num
 
@@ -456,9 +458,9 @@ def cmd_scrape(args: argparse.Namespace) -> None:
             extra_headers[k.strip()] = v.strip()
 
     # Stop-words
-    stopwords = frozenset()
+    stopwords: set[str] = frozenset()  # type: ignore[assignment]
     if getattr(args, "no_stopwords", False):
-        stopwords = DEFAULT_STOPWORDS
+        stopwords = DEFAULT_STOPWORDS  # type: ignore[assignment]
     stopwords_file = getattr(args, "stopwords_file", None)
     if stopwords_file:
         try:
@@ -514,7 +516,7 @@ def cmd_scrape(args: argparse.Namespace) -> None:
             user_agent=getattr(args, "user_agent", None),
             proxy=getattr(args, "proxy", None),
             extra_headers=extra_headers or None,
-            stopwords=stopwords if stopwords else None,
+            stopwords=stopwords if stopwords else None,  # type: ignore[arg-type]
             with_numbers=with_numbers,
             with_spaces=with_spaces,
             capture_paths=capture_paths,
@@ -575,7 +577,7 @@ def cmd_ocr(args: argparse.Namespace) -> None:
 
     all_tokens = result["usernames"] + result["passwords"] + result["words"]
 
-    def gen():
+    def gen() -> Generator[str, None, None]:
         yield from all_tokens
 
     count = _write_output(gen(), args.output)
@@ -647,17 +649,17 @@ def cmd_dns(args: argparse.Namespace) -> None:
         payloads.update(custom_payloads)
 
         patterns = DEFAULT_PATTERNS
-        extra_yaml_payloads: dict = {}
+        extra_yaml_payloads: dict[str, Any] = {}
 
         template_file = getattr(args, "template_file", None)
         if template_file:
             try:
                 yaml_templates, yaml_payloads = load_templates_from_yaml(template_file)
                 if yaml_templates:
-                    patterns = yaml_templates
+                    patterns = yaml_templates  # type: ignore[assignment]
                 if yaml_payloads:
-                    extra_yaml_payloads = yaml_payloads
-                    payloads.update(yaml_payloads)
+                    extra_yaml_payloads = yaml_payloads  # type: ignore[assignment]
+                    payloads.update(yaml_payloads)  # type: ignore[arg-type]
             except (FileNotFoundError, ImportError) as exc:
                 _err(str(exc))
                 return
@@ -695,7 +697,7 @@ def cmd_dns(args: argparse.Namespace) -> None:
                     extension_swap=getattr(args, "extension_swap", None),
                 ))
 
-        count = _write_output(chain(*generators), args.output)
+        count = _write_output(chain(*generators), args.output)  # type: ignore[arg-type]
         _ok(f"Generated: {count:,} DNS entries (ClusterBomb)")
         return
 
@@ -723,7 +725,7 @@ def cmd_dns(args: argparse.Namespace) -> None:
             extension_swap=getattr(args, "extension_swap", None),
         ))
 
-    count = _write_output(chain(*generators), args.output)
+    count = _write_output(chain(*generators), args.output)  # type: ignore[arg-type]
     _ok(f"Generated: {count:,} subdomains")
 
 
@@ -854,7 +856,7 @@ def cmd_corp_prefixes(args: argparse.Namespace) -> None:
     with_numeric = not getattr(args, "no_numeric", False)
 
     # ── Generate ────────────────────────────────────────────────────────────
-    def _generate():
+    def _generate() -> Generator[str, None, None]:
         for name in names:
             results = generate_from_name(
                 full_name=name,

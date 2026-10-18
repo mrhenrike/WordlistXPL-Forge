@@ -39,7 +39,7 @@ class PasswordGraph:
     def __init__(self, ngram_sizes: tuple[int, ...] = (2, 3, 4)) -> None:
         self.ngram_sizes = ngram_sizes
         self.nodes: dict[str, GraphNode] = {}
-        self.edges: dict[str, Counter] = defaultdict(Counter)   # src → Counter(dst → weight)
+        self.edges: dict[str, Counter[str]] = defaultdict(Counter[str])   # src → Counter[str](dst → weight)
         self._n_passwords = 0
 
     def _extract_tokens(self, pw: str) -> list[str]:
@@ -70,8 +70,8 @@ class PasswordGraph:
         unique_toks = list(set(tokens))
         for i, a in enumerate(unique_toks):
             for b in unique_toks[i+1:]:
-                self.edges[a][b] += weight
-                self.edges[b][a] += weight
+                self.edges[a][b] += weight  # type: ignore[assignment]
+                self.edges[b][a] += weight  # type: ignore[assignment]
 
     def train(self, passwords: list[str]) -> None:
         for pw in passwords:

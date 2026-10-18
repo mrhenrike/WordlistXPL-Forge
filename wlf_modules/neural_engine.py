@@ -23,7 +23,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ _MASK_CLASSES = {
 }
 
 
-def _require_torch():
+def _require_torch() -> Any:
     """Import torch or raise a helpful error mentioning the extra.
 
     Returns:
@@ -66,7 +66,7 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _vram_free_mb():
+def _vram_free_mb() -> Any:
     """Best-effort free VRAM in MiB (nvidia-smi), or None."""
     try:
         import subprocess
@@ -85,7 +85,7 @@ def _vram_free_mb():
         return None
 
 
-def _select_device(torch, compute_mode: str, vram_budget_mb: int = 4096):
+def _select_device(torch: Any, compute_mode: str, vram_budget_mb: int = 4096) -> Any:
     """Pick a torch device honoring compute mode and soft VRAM budget.
 
     Falls back to CPU when free VRAM is below a safety floor (~512 MiB).
@@ -144,36 +144,36 @@ class CharVocab:
     @classmethod
     def from_words(cls, words: list[str], max_vocab: int = 0) -> "CharVocab":
         from collections import Counter
-        counter: Counter = Counter()
+        counter: Counter[str] = Counter[str]()
         for w in words:
             counter.update(w)
         chars = [c for c, _ in counter.most_common(max_vocab or None)]
         chars.sort()
         return cls(chars)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {"itos": self.itos}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "CharVocab":
+    def from_dict(cls, d: dict[str, Any]) -> "CharVocab":
         obj = cls.__new__(cls)
         obj.itos = d["itos"]
         obj.stoi = {c: i for i, c in enumerate(obj.itos)}
         return obj
 
 
-def _build_model(torch, vocab_size: int, cfg: dict):
+def _build_model(torch: Any, vocab_size: int, cfg: dict[str, Any]) -> Any:
     """Construct the character-level LSTM model."""
     import torch.nn as nn
 
-    class CharLSTM(nn.Module):
-        def __init__(self, vocab, embed, hidden, layers):
+    class CharLSTM(nn.Module):  # type: ignore[misc]
+        def __init__(self, vocab: Any, embed: Any, hidden: Any, layers: Any) -> None:
             super().__init__()
             self.embed = nn.Embedding(vocab, embed, padding_idx=0)
             self.lstm = nn.LSTM(embed, hidden, layers, batch_first=True)
             self.head = nn.Linear(hidden, vocab)
 
-        def forward(self, x, state=None):
+        def forward(self, x: Any, state: Any = None) -> Any:
             e = self.embed(x)
             out, state = self.lstm(e, state)
             return self.head(out), state
@@ -199,7 +199,7 @@ def train_model(
     compute_mode: str = "auto",
     vram_budget_mb: int = 4096,
     seed: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Train a character-level LSTM and save it.
 
     Args:
@@ -237,7 +237,7 @@ def train_model(
 
     encoded = [vocab.encode(w) for w in words]
 
-    def _make_batch(rows: list[list[int]]):
+    def _make_batch(rows: list[list[int]]) -> Any:
         width = max(len(r) for r in rows) + 2
         xb = torch.full((len(rows), width), vocab.pad, dtype=torch.long)
         yb = torch.full((len(rows), width), vocab.pad, dtype=torch.long)
@@ -289,7 +289,7 @@ def train_model(
     }
 
 
-def _load_model(torch, model_path: str, compute_mode: str, vram_budget_mb: int = 4096):
+def _load_model(torch: Any, model_path: str, compute_mode: str, vram_budget_mb: int = 4096) -> Any:
     """Load a trained LSTM model and its vocabulary."""
     ckpt = torch.load(model_path, map_location="cpu", weights_only=False)
     vocab = CharVocab.from_dict(ckpt["vocab"])
@@ -438,7 +438,7 @@ def dpg_adapt(
     lr: float = 1e-3,
     compute_mode: str = "auto",
     vram_budget_mb: int = 4096,
-) -> dict:
+) -> dict[str, Any]:
     """Adapt a model toward a set of recovered passwords (Dynamic Password Guessing).
 
     Performs a short online fine-tune so subsequent sampling is biased toward the
@@ -567,7 +567,7 @@ def generate_hf(
                     break
 
 
-def handle_neural(args, ctx: dict):
+def handle_neural(args: Any, ctx: dict[str, Any]) -> Any:
     """CLI handler for the ``neural`` command.
 
     Args:

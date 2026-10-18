@@ -45,16 +45,16 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Callable, Generator, Optional
+from typing import Any, Callable, Generator, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 
 
 # ── YAML loader (optional dep) ────────────────────────────────────────────────
 
-def _load_yaml(path: str) -> dict:
+def _load_yaml(path: str) -> dict[str, Any]:
     try:
-        import yaml  # type: ignore
+        import yaml
         with open(path, encoding="utf-8") as fh:
             return yaml.safe_load(fh) or {}
     except ImportError:
@@ -62,23 +62,26 @@ def _load_yaml(path: str) -> dict:
     # fallback: try JSON
     import json
     with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
+        return json.load(fh)  # type: ignore[no-any-return]
 
 
 # ── Engine factory registry ───────────────────────────────────────────────────
 
-_FACTORIES: dict[str, Callable[[dict, dict], Generator]] = {}
+_FACTORIES: dict[str, Callable[..., Any]] = {}
 
 
-def register_engine(name: str):
+_F = TypeVar("_F", bound=Callable[..., Any])
+
+
+def register_engine(name: str) -> Callable[[_F], _F]:
     """Decorator to register an engine factory function."""
-    def _dec(fn):
+    def _dec(fn: _F) -> _F:
         _FACTORIES[name] = fn
         return fn
     return _dec
 
 
-def _get_factory(name: str, stage: dict, global_cfg: dict) -> Optional[Callable]:
+def _get_factory(name: str, stage: dict[str, Any], global_cfg: dict[str, Any]) -> Optional[Callable[..., Any]]:
     fn = _FACTORIES.get(name)
     if fn is None:
         fn = _FACTORIES.get(name.replace("-", "_"))
@@ -91,7 +94,7 @@ def _get_factory(name: str, stage: dict, global_cfg: dict) -> Optional[Callable]
 # ── Built-in engine factories ─────────────────────────────────────────────────
 
 @register_engine("markov")
-def _markov_factory(stage: dict, _gcfg: dict):
+def _markov_factory(stage: dict[str, Any], _gcfg: dict[str, Any]) -> Any:
     from wlf_modules.markov_engine import MarkovModel
     m = MarkovModel()
     path = stage.get("model") or ".model/markov_model.json"
@@ -109,7 +112,7 @@ def _markov_factory(stage: dict, _gcfg: dict):
 
 
 @register_engine("pcfg")
-def _pcfg_factory(stage: dict, _gcfg: dict):
+def _pcfg_factory(stage: dict[str, Any], _gcfg: dict[str, Any]) -> Any:
     from wlf_modules.pcfg_engine import PCFGGrammar
     g = PCFGGrammar()
     path = stage.get("model") or ".model/pcfg_grammar.json"
@@ -128,7 +131,7 @@ def _pcfg_factory(stage: dict, _gcfg: dict):
 
 
 @register_engine("semantic")
-def _semantic_factory(stage: dict, gcfg: dict):
+def _semantic_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.semantic_pcfg import generate_semantic
     from wlf_modules.profiler import load_profile_yaml
     pf = stage.get("profile")
@@ -140,15 +143,15 @@ def _semantic_factory(stage: dict, gcfg: dict):
 
 
 @register_engine("mask")
-def _mask_factory(stage: dict, _gcfg: dict):
+def _mask_factory(stage: dict[str, Any], _gcfg: dict[str, Any]) -> Any:
     from wlf_modules.gpu_expand import iter_mask
     mask = stage.get("mask", "?l?l?l?d?d")
     return iter_mask(mask, max_candidates=stage.get("limit", 100_000))
 
 
 @register_engine("prince")
-def _prince_factory(stage: dict, gcfg: dict):
-    from wlf_modules.prince_engine import PrinceEngine
+def _prince_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.prince_engine import PrinceEngine  # type: ignore[attr-defined]
     words_file = stage.get("words")
     if not words_file or not Path(words_file).exists():
         logger.error("prince engine requires valid 'words' path")
@@ -163,8 +166,8 @@ def _prince_factory(stage: dict, gcfg: dict):
 
 
 @register_engine("neural")
-def _neural_factory(stage: dict, gcfg: dict):
-    from wlf_modules.neural_engine import NeuralPasswordGenerator
+def _neural_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.neural_engine import NeuralPasswordGenerator  # type: ignore[attr-defined]
     path = stage.get("model") or ".model/neural_lstm.pt"
     p = stage.get("params") or {}
     gen = NeuralPasswordGenerator()
@@ -179,7 +182,7 @@ def _neural_factory(stage: dict, gcfg: dict):
 
 
 @register_engine("gan")
-def _gan_factory(stage: dict, gcfg: dict):
+def _gan_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.gan_engine import GANPasswordEngine
     p = stage.get("params") or {}
     eng = GANPasswordEngine(
@@ -191,7 +194,7 @@ def _gan_factory(stage: dict, gcfg: dict):
 
 
 @register_engine("transformer")
-def _transformer_factory(stage: dict, gcfg: dict):
+def _transformer_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.transformer_engine import TransformerPasswordEngine
     p = stage.get("params") or {}
     eng = TransformerPasswordEngine(
@@ -207,7 +210,7 @@ def _transformer_factory(stage: dict, gcfg: dict):
 
 
 @register_engine("br_deep")
-def _br_deep_factory(stage: dict, gcfg: dict):
+def _br_deep_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.br_deep_engine import BRDeepEngine
     p = stage.get("params") or {}
     eng = BRDeepEngine(
@@ -225,11 +228,11 @@ def _br_deep_factory(stage: dict, gcfg: dict):
 class PipelineDSL:
     """Parse and execute a YAML pipeline definition."""
 
-    def __init__(self, pipeline_file: str, global_ctx: Optional[dict] = None) -> None:
+    def __init__(self, pipeline_file: str, global_ctx: Optional[dict[str, Any]] = None) -> None:
         self.raw = _load_yaml(pipeline_file)
         self.global_ctx = global_ctx or {}
 
-    def _global_cfg(self) -> dict:
+    def _global_cfg(self) -> dict[str, Any]:
         cfg = dict(self.global_ctx)
         cfg.update(self.raw.get("global") or {})
         return cfg
@@ -271,7 +274,7 @@ class PipelineDSL:
         return pipeline.run()
 
     def output_path(self) -> Optional[str]:
-        return self.raw.get("merge", {}).get("output")
+        return self.raw.get("merge", {}).get("output")  # type: ignore[no-any-return]
 
 
 class _NullBloom:
@@ -280,7 +283,7 @@ class _NullBloom:
         return False
 
 
-def execute_pipeline(pipeline_file: str, global_ctx: Optional[dict] = None) -> Generator[str, None, None]:
+def execute_pipeline(pipeline_file: str, global_ctx: Optional[dict[str, Any]] = None) -> Generator[str, None, None]:
     """Parse and run a pipeline YAML file; yields candidate strings."""
     dsl = PipelineDSL(pipeline_file, global_ctx)
     return dsl.build_and_run()

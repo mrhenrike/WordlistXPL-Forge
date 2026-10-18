@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -305,11 +305,11 @@ def _dfs_walk(
             stack.append((current_path + next_char, direction, new_changes))
 
 
-def get_layout_info() -> dict[str, dict]:
+def get_layout_info() -> dict[str, dict[str, Any]]:
     """Return information about available layouts."""
     info = {}
     for name, layout in LAYOUTS.items():
-        chars = set()
+        chars: set[str] = set()
         for row in layout:
             chars.update(c for c in row if c)
         info[name] = {
@@ -320,7 +320,7 @@ def get_layout_info() -> dict[str, dict]:
     return info
 
 
-def handle_kwalk(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_kwalk(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for keyboard walk generation.
 
     Args:
@@ -335,7 +335,7 @@ def handle_kwalk(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         lines = ["Available keyboard layouts:"]
         for name, data in info.items():
             lines.append(f"  {name:20s} {data['rows']} rows, {data['chars']:3d} chars  [{data['sample']}...]")
-        return iter(["\n".join(lines)])
+        return iter(["\n".join(lines)])  # type: ignore[return-value]
 
     layout_str = getattr(args, "layout", "qwerty") or "qwerty"
     layouts = [l.strip() for l in layout_str.split(",")]

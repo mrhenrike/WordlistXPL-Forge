@@ -22,11 +22,12 @@ import zlib
 from datetime import datetime, date
 from itertools import permutations as _permutations, product as _product
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
+from typing import Any
 
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
-_BEHAVIOR_DB: Optional[dict] = None
+_BEHAVIOR_DB: Optional[dict[str, Any]] = None
 
 
 class _SeenSet:
@@ -70,7 +71,7 @@ def _find_data_file(filename: str) -> Path:
 logger = logging.getLogger(__name__)
 
 
-def _load_behavior_db() -> dict:
+def _load_behavior_db() -> dict[str, Any]:
     """Load behavior_patterns.json once and cache it in memory."""
     global _BEHAVIOR_DB
     if _BEHAVIOR_DB is None:
@@ -84,7 +85,7 @@ def _load_behavior_db() -> dict:
     return _BEHAVIOR_DB
 
 
-def load_profile_yaml(filepath: str) -> dict:
+def load_profile_yaml(filepath: str) -> dict[str, Any]:
     """
     Load a personal profile from a YAML file.
 
@@ -158,7 +159,7 @@ def load_profile_yaml(filepath: str) -> dict:
     return data
 
 
-def _normalize_date_fields(data: dict) -> dict:
+def _normalize_date_fields(data: dict[str, Any]) -> dict[str, Any]:
     """
     Normaliza campos de data do perfil YAML para o formato legado esperado pelo profiler.
 
@@ -234,7 +235,7 @@ def _normalize_date_fields(data: dict) -> dict:
 
 
 def _normalize_pet_entries(
-    pets_raw: list,
+    pets_raw: list[Any],
 ) -> tuple[list[str], dict[str, list[str]]]:
     """
     Parse pet list entries (plain strings or dicts with adoption year).
@@ -262,7 +263,7 @@ def _normalize_pet_entries(
     return names, year_map
 
 
-def _normalize_profile_pets(data: dict) -> dict:
+def _normalize_profile_pets(data: dict[str, Any]) -> dict[str, Any]:
     """Merge ``pet_adoptions`` into ``pets`` and keep dict entries intact."""
     pets_raw = list(data.get("pets") or [])
     for adop in data.get("pet_adoptions") or []:
@@ -273,7 +274,7 @@ def _normalize_profile_pets(data: dict) -> dict:
 
 
 def _build_pets_relationship_pool(
-    profile: dict,
+    profile: dict[str, Any],
     leet_mode: str,
     year_mids: list[str],
 ) -> list[str]:
@@ -344,7 +345,7 @@ def _build_pets_relationship_pool(
     return list(dict.fromkeys(plain_heads + adoption_priority + base + extended))
 
 
-def _build_corp_relationship_pool(profile: dict, leet_mode: str) -> list[str]:
+def _build_corp_relationship_pool(profile: dict[str, Any], leet_mode: str) -> list[str]:
     """Company tokens with full leet/case variants (not truncated per-source)."""
     domain = (profile.get("company_domain", "") or "").replace("https://", "").replace("http://", "")
     domain_prefix = domain.split(".")[0] if domain else ""
@@ -621,7 +622,7 @@ def _format_extension(fmt: str) -> str:
     }.get(fmt, ".lst")
 
 
-def suggested_profile_output_path(profile: dict, fmt: str = "lst") -> str:
+def suggested_profile_output_path(profile: dict[str, Any], fmt: str = "lst") -> str:
     """Default output path in cwd: <name-slug>.<ext> from export format."""
     slug = _slug_from_name(profile.get("full_name", "") or "")
     if not slug:
@@ -629,7 +630,7 @@ def suggested_profile_output_path(profile: dict, fmt: str = "lst") -> str:
     return str(Path.cwd() / f"{slug}{_format_extension(fmt)}")
 
 
-def default_profile_output_path(profile: dict) -> str:
+def default_profile_output_path(profile: dict[str, Any]) -> str:
     """Legacy default (lst in /tmp) - prefer suggested_profile_output_path."""
     slug = _slug_from_name(profile.get("full_name", "") or "")
     if not slug:
@@ -639,7 +640,7 @@ def default_profile_output_path(profile: dict) -> str:
 
 def normalize_profile_output_path(
     raw: str,
-    profile: dict,
+    profile: dict[str, Any],
     fmt: str = "lst",
 ) -> str:
     """
@@ -663,13 +664,13 @@ def normalize_profile_output_path(
     return str(target)
 
 
-def resolve_profile_output(cli_output: Optional[str], profile: dict) -> Optional[str]:
+def resolve_profile_output(cli_output: Optional[str], profile: dict[str, Any]) -> Optional[str]:
     """CLI -o wins; else interactive output_path; else None (stdout)."""
     fmt = (profile.get("output") or {}).get("format", "lst")
     if cli_output:
         return normalize_profile_output_path(cli_output, profile, fmt)
     if profile.get("output_path"):
-        return profile["output_path"]
+        return profile["output_path"]  # type: ignore[no-any-return]
     return None
 
 
@@ -1232,7 +1233,7 @@ def phrase_initials_variants(
 
 
 def _emit_phrase_initials_combos(
-    profile: dict,
+    profile: dict[str, Any],
     min_len: int,
     max_len: int,
     seen: "_SeenSet | set[str]",
@@ -1263,7 +1264,7 @@ def _emit_phrase_initials_combos(
 
 
 def _emit_phrase_full_combos(
-    profile: dict,
+    profile: dict[str, Any],
     min_len: int,
     max_len: int,
     seen: "_SeenSet | set[str]",
@@ -1573,13 +1574,7 @@ def _build_token_pool(
     return pool
 
 
-def _emit_pair_combos(
-    pool_a: list[str],
-    pool_b: list[str],
-    seps: list[str],
-    prefixes: list[str],
-    try_emit,
-) -> Generator[str, None, None]:
+def _emit_pair_combos(pool_a: list[str], pool_b: list[str], seps: list[str], prefixes: list[str], try_emit: Any) -> Generator[str, None, None]:
     """Emit a+sep+b and b+sep+a (optional leading prefix)."""
     if not pool_a or not pool_b:
         return
@@ -1602,13 +1597,7 @@ def _emit_pair_combos(
                             yield r
 
 
-def _emit_entity_date_combos(
-    entities: list[str],
-    dates: list[str],
-    seps: list[str],
-    prefixes: list[str],
-    try_emit,
-) -> Generator[str, None, None]:
+def _emit_entity_date_combos(entities: list[str], dates: list[str], seps: list[str], prefixes: list[str], try_emit: Any) -> Generator[str, None, None]:
     """Entity + date and date + entity (Pet2026, 2026Pet, _Pet@26, …)."""
     if not entities or not dates:
         return
@@ -1634,14 +1623,7 @@ def _emit_entity_date_combos(
                     yield r
 
 
-def _emit_triple_combos(
-    pool_a: list[str],
-    mids: list[str],
-    pool_b: list[str],
-    dual_seps: list[tuple[str, str]],
-    prefixes: list[str],
-    try_emit,
-) -> Generator[str, None, None]:
+def _emit_triple_combos(pool_a: list[str], mids: list[str], pool_b: list[str], dual_seps: list[tuple[str, str]], prefixes: list[str], try_emit: Any) -> Generator[str, None, None]:
     """pref + A + sep1 + mid + sep2 + B  (_NOME@2026#Pet, _CORP@2026#Dept)."""
     if not pool_a or not pool_b:
         return
@@ -1662,7 +1644,7 @@ def _emit_triple_combos(
 
 
 def _emit_profile_relationship_combos(
-    profile: dict,
+    profile: dict[str, Any],
     date_tokens: list[str],
     min_len: int,
     max_len: int,
@@ -2030,7 +2012,7 @@ def _emit_all(
     # 5-token combinations (depth 5, BEWGor max parity) - first 5 tokens
     if depth >= 5:
         limit5 = min(len(tokens), 5)
-        for combo in _permutations(tokens[:limit5], 5):
+        for combo in _permutations(tokens[:limit5], 5):  # type: ignore[assignment]
             r = _try_emit("".join(combo))
             if r:
                 yield r
@@ -2089,7 +2071,7 @@ def _ask_multi(prompt: str, hint: str = "(one per line, empty to stop)") -> list
     return values
 
 
-def _ask_aliases(t_func, multi_hint: str) -> tuple[str, list[str]]:
+def _ask_aliases(t_func: Any, multi_hint: str) -> tuple[str, list[str]]:
     """Single prompt for short name + nicknames (deduplicated)."""
     aliases = _ask_multi(t_func("field.aliases"), multi_hint)
     seen: set[str] = set()
@@ -2107,7 +2089,7 @@ _LEET_MODES = ("none", "basic", "medium", "aggressive")
 _LEET_BY_NUM = {"1": "none", "2": "basic", "3": "medium", "4": "aggressive"}
 
 
-def _ask_leet_mode(t_func, default: str = "basic") -> str:
+def _ask_leet_mode(t_func: Any, default: str = "basic") -> str:
     """Prompt leet mode via number (1-4) or slug."""
     print(f"  {t_func('gen.leet_menu')}")
     raw = input(f"  {t_func('engines.prompt')} [{default}]: ").strip().lower()
@@ -2133,7 +2115,7 @@ def _no(raw: str) -> bool:
 def interactive_profile(
     preset_leet: str | None = None,
     preset_output: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Full interactive personal profiling wizard with i18n support.
 
@@ -2152,7 +2134,7 @@ def interactive_profile(
 
     # ── Language selection (first screen) ─────────────────────
     locale = ask_language_selection()
-    profile: dict = {"locale": locale}
+    profile: dict[str, Any] = {"locale": locale}
 
     print("\n" + "=" * 58)
     print(f"  {t('wizard.header')}")
@@ -2404,7 +2386,7 @@ def interactive_profile(
 # ── Behavioral pattern generator ──────────────────────────────────────────────
 
 def _generate_from_behavior(
-    profile: dict,
+    profile: dict[str, Any],
     seen: "_SeenSet | set[str]",
     min_len: int,
     max_len: int,
@@ -2443,7 +2425,7 @@ def _generate_from_behavior(
     church = (profile.get("church_name") or "").strip()
     group = (profile.get("church_group") or "").strip()
 
-    rel_data: dict = {}
+    rel_data: dict[str, Any] = {}
     if rel_key:
         rel_data = db.get("religions", {}).get(rel_key, {})
 
@@ -2613,7 +2595,7 @@ def _generate_from_behavior(
 # ── Generation ────────────────────────────────────────────────────────────────
 
 def generate_from_profile(
-    profile: dict,
+    profile: dict[str, Any],
     leet_mode: Optional[str] = None,
     min_len: int = 6,
     max_len: int = 32,

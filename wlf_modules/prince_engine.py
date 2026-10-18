@@ -25,7 +25,7 @@ import logging
 from collections import Counter
 from itertools import product
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def _load_wordlist(filepath: str, max_words: int = 0) -> list[tuple[str, int]]:
     Returns:
         List of (word, count) tuples sorted by frequency descending.
     """
-    freq: Counter = Counter()
+    freq: Counter[str] = Counter[str]()
     path = Path(filepath)
 
     with path.open("r", encoding="utf-8", errors="ignore") as fh:
@@ -236,7 +236,7 @@ def _find_length_combos(
         current.pop()
 
 
-def handle_prince(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_prince(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for PRINCE attack mode.
 
     Args:

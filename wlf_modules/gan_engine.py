@@ -27,7 +27,7 @@ import logging
 import math
 import os
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ _BOS = 0
 _EOS = 1
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -59,19 +59,19 @@ def _require_torch():
 
 # ── Model definitions (only loaded when torch is available) ───────────────────
 
-def _build_generator(latent_dim: int = 128, hidden_dim: int = 256, seq_len: int = 18):
+def _build_generator(latent_dim: int = 128, hidden_dim: int = 256, seq_len: int = 18) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class Generator(nn.Module):
-        def __init__(self):
+    class Generator(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.fc = nn.Linear(latent_dim, hidden_dim)
             self.lstm = nn.LSTM(hidden_dim, hidden_dim, num_layers=2, batch_first=True)
             self.out = nn.Linear(hidden_dim, _VOCAB_SIZE)
             self.seq_len = seq_len
 
-        def forward(self, z):
+        def forward(self, z: Any) -> Any:
             x = torch.relu(self.fc(z)).unsqueeze(1).repeat(1, self.seq_len, 1)
             h, _ = self.lstm(x)
             return self.out(h)
@@ -79,18 +79,18 @@ def _build_generator(latent_dim: int = 128, hidden_dim: int = 256, seq_len: int 
     return Generator()
 
 
-def _build_discriminator(hidden_dim: int = 256):
+def _build_discriminator(hidden_dim: int = 256) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class Discriminator(nn.Module):
-        def __init__(self):
+    class Discriminator(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, 64)
             self.lstm = nn.LSTM(64, hidden_dim, num_layers=2, batch_first=True)
             self.fc = nn.Linear(hidden_dim, 1)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             e = self.emb(x)
             _, (h, _) = self.lstm(e)
             return torch.sigmoid(self.fc(h[-1]))
@@ -100,16 +100,16 @@ def _build_discriminator(hidden_dim: int = 256):
 
 # ── Sampling helpers ──────────────────────────────────────────────────────────
 
-def _sample_from_logits(logits, temperature: float = 1.0) -> int:
+def _sample_from_logits(logits: Any, temperature: float = 1.0) -> int:
     """Sample character index from logits with temperature."""
     torch = _require_torch()
     import torch.nn.functional as F
     scaled = logits / max(temperature, 1e-5)
     probs = F.softmax(scaled, dim=-1)
-    return torch.multinomial(probs, 1).item()
+    return torch.multinomial(probs, 1).item()  # type: ignore[no-any-return]
 
 
-def _logits_to_password(logit_seq, temperature: float = 1.0, max_len: int = 18) -> str:
+def _logits_to_password(logit_seq: Any, temperature: float = 1.0, max_len: int = 18) -> str:
     chars = []
     for t in range(min(logit_seq.shape[0], max_len)):
         idx = _sample_from_logits(logit_seq[t], temperature)
@@ -122,7 +122,7 @@ def _logits_to_password(logit_seq, temperature: float = 1.0, max_len: int = 18) 
 
 # ── Fallback: Markov approximation ────────────────────────────────────────────
 
-def _fallback_generate(max_candidates: int, temperature: float, min_len: int, max_len: int):
+def _fallback_generate(max_candidates: int, temperature: float, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
     """CPU fallback when torch unavailable — mimics GAN diversity via random walks."""
     import random
     import string
@@ -167,11 +167,11 @@ class GANPasswordEngine:
         self._discriminator = None
         self._loaded = False
 
-    def _auto_device(self):
+    def _auto_device(self) -> Generator[Any, None, None]:
         try:
             torch = _require_torch()
             if self._device:
-                return torch.device(self._device)
+                return torch.device(self._device)  # type: ignore[no-any-return]
             if torch.cuda.is_available():
                 free_mb = 0
                 try:
@@ -184,10 +184,10 @@ class GANPasswordEngine:
                 except Exception:
                     free_mb = 0
                 if free_mb >= 512 and free_mb <= self.vram_budget_mb:
-                    return torch.device("cuda")
-            return torch.device("cpu")
+                    return torch.device("cuda")  # type: ignore[no-any-return]
+            return torch.device("cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None
+            return None  # type: ignore[return-value]
 
     def load(self, path: Optional[str] = None) -> bool:
         path = path or self.model_path
@@ -198,14 +198,14 @@ class GANPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             self._generator = _build_generator(self.latent_dim, self.hidden_dim, self.seq_len)
             if "generator" in state:
-                self._generator.load_state_dict(state["generator"])
+                self._generator.load_state_dict(state["generator"])  # type: ignore[attr-defined]
             elif "state_dict" in state:
-                self._generator.load_state_dict(state["state_dict"])
+                self._generator.load_state_dict(state["state_dict"])  # type: ignore[attr-defined]
             else:
-                self._generator.load_state_dict(state)
+                self._generator.load_state_dict(state)  # type: ignore[attr-defined]
             if "discriminator" in state:
                 self._discriminator = _build_discriminator(self.hidden_dim)
-                self._discriminator.load_state_dict(state["discriminator"])
+                self._discriminator.load_state_dict(state["discriminator"])  # type: ignore[attr-defined]
             self._loaded = True
             logger.info("GAN model loaded from %s", path)
             return True

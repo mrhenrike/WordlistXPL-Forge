@@ -21,7 +21,7 @@ import logging
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ def identify(digest: str) -> list[tuple[str, Optional[int]]]:
         if rx.search(digest):
             out.append(cand)
     if not out and _HEX.match(digest):
-        out.extend(_BY_HEX_LEN.get(len(digest), []))
+        out.extend(_BY_HEX_LEN.get(len(digest), []))  # type: ignore[arg-type]
     if not out:
         out.append(("unknown", None))
     return out
@@ -96,7 +96,7 @@ def _md4(data: bytes) -> bytes:
 
 def _md4_pure(msg: bytes) -> bytes:
     """Pure-Python MD4 implementation (RFC 1320) for NTLM when OpenSSL lacks it."""
-    def lrot(x, n):
+    def lrot(x: Any, n: Any) -> Any:
         x &= 0xFFFFFFFF
         return ((x << n) | (x >> (32 - n))) & 0xFFFFFFFF
 
@@ -149,16 +149,16 @@ def _hash_one(pw: str, algo: str) -> Optional[str]:
         return _md4(pw.encode("utf-8")).hex()
     if a == "bcrypt":
         try:
-            import bcrypt
+            import bcrypt  # type: ignore[import-not-found]
         except ImportError:
             return None
-        return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
+        return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("ascii")  # type: ignore[no-any-return]
     if a in ("argon2", "argon2id"):
         try:
-            from argon2 import PasswordHasher
+            from argon2 import PasswordHasher  # type: ignore[import-not-found]
         except ImportError:
             return None
-        return PasswordHasher().hash(pw)
+        return PasswordHasher().hash(pw)  # type: ignore[no-any-return]
     if a == "pbkdf2":
         salt = b"wlf-static-salt"  # test corpora only; not for production storage
         dk = hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), salt, 100_000)
@@ -173,9 +173,7 @@ def _hash_one(pw: str, algo: str) -> Optional[str]:
     return None
 
 
-def hash_stream(
-    words, algo: str, fmt: str = "hash", separator: str = ":"
-) -> Generator[str, None, None]:
+def hash_stream(words: Any, algo: str, fmt: str = "hash", separator: str = ":") -> Generator[str, None, None]:
     """Generate digests for a stream of words.
 
     Args:
@@ -224,7 +222,7 @@ def _word_to_mask(word: str) -> str:
 
 
 def export_hcmask(input_path: str, output_path: str, top_n: int = 0,
-                  min_count: int = 1) -> dict:
+                  min_count: int = 1) -> dict[str, Any]:
     """Export a hashcat .hcmask file from a wordlist mask distribution.
 
     Args:
@@ -239,7 +237,7 @@ def export_hcmask(input_path: str, output_path: str, top_n: int = 0,
     src = Path(input_path)
     if not src.exists():
         raise FileNotFoundError(f"wordlist not found: {input_path}")
-    counter: Counter = Counter()
+    counter: Counter[str] = Counter[str]()
     total = 0
     with src.open("r", encoding="utf-8", errors="replace") as fh:
         for line in fh:
@@ -268,7 +266,7 @@ def _iter_wordfile(path: str) -> Generator[str, None, None]:
             yield line.rstrip("\n\r")
 
 
-def handle_hash_id(args, ctx: dict):
+def handle_hash_id(args: Any, ctx: dict[str, Any]) -> Any:
     """CLI handler for the ``hash-id`` command."""
     value = getattr(args, "hash", None)
     wordlist = getattr(args, "wordlist", None)
@@ -299,7 +297,7 @@ def handle_hash_id(args, ctx: dict):
     return iter(lines)
 
 
-def handle_hash_gen(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_hash_gen(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``hash-gen`` command."""
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:

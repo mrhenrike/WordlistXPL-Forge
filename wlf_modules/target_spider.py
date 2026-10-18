@@ -82,7 +82,7 @@ def _extract_words_from_html(html: str, min_len: int = 4) -> Set[str]:
 
 def _get_links(html: str, base_url: str) -> List[str]:
     """Extract internal links from HTML."""
-    links = []
+    links: list[str] = []
     if not _BS4:
         return links
 

@@ -22,7 +22,7 @@ import re
 import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ def detect_phone(segment: str) -> bool:
     return bool(_PHONE_RE.match(segment.strip()))
 
 
-def tag_segments(password: str) -> list[dict]:
+def tag_segments(password: str) -> list[dict[str, Any]]:
     """Tag each segment of a password with detection results.
 
     Splits the password into contiguous alpha / digit / special segments,
@@ -134,7 +134,7 @@ def tag_segments(password: str) -> list[dict]:
 
     Note: E and W tags are only applied to the full password (not sub-segments).
     """
-    results: list[dict] = []
+    results: list[dict[str, Any]] = []
     i = 0
     pw = password
 
@@ -191,9 +191,9 @@ class PCFGGrammar:
     """
 
     def __init__(self) -> None:
-        self.structure_counts: Counter = Counter()
-        self.terminals: dict[str, Counter] = defaultdict(Counter)
-        self.cap_patterns: dict[str, Counter] = defaultdict(Counter)
+        self.structure_counts: Counter[str] = Counter[str]()
+        self.terminals: dict[str, Counter[str]] = defaultdict(Counter[str])
+        self.cap_patterns: dict[str, Counter[str]] = defaultdict(Counter[str])
         self.total_trained: int = 0
 
     def _classify_segment(self, segment: str) -> tuple[str, str, str]:
@@ -207,7 +207,7 @@ class PCFGGrammar:
         if segment.isalpha():
             cap = "all_lower"
             for name, check in _CAPITALIZATION_PATTERNS.items():
-                if check(segment):
+                if check(segment):  # type: ignore[no-untyped-call]
                     cap = name
                     break
             return "L", f"L{len(segment)}", segment.lower()
@@ -242,7 +242,7 @@ class PCFGGrammar:
                 cls, key, norm = self._classify_segment(seg)
                 cap = "all_lower"
                 for name, check in _CAPITALIZATION_PATTERNS.items():
-                    if check(seg):
+                    if check(seg):  # type: ignore[no-untyped-call]
                         cap = name
                         break
                 segments.append((key, norm, cap))
@@ -290,7 +290,7 @@ class PCFGGrammar:
                 else:
                     cap = "all_lower"
                     for name, check in _CAPITALIZATION_PATTERNS.items():
-                        if check(seg):
+                        if check(seg):  # type: ignore[no-untyped-call]
                             cap = name
                             break
                 segments.append((key, norm, cap))
@@ -320,7 +320,7 @@ class PCFGGrammar:
 
         self.total_trained += 1
 
-    def train_from_file(self, filepath: str, max_lines: int = 0) -> dict:
+    def train_from_file(self, filepath: str, max_lines: int = 0) -> dict[str, Any]:
         """Train from a password file (one password per line).
 
         Args:
@@ -463,7 +463,7 @@ class PCFGGrammar:
                 current: list[str],
                 cum_neg_log: float,
                 seg_keys: list[str],
-            ):
+            ) -> None:
                 nonlocal batch_id
                 if len(heap) >= beam_width:
                     return
@@ -574,7 +574,7 @@ class PCFGGrammar:
         return "\n".join(lines)
 
 
-def handle_pcfg(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_pcfg(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler: train or generate using PCFG grammar.
 
     Args:
@@ -606,7 +606,7 @@ def handle_pcfg(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         out = getattr(args, "model_output", None) or ".model/pcfg_grammar.json"
         saved = grammar.save(out)
         logger.info("Grammar saved: %s", saved)
-        return iter([grammar.describe()])
+        return iter([grammar.describe()])  # type: ignore[return-value]
 
     model_path = getattr(args, "model", None) or ".model/pcfg_grammar.json"
     p = Path(model_path)

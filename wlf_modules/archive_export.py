@@ -17,7 +17,7 @@ import zipfile
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 from wlf_modules.sanitizer import sanitize as _sanitize
 
@@ -96,7 +96,7 @@ def export_wordlist(
     source_path: str,
     output_path: str,
     options: ExportOptions = ExportOptions(),
-) -> dict:
+) -> dict[str, Any]:
     """Sanitise and export a wordlist to the specified format.
 
     Pipeline:
@@ -209,11 +209,7 @@ def export_wordlist(
                 logger.warning("Could not remove temp file %s: %s", tmp_file, exc)
 
 
-def ask_export_options(
-    t_func=None,
-    preset_path: str | None = None,
-    ask_path: bool = True,
-) -> tuple[ExportOptions, str]:
+def ask_export_options(t_func: Any = None, preset_path: str | None = None, ask_path: bool = True) -> tuple[ExportOptions, str]:
     """Prompt the user interactively for export options.
 
     Args:

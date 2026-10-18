@@ -25,7 +25,8 @@ import logging
 import os
 import unicodedata
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +45,10 @@ def _resolve_config_path() -> Path:
 
 
 _DEFAULT_CONFIG_PATH = _resolve_config_path()
-_CONFIG_CACHE: Optional[dict] = None
+_CONFIG_CACHE: Optional[dict[str, Any]] = None
 
 
-def load_prefix_config(path: Optional[str] = None) -> dict:
+def load_prefix_config(path: Optional[str] = None) -> dict[str, Any]:
     """
     Load prefix patterns config from JSON file.
 
@@ -85,10 +86,10 @@ def load_prefix_config(path: Optional[str] = None) -> dict:
         _CONFIG_CACHE = config
 
     logger.debug("Loaded prefix config: %s (v%s)", cfg_path, config.get("_meta", {}).get("version", "?"))
-    return config
+    return config  # type: ignore[no-any-return]
 
 
-def reload_config() -> dict:
+def reload_config() -> dict[str, Any]:
     """Force reload of the config cache from disk."""
     global _CONFIG_CACHE
     _CONFIG_CACHE = None
@@ -106,7 +107,7 @@ def _norm(s: str) -> str:
 # ── Prefix resolution ──────────────────────────────────────────────────────────
 
 def get_all_prefixes(
-    config: dict,
+    config: dict[str, Any],
     categories: Optional[list[str]] = None,
 ) -> list[str]:
     """
@@ -130,7 +131,7 @@ def get_all_prefixes(
                 seen.add(a)
                 all_prefixes.append(a)
 
-    def _add_category(cat_data: dict) -> None:
+    def _add_category(cat_data: dict[str, Any]) -> None:
         if isinstance(cat_data, dict):
             if "aliases" in cat_data:
                 _add(cat_data["aliases"])
@@ -162,7 +163,7 @@ def get_all_prefixes(
 
 def get_prefixes_for_sector(
     sector: str,
-    config: dict,
+    config: dict[str, Any],
 ) -> list[str]:
     """
     Return department prefix aliases recommended for a given sector.
@@ -209,7 +210,7 @@ def generate_prefixed_usernames(
     ini:        str,
     prefixes:   list[str],
     separators: list[str],
-    config:     Optional[dict] = None,
+    config:     Optional[dict[str, Any]] = None,
     patterns:   Optional[list[str]] = None,
     max_per_prefix: int = 0,
 ) -> list[str]:
@@ -286,7 +287,7 @@ def generate_from_name(
     separators: Optional[list[str]] = None,
     sector:     Optional[str] = None,
     with_numeric: bool = True,
-    config:     Optional[dict] = None,
+    config:     Optional[dict[str, Any]] = None,
 ) -> list[str]:
     """
     Generate all prefixed username variations for a full name.
@@ -369,7 +370,7 @@ def generate_from_name(
 
 # ── CLI / integration helpers ─────────────────────────────────────────────────
 
-def list_all_prefixes(config: Optional[dict] = None) -> dict:
+def list_all_prefixes(config: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """
     Return all available prefix groups and their aliases for user inspection.
 
@@ -382,7 +383,7 @@ def list_all_prefixes(config: Optional[dict] = None) -> dict:
     if config is None:
         config = load_prefix_config()
 
-    result: dict = {}
+    result: dict[str, Any] = {}
 
     dept_data = config.get("department_prefixes", {})
     for dept_key, dept_val in dept_data.items():

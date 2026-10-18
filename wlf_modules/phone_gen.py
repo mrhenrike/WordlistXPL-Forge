@@ -21,13 +21,13 @@ from __future__ import annotations
 
 import logging
 from itertools import product
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
 # ── Country/DDI/State/DDD data ────────────────────────────────────────────────
 
-COUNTRIES: dict[str, dict] = {
+COUNTRIES: dict[str, dict[str, Any]] = {
     "brazil": {
         "ddi": "55",
         "name": "Brazil",
@@ -189,7 +189,7 @@ def list_states(country: str) -> list[str]:
 def get_ddds(country: str, state: str) -> list[str]:
     """Return DDD/area codes for a state."""
     c = COUNTRIES.get(country.lower(), {})
-    return c.get("states", {}).get(state.upper(), [])
+    return c.get("states", {}).get(state.upper(), [])  # type: ignore[no-any-return]
 
 
 def _expand_pattern(pattern: str) -> Generator[str, None, None]:
@@ -217,7 +217,7 @@ def _expand_pattern(pattern: str) -> Generator[str, None, None]:
 
 def estimate_count(pattern: str) -> int:
     """Return the number of combinations for a pattern."""
-    return 10 ** pattern.count("X")
+    return 10 ** pattern.count("X")  # type: ignore[no-any-return]
 
 
 def generate_phones(
@@ -302,7 +302,7 @@ def generate_phones(
                         yield r
 
 
-def interactive_phone_wizard() -> dict:
+def interactive_phone_wizard() -> dict[str, Any]:
     """
     Interactive wizard to configure phone number generation.
 

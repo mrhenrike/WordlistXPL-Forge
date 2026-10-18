@@ -19,7 +19,7 @@ import math
 import re
 import string
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Any
 
 
 # ── Structure detection ───────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ class CandidateExplanation:
     raw_score: float = 0.0
     normalized_score: float = 0.0
     structure: str = ""
-    charset_diversity: dict = field(default_factory=dict)
+    charset_diversity: dict[str, Any] = field(default_factory=dict)
     entropy: float = 0.0
     strength: str = ""
     charset_size: int = 0
@@ -131,7 +131,7 @@ class CandidateExplanation:
             lines.append("Notes     : " + "; ".join(self.notes))
         return "\n".join(lines)
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "candidate": self.candidate,
             "engine": self.origin_engine,

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ _PAD = 0
 _MAX_LEN = 32
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -45,12 +45,12 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20):
+def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class CharVAE(nn.Module):
-        def __init__(self):
+    class CharVAE(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, 32)
             self.encoder = nn.LSTM(32, hidden_dim, batch_first=True)
@@ -61,18 +61,18 @@ def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20):
             self.out = nn.Linear(hidden_dim, _VOCAB_SIZE)
             self.max_len = max_len
 
-        def encode(self, x):
+        def encode(self, x: Any) -> Any:
             e = self.emb(x)
             _, (h, _) = self.encoder(e)
             h = h[-1]
             return self.fc_mu(h), self.fc_logvar(h)
 
-        def reparameterize(self, mu, logvar):
+        def reparameterize(self, mu: Any, logvar: Any) -> Any:
             std = torch.exp(0.5 * logvar)
             eps = torch.randn_like(std)
             return mu + eps * std
 
-        def decode(self, z, max_len: int = 20):
+        def decode(self, z: Any, max_len: int = 20) -> Any:
             b = z.shape[0]
             h = torch.tanh(self.fc_dec_init(z)).unsqueeze(0)
             c = torch.zeros_like(h)
@@ -89,7 +89,7 @@ def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20):
                 inp = self.emb(idx)
             return torch.cat(logits_all, dim=1)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             mu, logvar = self.encode(x)
             z = self.reparameterize(mu, logvar)
             logits = self.decode(z, x.shape[1])
@@ -98,14 +98,14 @@ def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20):
     return CharVAE()
 
 
-def _pw_to_tensor(torch, pw: str, max_len: int = 20):
+def _pw_to_tensor(torch: Any, pw: str, max_len: int = 20) -> Any:
     indices = [_CHAR_TO_IDX.get(c, 0) for c in pw[:max_len]]
     while len(indices) < max_len:
         indices.append(0)
     return torch.tensor([indices], dtype=torch.long)
 
 
-def _logits_to_password(logit_seq, temperature: float = 1.0) -> str:
+def _logits_to_password(logit_seq: Any, temperature: float = 1.0) -> str:
     torch = _require_torch()
     import torch.nn.functional as F
     chars = []
@@ -120,7 +120,7 @@ def _logits_to_password(logit_seq, temperature: float = 1.0) -> str:
     return "".join(chars)
 
 
-def _fallback_generate(max_candidates: int, min_len: int, max_len: int):
+def _fallback_generate(max_candidates: int, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
     import random, string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
@@ -158,7 +158,7 @@ class VAEPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             logger.info("VAE loaded from %s", path)
             return True
@@ -166,16 +166,16 @@ class VAEPasswordEngine:
             logger.warning("Could not load VAE: %s", exc)
             return False
 
-    def _get_device(self):
+    def _get_device(self) -> Generator[Any, None, None]:
         try:
             torch = _require_torch()
             if torch.cuda.is_available():
-                return torch.device("cuda")
-            return torch.device("cpu")
+                return torch.device("cuda")  # type: ignore[no-any-return]
+            return torch.device("cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None
+            return None  # type: ignore[return-value]
 
-    def encode(self, password: str):
+    def encode(self, password: str) -> Generator[Any, None, None]:
         """Encode a password → (mu, logvar) tensors in latent space."""
         torch = _require_torch()
         if not self._loaded or self._model is None:
@@ -207,7 +207,7 @@ class VAEPasswordEngine:
             for i in range(steps):
                 t = i / max(steps - 1, 1)
                 z = (1.0 - t) * mu_a + t * mu_b
-                logits = self._model.decode(z, self.max_len)
+                logits = self._model.decode(z, self.max_len)  # type: ignore[attr-defined]
                 pw = _logits_to_password(logits[0], temperature=1.0)
                 if pw:
                     score = 1.0 - abs(t - 0.5) * 0.4  # peak at midpoint

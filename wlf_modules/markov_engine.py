@@ -23,7 +23,7 @@ import logging
 import math
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +38,8 @@ class MarkovModel:
     def __init__(self, order: int = 3, smoothing: float = 0.01) -> None:
         self.order: int = order
         self.smoothing: float = max(0.0, smoothing)
-        self.ngrams: dict[int, dict[str, Counter]] = defaultdict(lambda: defaultdict(Counter))
-        self.length_dist: Counter = Counter()
+        self.ngrams: dict[int, dict[str, Counter[str]]] = defaultdict(lambda: defaultdict(Counter[str]))
+        self.length_dist: Counter[str] = Counter[str]()
         self.total_trained: int = 0
         self.alphabet: set[str] = set()
 
@@ -49,7 +49,7 @@ class MarkovModel:
         if not password or len(password) < 2:
             return
 
-        self.length_dist[len(password)] += 1
+        self.length_dist[len(password)] += 1  # type: ignore[index]
         self.total_trained += 1
 
         padded = INITIAL_TOKEN * self.order + password + END_TOKEN
@@ -61,7 +61,7 @@ class MarkovModel:
 
         self.alphabet.update(password)
 
-    def train_from_file(self, filepath: str, max_lines: int = 0) -> dict:
+    def train_from_file(self, filepath: str, max_lines: int = 0) -> dict[str, Any]:
         """Train from a password file.
 
         Args:
@@ -114,7 +114,7 @@ class MarkovModel:
             return 0
         alpha = self.smoothing
         vocab_size = max(len(self.length_dist) + 1, 16)
-        count = self.length_dist.get(length, 0)
+        count = self.length_dist.get(length, 0)  # type: ignore[call-overload]
         prob = (count + alpha) / (total + alpha * vocab_size)
         return max(0, min(COST_LEVELS, int(-math.log2(max(prob, 1e-15)) * COST_LEVELS / 8)))
 
@@ -207,9 +207,9 @@ class MarkovModel:
         }
         for pos, contexts in self.ngrams.items():
             pos_key = str(pos)
-            data["ngrams"][pos_key] = {}
+            data["ngrams"][pos_key] = {}  # type: ignore[index]
             for ctx, counter in contexts.items():
-                data["ngrams"][pos_key][ctx] = dict(counter.most_common(50))
+                data["ngrams"][pos_key][ctx] = dict(counter.most_common(50))  # type: ignore[index]
 
         path = Path(filepath)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -227,7 +227,7 @@ class MarkovModel:
         self.smoothing = float(data.get("smoothing", 0.01))
         self.total_trained = data.get("total_trained", 0)
         self.alphabet = set(data.get("alphabet", []))
-        self.length_dist = Counter({int(k): v for k, v in data.get("length_dist", {}).items()})
+        self.length_dist = Counter({int(k): v for k, v in data.get("length_dist", {}).items()})  # type: ignore[misc]
         self.ngrams = defaultdict(lambda: defaultdict(Counter))
         for pos_key, contexts in data.get("ngrams", {}).items():
             pos = int(pos_key)
@@ -257,7 +257,7 @@ class MarkovModel:
         return "\n".join(lines)
 
 
-def handle_markov(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_markov(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler: train or generate using Markov model.
 
     Args:
@@ -290,7 +290,7 @@ def handle_markov(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         out = getattr(args, "model_output", None) or ".model/markov_model.json"
         saved = model.save(out)
         logger.info("Model saved: %s", saved)
-        return iter([model.describe()])
+        return iter([model.describe()])  # type: ignore[return-value]
 
     model_path = getattr(args, "model", None) or ".model/markov_model.json"
     p = Path(model_path)

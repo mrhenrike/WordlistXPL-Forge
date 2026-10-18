@@ -31,7 +31,7 @@ import re
 import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any, Generator
 
 logger = logging.getLogger(__name__)
 
@@ -189,7 +189,7 @@ def abstract_password(val: str) -> str:
     return "".join(result)
 
 
-def _char_classes(val: str) -> dict:
+def _char_classes(val: str) -> dict[str, Any]:
     """Return character class composition of a string (fractions, no raw data)."""
     n = len(val) or 1
     return {
@@ -228,15 +228,15 @@ class PatternModel:
         self._version: str = MODEL_VERSION
 
         # username pattern counts: sector → {pattern_id: count}
-        self._uid_pattern_counts:  dict[str, Counter] = defaultdict(Counter)
+        self._uid_pattern_counts:  dict[str, Counter[str]] = defaultdict(Counter[str])
         # separator counts: sector → {sep: count}
-        self._sep_counts:          dict[str, Counter] = defaultdict(Counter)
+        self._sep_counts:          dict[str, Counter[str]] = defaultdict(Counter[str])
         # abstract username shape counts: sector → {abstract_shape: count}
-        self._uid_shape_counts:    dict[str, Counter] = defaultdict(Counter)
+        self._uid_shape_counts:    dict[str, Counter[str]] = defaultdict(Counter[str])
         # password structural pattern counts: {abstract_pat: count}
-        self._pwd_pattern_counts:  Counter = Counter()
+        self._pwd_pattern_counts:  Counter[str] = Counter[str]()
         # password abstract shape counts
-        self._pwd_shape_counts:    Counter = Counter()
+        self._pwd_shape_counts:    Counter[str] = Counter[str]()
         # username length stats accumulators: sector → [lengths]
         self._uid_lengths:         dict[str, list[int]] = defaultdict(list)
         # password length stats
@@ -257,7 +257,7 @@ class PatternModel:
         workemail_col:   str = "workemail",
         domain_col:      Optional[str] = None,
         max_rows:        int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Extract username patterns from a CSV AD export.
 
@@ -324,7 +324,7 @@ class PatternModel:
                     self._uid_pattern_counts[sector][pat_id] += 1
 
                     # Extract separator
-                    sep_found = _extract_separator(local, seps)
+                    sep_found = _extract_separator(local, seps)  # type: ignore[arg-type]
                     if sep_found is not None:
                         self._sep_counts[sector][sep_found] += 1
                     elif re.match(r"^[a-z]+$", local):
@@ -355,7 +355,7 @@ class PatternModel:
         mode: str = "password",
         max_lines: int = 500_000,
         source_label: str = "",
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Learn structural patterns from a wordlist file.
 
@@ -411,7 +411,7 @@ class PatternModel:
         self,
         path: str,
         source_label: str = "",
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Learn username structural patterns from a username list file.
 
@@ -444,7 +444,7 @@ class PatternModel:
         out.parent.mkdir(parents=True, exist_ok=True)
 
         # Compute length statistics (mean, std, min, max per sector)
-        len_stats: dict = {}
+        len_stats: dict[str, Any] = {}
         for sector, lengths in self._uid_lengths.items():
             if lengths:
                 n = len(lengths)
@@ -458,7 +458,7 @@ class PatternModel:
                     "n":    n,
                 }
 
-        pwd_len_stats: dict = {}
+        pwd_len_stats: dict[str, Any] = {}
         if self._pwd_lengths:
             n = len(self._pwd_lengths)
             mean = sum(self._pwd_lengths) / n
@@ -472,7 +472,7 @@ class PatternModel:
             }
 
         # Normalize pattern counts to probabilities
-        uid_weights: dict = {}
+        uid_weights: dict[str, Any] = {}
         for sector, counts in self._uid_pattern_counts.items():
             total = sum(counts.values()) or 1
             uid_weights[sector] = {
@@ -480,7 +480,7 @@ class PatternModel:
                 for pat, cnt in counts.most_common()
             }
 
-        sep_weights: dict = {}
+        sep_weights: dict[str, Any] = {}
         for sector, counts in self._sep_counts.items():
             total = sum(counts.values()) or 1
             sep_weights[sector] = {
@@ -489,7 +489,7 @@ class PatternModel:
             }
 
         # Top abstract uid shapes (privacy: these are abstract, not actual usernames)
-        uid_shapes: dict = {}
+        uid_shapes: dict[str, Any] = {}
         for sector, counts in self._uid_shape_counts.items():
             total = sum(counts.values()) or 1
             uid_shapes[sector] = {
@@ -645,7 +645,7 @@ class PatternModel:
             shape_score = shape_counts.get(shape, 0) / total_shapes
 
             # 3. Separator weight
-            sep_found = _extract_separator(local, {".", "_", "-"})
+            sep_found = _extract_separator(local, {".", "_", "-"})  # type: ignore[arg-type]
             sep_score = sep_weights.get(sep_found or "", 0.0)
 
             # Combined score (weighted)
@@ -659,7 +659,7 @@ class PatternModel:
         self,
         candidates: list[str],
         domain: str = "",
-    ):
+    ) -> Generator[Any, None, None]:
         """
         Rank candidates and yield them in probability order.
 
@@ -735,7 +735,7 @@ class PatternModel:
             for shape, cnt in self._pwd_shape_counts.most_common(n)
         ]
 
-    def get_expected_uid_length(self, sector: str = "generic") -> dict:
+    def get_expected_uid_length(self, sector: str = "generic") -> dict[str, Any]:
         """
         Return expected username length stats for a sector.
 
@@ -761,7 +761,7 @@ class PatternModel:
 
 # ── Internal pattern classifiers ───────────────────────────────────────────────
 
-def _build_pattern_classifiers(corporate_patterns: list[dict]) -> list[tuple]:
+def _build_pattern_classifiers(corporate_patterns: list[dict[str, Any]]) -> list[tuple[Any, ...]]:
     """
     Build a list of (pattern_id, regex_or_callable) classifiers from
     CORPORATE_PATTERNS fmt strings.
@@ -791,7 +791,7 @@ def _build_pattern_classifiers(corporate_patterns: list[dict]) -> list[tuple]:
     return list(shape_to_pattern.items())
 
 
-def _classify_uid_to_pattern(local: str, classifiers: list[tuple]) -> str:
+def _classify_uid_to_pattern(local: str, classifiers: list[tuple[Any, ...]]) -> str:
     """
     Classify a username local-part into the closest CORPORATE_PATTERNS id.
 
@@ -806,7 +806,7 @@ def _classify_uid_to_pattern(local: str, classifiers: list[tuple]) -> str:
     shape_map = dict(classifiers)
     pat = shape_map.get(shape)
     if pat:
-        return pat
+        return pat  # type: ignore[no-any-return]
     # Fallback heuristics
     if re.match(r"^\d+$", local):
         return "numeric"
@@ -823,10 +823,10 @@ def _classify_uid_to_pattern(local: str, classifiers: list[tuple]) -> str:
     return "?"
 
 
-def _extract_separator(local: str, seps: set) -> Optional[str]:
+def _extract_separator(local: str, seps: set[int]) -> Optional[str]:
     """Extract the first separator found in a username local-part."""
     for sep in (".", "_", "-"):
-        if sep in local and sep in seps:
+        if sep in local and sep in seps:  # type: ignore[comparison-overlap]
             return sep
     return None
 

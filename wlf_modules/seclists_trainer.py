@@ -17,7 +17,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]
     """
     root = seclists_root or find_seclists_root()
     corpus = load_corpus_index()
-    result: Dict[str, List[str]] = {"found": [], "missing": [], "seclists_root": str(root) if root else "not found"}
+    result: Dict[str, List[str]] = {"found": [], "missing": [], "seclists_root": str(root) if root else "not found"}  # type: ignore[dict-item]
 
     if not root:
         logger.warning("SecLists not found. %s", _SECLISTS_HINT)
@@ -129,22 +129,16 @@ def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]
     return result
 
 
-def load_corpus_index() -> dict:
+def load_corpus_index() -> dict[str, Any]:
     """Load the SecLists corpus index JSON."""
     if not _CORPUS_INDEX.exists():
         logger.error("Corpus index not found: %s", _CORPUS_INDEX)
         return {}
     with open(_CORPUS_INDEX, encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore[no-any-return]
 
 
-def train_from_seclists(
-    model,
-    seclists_root: Path,
-    categories: Optional[List[str]] = None,
-    max_password_sources: int = 0,
-    max_username_sources: int = 0,
-) -> dict:
+def train_from_seclists(model: Any, seclists_root: Path, categories: Optional[List[str]] = None, max_password_sources: int = 0, max_username_sources: int = 0) -> dict[str, Any]:
     """Batch-train a PatternModel from SecLists corpus.
 
     Args:
@@ -163,7 +157,7 @@ def train_from_seclists(
         return {"error": "corpus index not loaded"}
 
     cats = categories or ["password", "username", "frequency"]
-    summary: dict = {
+    summary: dict[str, Any] = {
         "password_files": 0, "password_samples": 0,
         "username_files": 0, "username_samples": 0,
         "frequency_files": 0, "frequency_samples": 0,
@@ -238,7 +232,7 @@ def train_from_seclists(
     return summary
 
 
-def _train_withcount(model, fpath: Path, fmt: str, max_lines: int) -> int:
+def _train_withcount(model: Any, fpath: Path, fmt: str, max_lines: int) -> int:
     """Train from files where each line has a count and a password.
 
     Formats:

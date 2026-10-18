@@ -36,7 +36,7 @@ import re
 import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def _try_import_torch() -> bool:
 
 # ── MAYA structural patterns (reuse from benchmark_suite if available) ─────────
 
-def _load_maya_patterns() -> dict[str, re.Pattern]:
+def _load_maya_patterns() -> dict[str, re.Pattern[str]]:
     try:
         from wlf_modules.benchmark_suite import MAYA_PATTERNS
         return MAYA_PATTERNS
@@ -95,7 +95,7 @@ def _load_maya_patterns() -> dict[str, re.Pattern]:
     }
 
 
-_MAYA_PATTERNS: dict[str, re.Pattern] = {}
+_MAYA_PATTERNS: dict[str, re.Pattern[str]] = {}
 
 # Pattern empirical weights from MAYA paper frequency analysis (R1-R19).
 # Higher weight = pattern appears more frequently in real cracked password sets.
@@ -187,7 +187,7 @@ def _extract_features(word: str) -> list[float]:
 
 # ── Fallback: pattern-frequency scorer (pure Python) ─────────────────────────
 
-def _fallback_score(word: str, patterns: dict[str, re.Pattern]) -> float:
+def _fallback_score(word: str, patterns: dict[str, re.Pattern[str]]) -> float:
     """Score a candidate using MAYA pattern weights + entropy heuristics.
 
     Returns a value in [0, 1] where higher = more likely to crack successfully.
@@ -231,19 +231,19 @@ def _build_torch_model(input_dim: int = 12, hidden: int = 32) -> object:
     torch = _torch_mod
     nn = _nn_mod
 
-    class _MLP(nn.Module):  # type: ignore[misc]
+    class _MLP(nn.Module):  # type: ignore[misc, name-defined]
         def __init__(self) -> None:
             super().__init__()
-            self.net = nn.Sequential(
-                nn.Linear(input_dim, hidden),
-                nn.ReLU(),
-                nn.Linear(hidden, 16),
-                nn.ReLU(),
-                nn.Linear(16, 1),
-                nn.Sigmoid(),
+            self.net = nn.Sequential(  # type: ignore[union-attr]
+                nn.Linear(input_dim, hidden),  # type: ignore[union-attr]
+                nn.ReLU(),  # type: ignore[union-attr]
+                nn.Linear(hidden, 16),  # type: ignore[union-attr]
+                nn.ReLU(),  # type: ignore[union-attr]
+                nn.Linear(16, 1),  # type: ignore[union-attr]
+                nn.Sigmoid(),  # type: ignore[union-attr]
             )
 
-        def forward(self, x):  # type: ignore[override]
+        def forward(self, x: Any) -> Any:
             return self.net(x).squeeze(-1)
 
     return _MLP()
@@ -258,16 +258,16 @@ def _torch_score_batch(words: list[str], device: str = "cpu") -> list[float]:
 
     if _session_model is None or _session_model_device != device:
         _session_model = _build_torch_model()
-        _session_model.to(device)
-        _session_model.eval()
+        _session_model.to(device)  # type: ignore[attr-defined]
+        _session_model.eval()  # type: ignore[attr-defined]
         _session_model_device = device
         logger.debug("maya_ranker: new torch model on device=%s", device)
 
     features = [_extract_features(w) for w in words]
 
-    with torch.no_grad():
-        x = torch.tensor(features, dtype=torch.float32, device=device)
-        scores = _session_model(x).cpu().tolist()
+    with torch.no_grad():  # type: ignore[union-attr]
+        x = torch.tensor(features, dtype=torch.float32, device=device)  # type: ignore[union-attr]
+        scores = _session_model(x).cpu().tolist()  # type: ignore[operator]
 
     # Blend with fallback pattern score for untrained model
     blended = []
@@ -321,9 +321,9 @@ def train_session_model(
     # Determine device
     device = "cpu"
     if use_gpu:
-        if torch.cuda.is_available():
+        if torch.cuda.is_available():  # type: ignore[union-attr]
             device = "cuda"
-        elif hasattr(torch, "backends") and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        elif hasattr(torch, "backends") and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
             device = "mps"
         else:
             logger.info("maya_ranker: GPU requested but not available, using CPU")
@@ -354,29 +354,29 @@ def train_session_model(
         hit = any(patterns[pid].match(w) for pid in high_weight_patterns if pid in patterns)
         labels.append(1.0 if hit else 0.0)
 
-    x = torch.tensor(features, dtype=torch.float32, device=device)
-    y = torch.tensor(labels, dtype=torch.float32, device=device)
+    x = torch.tensor(features, dtype=torch.float32, device=device)  # type: ignore[union-attr]
+    y = torch.tensor(labels, dtype=torch.float32, device=device)  # type: ignore[union-attr]
 
     model = _build_torch_model()
-    model.to(device)
-    model.train()
+    model.to(device)  # type: ignore[attr-defined]
+    model.train()  # type: ignore[attr-defined]
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    criterion = nn.BCELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)  # type: ignore[union-attr, attr-defined]
+    criterion = nn.BCELoss()  # type: ignore[union-attr]
 
     batch_size = 512
     n_epochs = 5
     n = len(words)
 
     for epoch in range(n_epochs):
-        perm = torch.randperm(n, device=device)
+        perm = torch.randperm(n, device=device)  # type: ignore[union-attr]
         epoch_loss = 0.0
         batches = 0
         for start in range(0, n, batch_size):
             idx = perm[start: start + batch_size]
             xb, yb = x[idx], y[idx]
             optimizer.zero_grad()
-            preds = model(xb)
+            preds = model(xb)  # type: ignore[operator]
             loss = criterion(preds, yb)
             loss.backward()
             optimizer.step()
@@ -384,7 +384,7 @@ def train_session_model(
             batches += 1
         logger.debug("maya_ranker training epoch %d/%d loss=%.4f", epoch + 1, n_epochs, epoch_loss / max(batches, 1))
 
-    model.eval()
+    model.eval()  # type: ignore[attr-defined]
     _session_model = model
     _session_model_device = device
     logger.info("maya_ranker: session model trained on %d samples (device=%s)", n, device)
@@ -405,7 +405,7 @@ class ScoredCandidate:
 
 # ── Pattern cache helper ──────────────────────────────────────────────────────
 
-def _get_patterns() -> dict[str, re.Pattern]:
+def _get_patterns() -> dict[str, re.Pattern[str]]:
     global _MAYA_PATTERNS
     if not _MAYA_PATTERNS:
         _MAYA_PATTERNS = _load_maya_patterns()
@@ -416,7 +416,7 @@ def _get_patterns() -> dict[str, re.Pattern]:
 
 def score_candidates(
     words: list[str],
-    profile_hints: Optional[dict] = None,
+    profile_hints: Optional[dict[str, Any]] = None,
     use_gpu: bool = False,
     backend: str = "auto",
     batch_size: int = 1024,
@@ -464,9 +464,9 @@ def score_candidates(
         device = "cpu"
         if use_gpu:
             torch = _torch_mod
-            if torch.cuda.is_available():
+            if torch.cuda.is_available():  # type: ignore[union-attr]
                 device = "cuda"
-            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
                 device = "mps"
 
         for batch_start in range(0, len(words), batch_size):
@@ -519,7 +519,7 @@ def rank_wordlist(
     use_gpu: bool = False,
     top_n: int = 0,
     backend: str = "auto",
-    profile_hints: Optional[dict] = None,
+    profile_hints: Optional[dict[str, Any]] = None,
     chunk_size: int = 10_000,
     min_score: float = 0.0,
 ) -> RankResult:
@@ -555,9 +555,9 @@ def rank_wordlist(
         actual_backend = "torch"
         if use_gpu:
             torch = _torch_mod
-            if torch.cuda.is_available():
+            if torch.cuda.is_available():  # type: ignore[union-attr]
                 device_used = "cuda"
-            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
                 device_used = "mps"
 
     all_scored: list[ScoredCandidate] = []

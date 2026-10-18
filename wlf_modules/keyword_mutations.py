@@ -17,7 +17,7 @@ import logging
 import re
 import zlib
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
 logger = logging.getLogger(__name__)
 
@@ -258,10 +258,10 @@ def mutate(
 
 
 def mutate_tokens(
-    token_dict: dict,
+    token_dict: dict[str, Any],
     modes: list[MutationMode],
     scope_keys: Optional[list[str]] = None,
-) -> dict:
+) -> dict[str, Any]:
     """Apply mutations to string/list values in a profile dictionary.
 
     For each targeted key, a new key ``<original_key>_mutations`` is added to
@@ -305,7 +305,7 @@ def mutate_tokens(
     return result
 
 
-def ask_mutation_options(t_func=None) -> tuple[list[MutationMode], bool]:
+def ask_mutation_options(t_func: Any = None) -> tuple[list[MutationMode], bool]:
     """Prompt the user interactively for mutation options.
 
     Args:

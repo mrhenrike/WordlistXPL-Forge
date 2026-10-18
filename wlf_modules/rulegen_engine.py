@@ -26,7 +26,7 @@ import logging
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +149,7 @@ def analyze_passwords(
     passwords: list[str],
     dictionary: Optional[set[str]] = None,
     max_rules_per_password: int = 3,
-) -> tuple[Counter, dict[str, list[str]]]:
+) -> tuple[Counter[str], dict[str, list[str]]]:
     """Analyze passwords and extract transformation rules.
 
     Args:
@@ -163,7 +163,7 @@ def analyze_passwords(
     if dictionary is None:
         dictionary = _build_auto_dictionary(passwords)
 
-    rule_counter: Counter = Counter()
+    rule_counter: Counter[str] = Counter[str]()
     derivations: dict[str, list[str]] = {}
 
     for pw in passwords:
@@ -229,7 +229,7 @@ def generate_rule_file(
     dict_file: Optional[str] = None,
     max_lines: int = 0,
     top_rules: int = 100,
-) -> dict:
+) -> dict[str, Any]:
     """Analyze a password file and generate a .rule file.
 
     Args:
@@ -288,7 +288,7 @@ def generate_rule_file(
     }
 
 
-def handle_rulegen(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_rulegen(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for hashcat rule generation.
 
     Args:
@@ -322,7 +322,7 @@ def handle_rulegen(args, ctx: dict) -> Optional[Generator[str, None, None]]:
             f"  Rules written      : {stats['rules_written']:,}\n"
             f"  Output             : {stats['output']}"
         )
-        return iter([summary])
+        return iter([summary])  # type: ignore[return-value]
 
     all_passwords: list[str] = []
     for src in input_files:

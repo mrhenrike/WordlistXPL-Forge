@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import sys
 from itertools import permutations
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ def _leetify(text: str) -> str:
     return "".join(LEET_MAP.get(c.lower(), c) if c.isalpha() else c for c in text)
 
 
-def handle_combiner(args, ctx: dict) -> None:
+def handle_combiner(args: Any, ctx: dict[str, Any]) -> None:
     """CLI handler for the combiner subcommand."""
     keywords = list(args.keywords) if args.keywords else []
 
@@ -240,10 +240,10 @@ def handle_combiner(args, ctx: dict) -> None:
         max_length=getattr(args, "max_len", 64),
     )
 
-    return gen
+    return gen  # type: ignore[return-value]
 
 
-def _resolve_link_words(args) -> list[str]:
+def _resolve_link_words(args: Any) -> list[str]:
     """Resolve linguistic linking words from CLI args, with user confirmation.
 
     Reads ``--link-lang`` (language codes/aliases or ``all``) and ``--link-words``

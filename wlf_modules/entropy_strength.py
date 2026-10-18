@@ -19,7 +19,7 @@ import logging
 import math
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ def _has_date(pw: str) -> bool:
     return False
 
 
-def estimate(pw: str, extra_dict: Optional[set[str]] = None) -> dict:
+def estimate(pw: str, extra_dict: Optional[set[str]] = None) -> dict[str, Any]:
     """Estimate strength, entropy and crack times for one password.
 
     Args:
@@ -245,7 +245,7 @@ def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
         The breach count, 0 if not found, or None if the check could not run.
     """
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
     except ImportError:
         logger.warning("HIBP check requires 'requests'")
         return None
@@ -271,7 +271,7 @@ def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
     return 0
 
 
-def format_report(result: dict, hibp: Optional[int] = None) -> list[str]:
+def format_report(result: dict[str, Any], hibp: Optional[int] = None) -> list[str]:
     """Build a detailed text report for a single password estimate."""
     labels = ["very weak", "weak", "fair", "strong", "very strong"]
     lines = [
@@ -295,7 +295,7 @@ def format_report(result: dict, hibp: Optional[int] = None) -> list[str]:
     return lines
 
 
-def handle_strength(args, ctx: dict):
+def handle_strength(args: Any, ctx: dict[str, Any]) -> Any:
     """CLI handler for the ``strength`` command.
 
     Returns:

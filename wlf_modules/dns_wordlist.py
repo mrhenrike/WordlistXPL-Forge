@@ -23,7 +23,7 @@ import logging
 import re
 from itertools import permutations, product
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +280,7 @@ def clusterbomb_generate(
                 yield result
 
 
-def _passes_filter(s: str, match_re, filter_re) -> bool:
+def _passes_filter(s: str, match_re: Any, filter_re: Any) -> bool:
     if match_re and not match_re.search(s):
         return False
     if filter_re and filter_re.search(s):
@@ -481,11 +481,11 @@ def load_templates_from_yaml(filepath: str) -> list[str]:
     else:
         raw = []
 
-    for t in raw:
+    for t in raw:  # type: ignore[union-attr]
         if isinstance(t, str):
             templates.append(t)
 
-    return templates, payloads_from_yaml
+    return templates, payloads_from_yaml  # type: ignore[return-value]
 
 
 def generate_from_yaml_templates(

@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
+
+from typing import Any, Generator, Optional
 
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
@@ -155,7 +158,7 @@ def cmd_mutate(args: argparse.Namespace) -> None:
 
     seen_variants: set[str] = set()
 
-    def _gen():
+    def _gen() -> Generator[str, None, None]:
         for base in base_passwords:
             for v in password_variants(
                 base,
@@ -247,7 +250,7 @@ def cmd_phrase(args: argparse.Namespace) -> None:
         extra_suffixes=extra_suffixes,
     )
 
-    def _gen():
+    def _gen() -> Generator[str, None, None]:
         yield from variants
 
     count = _write_output(_gen(), args.output)
@@ -313,7 +316,7 @@ def cmd_leet_perm(args: argparse.Namespace) -> None:
     max_per = getattr(args, "max_per_word", 512) or 512
     max_lines = getattr(args, "max_lines", 0) or 0
 
-    def _gen():
+    def _gen() -> Generator[str, None, None]:
         count = 0
         with path.open(encoding="utf-8", errors="replace") as fh:
             for line in fh:
@@ -334,7 +337,7 @@ def cmd_leet_perm(args: argparse.Namespace) -> None:
 def cmd_combiner(args: argparse.Namespace) -> None:
     """Handler for keyword combiner wordlist generation."""
     from wlf_modules.combiner import handle_combiner
-    gen = handle_combiner(args, {})
+    gen = handle_combiner(args, {})  # type: ignore[func-returns-value]
     if gen:
         count = _write_output(gen, args.output)
         _ok(f"Generated: {count:,} combined entries")
@@ -436,7 +439,7 @@ def cmd_br_names(args: argparse.Namespace) -> None:
         _warn("No names loaded from BRWordList.")
         return
 
-    count = _write_output(iter(usernames), args.output)
+    count = _write_output(iter(usernames), args.output)  # type: ignore[arg-type]
     _ok(f"br-names: {count:,} username entries generated")
 
 
@@ -490,7 +493,7 @@ def cmd_iwlgen(args: argparse.Namespace) -> None:
     engine = IwlgenEngine()
     wordlist = engine.generate(keywords=keywords, config=config)
 
-    count = _write_output(iter(wordlist), args.output)
+    count = _write_output(iter(wordlist), args.output)  # type: ignore[arg-type]
     _ok(f"iwlgen: {count:,} entries generated")
 
 
@@ -526,11 +529,11 @@ def cmd_passphrase(args: argparse.Namespace) -> None:
 
 
 
-def cmd_br_deep(args) -> None:
+def cmd_br_deep(args: argparse.Namespace) -> None:
     """Brazilian deep profile wordlist generation."""
     try:
         from wlf_modules.br_deep_engine import BRDeepEngine
-        profile: dict = {}
+        profile: dict[str, Any] = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
             profile = _load_profile_file(profile_file)
@@ -555,11 +558,11 @@ def cmd_br_deep(args) -> None:
 
 
 
-def cmd_pbmp(args) -> None:
+def cmd_pbmp(args: argparse.Namespace) -> None:
     """Show PBMP strategy distribution for a profile."""
     try:
         from wlf_modules.pbmp_full import PBMPFull
-        profile: dict = {}
+        profile: dict[str, Any] = {}
         profile_file = getattr(args, "profile_file", None)
         if profile_file:
             profile = _load_profile_file(profile_file)
@@ -575,7 +578,7 @@ def cmd_pbmp(args) -> None:
 
 
 
-def cmd_evolve(args) -> None:
+def cmd_evolve(args: argparse.Namespace) -> None:
     """Evolutionary password generation (genetic / MAP-Elites)."""
     try:
         mode = getattr(args, "mode", None) or "genetic"
@@ -592,7 +595,7 @@ def cmd_evolve(args) -> None:
             gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
         else:
             from wlf_modules.genetic_engine import GeneticPasswordEngine
-            eng = GeneticPasswordEngine()
+            eng = GeneticPasswordEngine()  # type: ignore[assignment]
             gen_raw = eng.generate(seed_passwords=seed_words or None, max_candidates=limit)
 
         gen = (pw for pw, _ in gen_raw)
@@ -602,7 +605,7 @@ def cmd_evolve(args) -> None:
 
 
 
-def cmd_graph_expand(args) -> None:
+def cmd_graph_expand(args: argparse.Namespace) -> None:
     """Graph-based wordlist expansion from a seed corpus."""
     try:
         from wlf_modules.password_graph import PasswordGraphEngine
@@ -622,7 +625,7 @@ def cmd_graph_expand(args) -> None:
 
 
 
-def cmd_temporal_model(args) -> None:
+def cmd_temporal_model(args: argparse.Namespace) -> None:
     """Temporal drift wordlist — evolve seeds across years."""
     try:
         from wlf_modules.temporal_drift import TemporalDriftEngine
@@ -643,7 +646,7 @@ def cmd_temporal_model(args) -> None:
 
 
 
-def cmd_domain_pcfg(args) -> None:
+def cmd_domain_pcfg(args: argparse.Namespace) -> None:
     """Domain-specific PCFG generation (corporate, healthcare, finance, etc.)."""
     try:
         from wlf_modules.domain_pcfg import DomainPCFG
@@ -663,7 +666,7 @@ def cmd_domain_pcfg(args) -> None:
 
 
 
-def cmd_vae_interp(args) -> None:
+def cmd_vae_interp(args: argparse.Namespace) -> None:
     """VAE latent space interpolation between two passwords."""
     try:
         from wlf_modules.vae_engine import VAEPasswordEngine
@@ -681,5 +684,5 @@ def cmd_vae_interp(args) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore[name-defined]
 

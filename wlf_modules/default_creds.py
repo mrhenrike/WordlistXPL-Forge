@@ -17,13 +17,14 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
-_DB: Optional[dict] = None
+_DB: Optional[dict[str, Any]] = None
 _DB_PATH: Optional[Path] = None
 
 
@@ -49,7 +50,7 @@ def _resolve_db_path(explicit: Optional[str | Path] = None) -> Path:
     return candidates[0]
 
 
-def _load_db(explicit: Optional[str | Path] = None) -> dict:
+def _load_db(explicit: Optional[str | Path] = None) -> dict[str, Any]:
     """Load and cache the credentials database."""
     global _DB, _DB_PATH
     db_path = _resolve_db_path(explicit)
@@ -164,7 +165,7 @@ def generate_snmp(version: str = "v2") -> Generator[str, None, None]:
             yield community
 
 
-def handle_default_creds(args: object, _ctx: dict) -> None:
+def handle_default_creds(args: object, _ctx: dict[str, Any]) -> None:
     """CLI handler for the default-creds subcommand."""
     import sys
 

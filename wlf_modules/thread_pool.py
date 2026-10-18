@@ -21,6 +21,7 @@ import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import Any, Callable, Generator, Iterable, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +143,7 @@ class SmartPool:
                 )
         return self._executor
 
-    def submit(self, fn: Callable, *args, **kwargs) -> Future:
+    def submit(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Future[Any]:
         """
         Submit a single callable for execution.
 
@@ -157,10 +158,10 @@ class SmartPool:
 
     def map(
         self,
-        fn:       Callable,
-        items:    Iterable,
+        fn: Callable[..., Any],
+        items: Iterable[Any],
         timeout:  Optional[float] = None,
-    ) -> Generator:
+    ) -> Generator[Any, None, None]:
         """
         Map fn over items using the thread pool, yielding results as they complete.
 
@@ -183,9 +184,9 @@ class SmartPool:
 
     def map_ordered(
         self,
-        fn:    Callable,
-        items: list,
-    ) -> list:
+        fn: Callable[..., Any],
+        items: list[Any],
+    ) -> list[Any]:
         """
         Map fn over items and return results in INPUT order.
 
@@ -230,7 +231,7 @@ class SmartPool:
         seen: set[str] = set()
         executor = self._get_executor()
 
-        futures = [executor.submit(lambda g=gen: list(g())) for gen in generators]
+        futures = [executor.submit(lambda g=gen: list(g())) for gen in generators]  # type: ignore[misc]
         for future in as_completed(futures):
             try:
                 results = future.result() or []
@@ -252,10 +253,10 @@ class SmartPool:
                 self._executor = None
         self._active = False
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         return self
 
-    def __exit__(self, *_):
+    def __exit__(self, *_: Any) -> None:
         self.shutdown()
 
 
@@ -263,7 +264,7 @@ class SmartPool:
 
 def parallel_generate(
     generator_fn: Callable[[Any], Iterable[str]],
-    items:        list,
+    items: list[Any],
     threads:      int = DEFAULT_THREADS,
     dedup:        bool = True,
     progress_cb:  Optional[Callable[[int, int], None]] = None,

@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 import random
 import string
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ _EOS = len(_CHARSET) + 1
 _VOCAB = len(_CHARSET) + 2
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -57,13 +57,13 @@ def _build_tcn(
     n_layers: int,
     kernel_size: int,
     dropout: float,
-):
+) -> Any:
     torch = _require_torch()
     import torch.nn as nn
     import torch.nn.functional as F
 
-    class CausalConv1d(nn.Module):
-        def __init__(self, channels, kernel, dilation):
+    class CausalConv1d(nn.Module):  # type: ignore[misc]
+        def __init__(self, channels: Any, kernel: Any, dilation: Any) -> None:
             super().__init__()
             self.pad = (kernel - 1) * dilation
             self.conv = nn.Conv1d(
@@ -72,12 +72,12 @@ def _build_tcn(
             )
             self.dropout = nn.Dropout(dropout)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             x_pad = F.pad(x, (self.pad, 0))
             return self.dropout(F.relu(self.conv(x_pad)))
 
-    class TCNPasswordModel(nn.Module):
-        def __init__(self):
+    class TCNPasswordModel(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(vocab, d_model)
             self.layers = nn.ModuleList([
@@ -86,7 +86,7 @@ def _build_tcn(
             ])
             self.head = nn.Linear(d_model, vocab)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             # x: (B, T)  → emb: (B, T, d) → (B, d, T) for Conv1d
             h = self.emb(x).permute(0, 2, 1)
             for layer in self.layers:
@@ -138,7 +138,7 @@ class TCNPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             return True
         except Exception as exc:

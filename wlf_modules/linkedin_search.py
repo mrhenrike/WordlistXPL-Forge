@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from typing import Optional
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -63,10 +63,10 @@ def _get_access_token() -> str:
     return os.environ.get("LINKEDIN_ACCESS_TOKEN", "").strip()
 
 
-def _get_session():
+def _get_session() -> Any:
     """Return a configured requests.Session with LinkedIn OAuth2 headers."""
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
     except ImportError:
         raise ImportError("requests required - install with: pip install requests")
 
@@ -86,7 +86,7 @@ def _get_session():
     return session
 
 
-def validate_token() -> dict:
+def validate_token() -> dict[str, Any]:
     """
     Validate the current access token by fetching the authenticated profile.
 
@@ -294,7 +294,7 @@ def search_employees_by_company(
     return names[:max_results]
 
 
-def _extract_name_from_element(elem: dict) -> str:
+def _extract_name_from_element(elem: dict[str, Any]) -> str:
     """Extract a full name from a LinkedIn API response element."""
     # Various response shapes from different LinkedIn API versions
     for key in ("name", "fullName", "localizedName"):
@@ -387,7 +387,7 @@ def refresh_access_token() -> Optional[str]:
         if resp.status_code == 200:
             new_token = resp.json().get("access_token")
             logger.info("LinkedIn token refreshed via client_credentials.")
-            return new_token
+            return new_token  # type: ignore[no-any-return]
         else:
             logger.warning(
                 "Token refresh failed (HTTP %d). "

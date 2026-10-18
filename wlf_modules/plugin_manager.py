@@ -53,8 +53,8 @@ class WLFPlugin(ABC):
     @abstractmethod
     def generate(
         self,
-        profile: dict,
-        ctx: dict,
+        profile: dict[str, Any],
+        ctx: dict[str, Any],
     ) -> Generator[tuple[str, float], None, None]:
         """Generate (candidate, score) tuples.
 
@@ -158,8 +158,8 @@ def auto_discover() -> list[str]:
 
 def run_plugin(
     name: str,
-    profile: dict,
-    ctx: dict,
+    profile: dict[str, Any],
+    ctx: dict[str, Any],
 ) -> Generator[tuple[str, float], None, None]:
     """Run a registered plugin by name; raise KeyError if not found."""
     plugin = _REGISTRY.get(name)

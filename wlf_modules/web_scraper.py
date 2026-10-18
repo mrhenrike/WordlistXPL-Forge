@@ -25,21 +25,21 @@ import logging
 import re
 import time
 from collections import deque
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 from urllib.parse import urljoin, urlparse
 
 logger = logging.getLogger(__name__)
 
 try:
-    import requests
-    from bs4 import BeautifulSoup
+    import requests  # type: ignore[import-untyped]
+    from bs4 import BeautifulSoup  # type: ignore[import-not-found]
     _DEPS_OK = True
 except ImportError:
     _DEPS_OK = False
     logger.warning("requests e beautifulsoup4 não instalados. web_scraper desativado.")
 
 try:
-    from pypdf import PdfReader
+    from pypdf import PdfReader  # type: ignore[import-not-found]
     _PDF_OK = True
 except ImportError:
     _PDF_OK = False
@@ -113,7 +113,7 @@ class WebScraper:
         delay: float = 0.5,
         timeout: int = 10,
         auth: Optional[tuple[str, str]] = None,
-        cookies: Optional[dict] = None,
+        cookies: Optional[dict[str, Any]] = None,
         proxy: Optional[str] = None,
         extra_headers: Optional[dict[str, str]] = None,
         stopwords: Optional[frozenset[str]] = None,

@@ -9,10 +9,10 @@ Version: 1.0.0
 from __future__ import annotations
 
 import itertools
-from typing import Generator, Iterable
+from typing import Generator, Iterable, Any
 
 
-def extract_semantic_banks(profile: dict) -> dict[str, list[str]]:
+def extract_semantic_banks(profile: dict[str, Any]) -> dict[str, list[str]]:
     banks: dict[str, list[str]] = {
         "NAME": [],
         "PET": [],
@@ -72,7 +72,7 @@ _TEMPLATES = [
 
 
 def generate_semantic(
-    profile: dict,
+    profile: dict[str, Any],
     max_candidates: int = 50_000,
     templates: Iterable[tuple[str, ...]] | None = None,
 ) -> Generator[str, None, None]:

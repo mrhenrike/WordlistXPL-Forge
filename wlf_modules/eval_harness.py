@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def evaluate_candidates(
     cutoffs: Optional[list[int]] = None,
     max_candidates: int = 0,
     max_reference: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Evaluate candidate lists against a reference test set.
 
     Args:
@@ -63,7 +63,7 @@ def evaluate_candidates(
     total_ref = len(reference)
     labels = labels or [Path(p).stem for p in candidate_paths]
 
-    results: dict[str, dict] = {}
+    results: dict[str, dict[str, Any]] = {}
     for path, label in zip(candidate_paths, labels):
         p = Path(path)
         if not p.exists():
@@ -96,7 +96,7 @@ def evaluate_candidates(
     return {"reference_total": total_ref, "cutoffs": cutoffs, "engines": results}
 
 
-def format_evaluation(report: dict) -> list[str]:
+def format_evaluation(report: dict[str, Any]) -> list[str]:
     """Format an evaluation report as aligned text lines."""
     lines = [
         f"Reference set: {report['reference_total']:,} passwords",
@@ -123,7 +123,7 @@ def curate_lists(
     metric: str = "hitrate",
     top_k: int = 2,
     max_reference: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Rank candidate lists by crack rate and pick the best.
 
     Args:
@@ -137,7 +137,7 @@ def curate_lists(
         Dict with the ranking and the selected files.
     """
     reference = _load_set(reference_path, max_reference)
-    ranking: list[dict] = []
+    ranking: list[dict[str, Any]] = []
     for path in candidate_paths:
         p = Path(path)
         if not p.exists():
@@ -181,7 +181,7 @@ def merge_selected(selected: list[str]) -> Generator[str, None, None]:
                     yield e
 
 
-def handle_evaluate(args, ctx: dict):
+def handle_evaluate(args: Any, ctx: dict[str, Any]) -> Any:
     """CLI handler for the ``evaluate`` command.
 
     Returns:
@@ -210,7 +210,7 @@ def handle_evaluate(args, ctx: dict):
     return ("lines", iter(format_evaluation(report)))
 
 
-def handle_curate(args, ctx: dict):
+def handle_curate(args: Any, ctx: dict[str, Any]) -> Any:
     """CLI handler for the ``curate`` command.
 
     Returns:

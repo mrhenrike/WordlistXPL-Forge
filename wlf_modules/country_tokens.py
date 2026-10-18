@@ -9,11 +9,11 @@ Author: André Henrique (@mrhenrike)
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import Optional, Any
 
 # canonical_key → metadata
 # aliases: extra spellings; local_name: native endonym when useful for passwords
-COUNTRY_REGISTRY: dict[str, dict] = {
+COUNTRY_REGISTRY: dict[str, dict[str, Any]] = {
     "brazil": {
         "iso2": "BR",
         "iso3": "BRA",
