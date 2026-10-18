@@ -568,6 +568,25 @@ def build_parser() -> argparse.ArgumentParser:
                        default="text", help="Output format: text, json, csv, markdown (default: text)")
     p_an.add_argument("-o", "--output", help="Save report to file")
 
+    # ── compare ──────────────────────────────────────────────────────────
+    p_cmp = sub.add_parser("compare", help="Compare two wordlists (overlap metrics)")
+    p_cmp.add_argument("file_a", help="First wordlist")
+    p_cmp.add_argument("file_b", help="Second wordlist")
+    p_cmp.add_argument("--format", choices=["text", "json", "csv"],
+                        default="text", help="Output format (default: text)")
+    p_cmp.add_argument("--case-insensitive", action="store_true",
+                        dest="case_insensitive",
+                        help="Case-insensitive comparison")
+    p_cmp.add_argument("--sample", type=int, default=0, metavar="N",
+                        help="Reservoir sample N entries per file (for large wordlists)")
+    p_cmp.add_argument("--output-common", dest="output_common", metavar="FILE",
+                        help="Save common entries to file")
+    p_cmp.add_argument("--output-only-a", dest="output_only_a", metavar="FILE",
+                        help="Save entries only in A to file")
+    p_cmp.add_argument("--output-only-b", dest="output_only_b", metavar="FILE",
+                        help="Save entries only in B to file")
+    p_cmp.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")

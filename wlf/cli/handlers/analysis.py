@@ -436,3 +436,29 @@ def cmd_explain_cmd(args: argparse.Namespace) -> None:
     cmd_score(args)
 
 
+def cmd_compare(args: argparse.Namespace) -> None:
+    """Handler for wordlist comparison / overlap metrics."""
+    from wlf_modules.compare_engine import handle_compare
+
+    file_a = getattr(args, "file_a", None)
+    file_b = getattr(args, "file_b", None)
+
+    if not file_a or not file_b:
+        _warn("Usage: wlf compare <file_a> <file_b>")
+        return
+
+    _info(f"Comparing: {file_a} vs {file_b}")
+    gen = handle_compare(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Comparison failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
