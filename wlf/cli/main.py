@@ -84,6 +84,18 @@ def main() -> None:
     _GLOBAL_CTX["chunk_bytes"] = int(getattr(args, "chunk_bytes", 0) or 0)
     _GLOBAL_CTX["stream"] = bool(getattr(args, "stream_global", False))
     _GLOBAL_CTX["enforce_safe_default"] = bool(getattr(args, "safe_default_limit", False))
+    _GLOBAL_CTX["checkpoint"] = bool(getattr(args, "checkpoint", False))
+
+    resume_id = getattr(args, "resume_id", None)
+    if resume_id:
+        from wlf_modules.session_manager import get_manager
+        try:
+            ctx = get_manager().resume_ctx(resume_id)
+            _GLOBAL_CTX.update(ctx)
+            _info(f"Resuming session {resume_id} (skipping {ctx.get('_resume_emitted', 0):,} entries)")
+        except FileNotFoundError:
+            _err(f"Session not found: {resume_id}")
+            return
 
     if global_min_len or global_max_len:
         parts = []
