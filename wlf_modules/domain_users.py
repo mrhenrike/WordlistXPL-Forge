@@ -493,7 +493,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext in (".xlsx", ".xls"):
         try:
-            import openpyxl  # type: ignore[import-untyped]
+            import openpyxl
             wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
             for ws in wb.worksheets:
                 for row in ws.iter_rows(values_only=True):
@@ -505,7 +505,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext == ".pdf":
         try:
-            import pdfplumber  # type: ignore[import-not-found]
+            import pdfplumber
             with pdfplumber.open(filepath) as pdf:
                 for page in pdf.pages:
                     text = page.extract_text() or ""
@@ -515,7 +515,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext in (".docx",):
         try:
-            import docx  # type: ignore[import-not-found]
+            import docx
             doc = docx.Document(filepath)
             for para in doc.paragraphs:
                 if para.text.strip():
@@ -604,8 +604,8 @@ def search_names_google_dorks(
         List of candidate name strings found.
     """
     try:
-        import requests  # type: ignore[import-untyped]
-        from bs4 import BeautifulSoup  # type: ignore[import-not-found]
+        import requests
+        from bs4 import BeautifulSoup
     except ImportError:
         logger.error("requests and beautifulsoup4 required. Install: pip install requests beautifulsoup4")
         return []

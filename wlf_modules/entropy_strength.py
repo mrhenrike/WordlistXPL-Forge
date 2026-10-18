@@ -245,7 +245,7 @@ def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
         The breach count, 0 if not found, or None if the check could not run.
     """
     try:
-        import requests  # type: ignore[import-untyped]
+        import requests
     except ImportError:
         logger.warning("HIBP check requires 'requests'")
         return None

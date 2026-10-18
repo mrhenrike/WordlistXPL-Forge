@@ -28,7 +28,7 @@ except ImportError:
     logger.warning("easyocr não instalado. Instale com: pip install easyocr")
 
 try:
-    from PIL import Image  # type: ignore[import-not-found]
+    from PIL import Image
     _PIL_OK = True
 except ImportError:
     _PIL_OK = False

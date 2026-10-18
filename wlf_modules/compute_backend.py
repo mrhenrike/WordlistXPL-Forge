@@ -134,7 +134,7 @@ class CPUBackend(ComputeBackend):
 
     def dot_product_batch(self, a: list[float], B: list[list[float]]) -> list[float]:
         try:
-            import numpy as np  # type: ignore[import-not-found]
+            import numpy as np
             a_arr = np.array(a, dtype=np.float32)
             B_arr = np.array(B, dtype=np.float32)
             return (B_arr @ a_arr).tolist()  # type: ignore[no-any-return]

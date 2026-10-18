@@ -26,13 +26,13 @@ from typing import List, Optional, Set
 __version__ = "1.0.0"
 
 try:
-    import requests  # type: ignore
+    import requests
     _REQUESTS = True
 except ImportError:
     _REQUESTS = False
 
 try:
-    from bs4 import BeautifulSoup  # type: ignore
+    from bs4 import BeautifulSoup
     _BS4 = True
 except ImportError:
     _BS4 = False
