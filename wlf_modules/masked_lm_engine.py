@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ _MASK_CLASS_CHARS = {
 }
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -57,12 +57,12 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _build_masked_lm(d_model: int = 256, n_layers: int = 4, max_len: int = 32):
+def _build_masked_lm(d_model: int = 256, n_layers: int = 4, max_len: int = 32) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class MaskedLM(nn.Module):
-        def __init__(self):
+    class MaskedLM(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_TOTAL_VOCAB, d_model, padding_idx=_PAD_IDX)
             self.pos = nn.Embedding(max_len, d_model)
@@ -74,7 +74,7 @@ def _build_masked_lm(d_model: int = 256, n_layers: int = 4, max_len: int = 32):
             self.norm = nn.LayerNorm(d_model)
             self.head = nn.Linear(d_model, _TOTAL_VOCAB)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             T = x.shape[1]
             pos = torch.arange(T, device=x.device).unsqueeze(0)
             pad_mask = (x == _PAD_IDX)
@@ -100,14 +100,14 @@ def _parse_template(template: str) -> tuple[list[int], list[bool]]:
     return tokens, is_masked
 
 
-def _allowed_for_class(cls: str) -> Optional[set]:
+def _allowed_for_class(cls: str) -> Optional[set[int]]:
     chars = _MASK_CLASS_CHARS.get(cls)
     if chars is None:
         return None
     return {_CHAR_TO_IDX[c] for c in chars if c in _CHAR_TO_IDX}
 
 
-def _fallback_fill(template: str, max_candidates: int):
+def _fallback_fill(template: str, max_candidates: int) -> Generator[tuple[str, float], None, None]:
     """CPU fallback: fill ?-positions randomly."""
     import random, string
     rng = random.Random()
@@ -146,7 +146,7 @@ class MaskedLMEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             return True
         except Exception as exc:

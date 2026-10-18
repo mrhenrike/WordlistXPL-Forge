@@ -130,16 +130,16 @@ def generate_wordlist(
 
     words: list[str] = []
 
-    from wlf_modules.default_creds import get_default_passwords
+    from wlf_modules.default_creds import get_default_passwords  # type: ignore[attr-defined]
     words.extend(get_default_passwords())
 
     if target_info and target_info.get("vendor"):
-        from wlf_modules.default_creds import get_vendor_passwords
+        from wlf_modules.default_creds import get_vendor_passwords  # type: ignore[attr-defined]
         vendor_passwords = get_vendor_passwords(target_info["vendor"])
         words.extend(vendor_passwords)
 
     try:
-        from wlf_modules.markov_engine import MarkovEngine
+        from wlf_modules.markov_engine import MarkovEngine  # type: ignore[attr-defined]
         engine = MarkovEngine()
         markov_words = engine.generate(count=min(max_words // 2, 50000))
         words.extend(markov_words)
@@ -147,7 +147,7 @@ def generate_wordlist(
         pass
 
     try:
-        from wlf_modules.rule_engine import RuleEngine
+        from wlf_modules.rule_engine import RuleEngine  # type: ignore[attr-defined]
         re_engine = RuleEngine()
         base_words = words[:1000]
         mutated = re_engine.apply_rules(base_words)

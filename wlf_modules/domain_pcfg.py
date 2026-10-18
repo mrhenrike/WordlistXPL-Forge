@@ -26,7 +26,8 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
+from typing import Any
 
 
 # ── Domain vocabulary seeds ───────────────────────────────────────────────────
@@ -104,7 +105,7 @@ class DomainPCFGModel:
     total_trained: int = 0
     alpha: float = 0.1    # Dirichlet smoothing
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "sector": self.sector,
             "structure_counts": self.structure_counts,
@@ -114,7 +115,7 @@ class DomainPCFGModel:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "DomainPCFGModel":
+    def from_dict(cls, d: dict[str, Any]) -> "DomainPCFGModel":
         m = cls(sector=d.get("sector", "generic"), alpha=d.get("alpha", 0.1))
         m.structure_counts = d.get("structure_counts", {})
         m.segment_counts = defaultdict(dict, d.get("segment_counts", {}))
@@ -146,7 +147,7 @@ class DomainPCFG:
             seed_pws.append(word + "2025")
         self.train(seed_pws, weight=0.5)
 
-    def train_from_profile(self, profile: dict) -> None:
+    def train_from_profile(self, profile: dict[str, Any]) -> None:
         """Extract seeds from a user/target profile."""
         seeds = []
         name = profile.get("full_name", "") or profile.get("short_name", "")
@@ -227,7 +228,7 @@ class DomainPCFG:
 
     def generate(
         self,
-        profile: Optional[dict] = None,
+        profile: Optional[dict[str, Any]] = None,
         corpus: Optional[list[str]] = None,
         max_candidates: int = 100_000,
         min_len: int = 4,

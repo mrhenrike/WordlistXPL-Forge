@@ -36,7 +36,7 @@ import itertools
 import logging
 import zlib
 from dataclasses import dataclass, field
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ def mangle_to_file(
     words: list[str],
     output_path: str,
     options: ManglerOptions = ManglerOptions(),
-) -> dict:
+) -> dict[str, Any]:
     """Write mangle output to a file, one candidate per line.
 
     Args:

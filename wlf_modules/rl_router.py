@@ -35,8 +35,8 @@ from wlf_modules.bandit_router import ArmStats, BanditRouter
 
 def _arm_stats_features(arm: ArmStats) -> list[float]:
     """3 features per arm: mean_reward, n_pulls (log), confidence."""
-    n = arm.n_pulls
-    mean = arm.mean_reward
+    n = arm.n_pulls  # type: ignore[attr-defined]
+    mean = arm.mean_reward  # type: ignore[attr-defined]
     conf = math.sqrt(2 * math.log(max(n + 1, 1)) / max(n, 1))
     return [mean, math.log1p(n) / 10.0, min(conf, 1.0)]
 
@@ -163,7 +163,7 @@ class RLRouter(BanditRouter):
         seed: Optional[int] = None,
         model_path: Optional[str] = None,
     ) -> None:
-        super().__init__(arm_names)
+        super().__init__(arm_names)  # type: ignore[arg-type]
         n = len(arm_names)
         rng = random.Random(seed)
         # input = 8 context features + 5 recent rewards + n_arms*3
@@ -186,8 +186,8 @@ class RLRouter(BanditRouter):
 
     def _build_state(self) -> list[float]:
         arm_feats: list[float] = []
-        for name in self._arms:
-            arm_feats.extend(_arm_stats_features(self._stats[name]))
+        for name in self._arms:  # type: ignore[attr-defined]
+            arm_feats.extend(_arm_stats_features(self._stats[name]))  # type: ignore[attr-defined]
         recent = list(self._recent_rewards)
         return self._context_feat + recent + arm_feats
 
@@ -207,7 +207,7 @@ class RLRouter(BanditRouter):
                 break
         self._last_action = chosen_idx
         self._last_state = state
-        return self._arms[chosen_idx]
+        return self._arms[chosen_idx]  # type: ignore[no-any-return, attr-defined]
 
     def update(self, arm_name: str, reward: float) -> None:
         super().update(arm_name, reward)

@@ -19,7 +19,7 @@ Versão: 1.0.0
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def xor_decrypt_str(ciphertext: bytes, key: str, encoding: str = "utf-8") -> str
     return decrypted.decode(encoding, errors="replace")
 
 
-def brute_force_single_byte(hex_string: str) -> list[dict]:
+def brute_force_single_byte(hex_string: str) -> list[dict[str, Any]]:
     """
     Brute-force de chave XOR de 1 byte sobre dados hexadecimais.
 
@@ -128,7 +128,7 @@ def brute_force_single_byte(hex_string: str) -> list[dict]:
         logger.error("Hex inválido: %s", exc)
         return []
 
-    candidates: list[dict] = []
+    candidates: list[dict[str, Any]] = []
 
     for key_byte in range(256):
         key = bytes([key_byte])

@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import os
 import re
-from typing import Generator, Iterable, Optional
+from typing import Generator, Iterable, Optional, Any
 from urllib.parse import unquote, urlparse
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ def collect_wayback(domain: str, limit: int = 5000, timeout: float = 20.0) -> se
         Set of candidate words from URL paths and query parameters.
     """
     try:
-        import requests
+        import requests  # type: ignore[import-untyped]
     except ImportError:
         logger.error("wayback collector requires 'requests'")
         return set()
@@ -247,7 +247,7 @@ def enrich_llm(words: set[str], provider: str, model: str,
     return out
 
 
-def handle_osint(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_osint(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``osint`` command.
 
     Args:
@@ -271,7 +271,7 @@ def handle_osint(args, ctx: dict) -> Optional[Generator[str, None, None]]:
 
     if not words:
         logger.warning("no words collected")
-        return iter([])
+        return iter([])  # type: ignore[return-value]
 
     if getattr(args, "enrich", False):
         provider = getattr(args, "provider", None)
@@ -284,4 +284,4 @@ def handle_osint(args, ctx: dict) -> Optional[Generator[str, None, None]]:
     if getattr(args, "lowercase", False):
         words = {w.lower() for w in words}
 
-    return iter(sorted(words))
+    return iter(sorted(words))  # type: ignore[return-value]

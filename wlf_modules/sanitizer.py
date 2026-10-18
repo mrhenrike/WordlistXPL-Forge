@@ -29,7 +29,7 @@ import random
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ def sanitize(
     exclude_pattern: Optional[str] = None,
     inplace: bool = False,
     strip_control: bool = False,
-) -> dict:
+) -> dict[str, Any]:
     """
     Sanitiza uma wordlist aplicando todos os filtros configurados.
 
@@ -234,7 +234,7 @@ def reverse_file(
     return len(reversed_lines)
 
 
-def format_sanitize_stats(stats: dict, filepath: str) -> str:
+def format_sanitize_stats(stats: dict[str, Any], filepath: str) -> str:
     """
     Formata estatísticas de sanitização para exibição.
 

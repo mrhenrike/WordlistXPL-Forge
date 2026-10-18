@@ -62,7 +62,7 @@ def _extract_xlsx(path: Path) -> str:
         Conteúdo concatenado das células.
     """
     try:
-        import openpyxl
+        import openpyxl  # type: ignore[import-untyped]
         wb = openpyxl.load_workbook(str(path), read_only=True, data_only=True)
         parts: list[str] = []
         for ws in wb.worksheets:
@@ -88,7 +88,7 @@ def _extract_docx(path: Path) -> str:
         Texto extraído.
     """
     try:
-        import docx
+        import docx  # type: ignore[import-not-found]
         doc = docx.Document(str(path))
         return "\n".join(p.text for p in doc.paragraphs)
     except Exception as exc:
@@ -107,9 +107,9 @@ def _extract_rtf(path: Path) -> str:
         Texto sem formatação RTF.
     """
     try:
-        from striprtf.striprtf import rtf_to_text
+        from striprtf.striprtf import rtf_to_text  # type: ignore[import-not-found]
         raw = path.read_bytes().decode("utf-8", errors="replace")
-        return rtf_to_text(raw)
+        return rtf_to_text(raw)  # type: ignore[no-any-return]
     except Exception as exc:
         logger.warning("Erro ao ler RTF %s: %s", path, exc)
         return ""
@@ -126,7 +126,7 @@ def _extract_pdf(path: Path) -> str:
         Texto extraído de todas as páginas.
     """
     try:
-        import pdfplumber
+        import pdfplumber  # type: ignore[import-not-found]
         parts: list[str] = []
         with pdfplumber.open(str(path)) as pdf:
             for page in pdf.pages:

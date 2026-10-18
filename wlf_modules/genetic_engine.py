@@ -22,7 +22,7 @@ import random
 import string
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Callable, Generator, Optional
+from typing import Callable, Generator, Optional, Any
 
 
 # ── Fitness helpers ───────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ for _fn, _w in _MUTATIONS:
     _MUTATION_CDF.append((_acc, _fn))
 
 
-def _pick_mutation(rng: random.Random):
+def _pick_mutation(rng: random.Random) -> Any:
     r = rng.random()
     for threshold, fn in _MUTATION_CDF:
         if r <= threshold:

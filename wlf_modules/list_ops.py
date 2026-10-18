@@ -17,7 +17,7 @@ import hashlib
 import logging
 import math
 from pathlib import Path
-from typing import Generator, Iterable, Optional
+from typing import Generator, Iterable, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ def split_file(
     by_lines: int = 0,
     by_size: str = "",
     by_length: bool = False,
-) -> dict:
+) -> dict[str, Any]:
     """Split a wordlist into multiple files.
 
     Exactly one split mode is used, evaluated in this order: by_length,
@@ -360,7 +360,7 @@ def _count_lines(path: str) -> int:
     return n
 
 
-def handle_dedup(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_dedup(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``dedup`` command."""
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:
@@ -376,7 +376,7 @@ def handle_dedup(args, ctx: dict) -> Optional[Generator[str, None, None]]:
     return dedup_stream(words, use_bloom=use_bloom, capacity=capacity)
 
 
-def handle_subtract(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_subtract(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``subtract`` command."""
     wordlist = getattr(args, "wordlist", None)
     remove = getattr(args, "remove", None) or []

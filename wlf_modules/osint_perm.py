@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass, field
-from typing import Dict, Generator, List, Optional
+from typing import Dict, Generator, List, Optional, Any
 
 __version__ = "1.0.0"
 
@@ -115,7 +115,7 @@ class OsintProfile:
     level: int = 1
     complexity: int = field(default=0, repr=False)   # alias for level; 0 = unset
     years: List[str] = field(default_factory=list)
-    nums_range: tuple = (0, 99)
+    nums_range: tuple[Any, ...] = (0, 99)
     special_chars: List[str] = field(default_factory=list)
     apply_post_leet: bool = False
 
@@ -128,7 +128,7 @@ class OsintProfile:
 def _recipes(
     level: int,
     years: List[str],
-    nums_range: tuple,
+    nums_range: tuple[Any, ...],
     special_chars: List[str],
 ) -> List[str]:
     """Return suffix/append recipes based on generation level.
@@ -262,7 +262,7 @@ class OsintPermGenerator:
                 candidates.append(w1 + "_" + w2)
 
         result: List[str] = []
-        seen: set = set()
+        seen: set[str] = set()
         for c in candidates:
             c = c.strip()
             if 4 <= len(c) <= 32 and c not in seen:

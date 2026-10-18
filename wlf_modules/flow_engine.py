@@ -22,7 +22,7 @@ import logging
 import math
 import random
 import string
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ _CHAR_TO_IDX = {c: i for i, c in enumerate(_CHARSET)}
 _IDX_TO_CHAR = {i: c for i, c in enumerate(_CHARSET)}
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -45,13 +45,13 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _build_flow(d_model: int, seq_len: int, n_layers: int):
+def _build_flow(d_model: int, seq_len: int, n_layers: int) -> Any:
     torch = _require_torch()
     import torch.nn as nn
     import torch.nn.functional as F
 
-    class CouplingLayer(nn.Module):
-        def __init__(self, d, mask):
+    class CouplingLayer(nn.Module):  # type: ignore[misc]
+        def __init__(self, d: Any, mask: Any) -> None:
             super().__init__()
             self.register_buffer("mask", mask)
             self.net_s = nn.Sequential(
@@ -63,7 +63,7 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int):
                 nn.Linear(d * 2, d),
             )
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             x_m = x * self.mask
             s = self.net_s(x_m) * (1 - self.mask)
             t = self.net_t(x_m) * (1 - self.mask)
@@ -71,15 +71,15 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int):
             log_det = (s * (1 - self.mask)).sum(dim=-1)
             return y, log_det
 
-        def inverse(self, y):
+        def inverse(self, y: Any) -> Any:
             y_m = y * self.mask
             s = self.net_s(y_m) * (1 - self.mask)
             t = self.net_t(y_m) * (1 - self.mask)
             x = y_m + (1 - self.mask) * ((y - t) * torch.exp(-s))
             return x
 
-    class RealNVP(nn.Module):
-        def __init__(self):
+    class RealNVP(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.proj = nn.Linear(_VOCAB, d_model)
             masks = []
@@ -94,7 +94,7 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int):
             ])
             self.unproj = nn.Linear(d_model, _VOCAB)
 
-        def forward(self, one_hot):
+        def forward(self, one_hot: Any) -> Any:
             # one_hot: (B, T, V) → embed → (B, T*d)
             h = F.relu(self.proj(one_hot))
             z = h.view(h.shape[0], -1)
@@ -104,7 +104,7 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int):
                 log_det = log_det + ld
             return z, log_det
 
-        def sample(self, n, seq_len_):
+        def sample(self, n: Any, seq_len_: Any) -> Any:
             z = torch.randn(n, seq_len_ * d_model)
             for layer in reversed(self.coupling):
                 z = layer.inverse(z)
@@ -153,7 +153,7 @@ class FlowPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             return True
         except Exception as exc:

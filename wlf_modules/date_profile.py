@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Any
 
 from wlf_modules.i18n import (
     get_months,
@@ -83,7 +83,7 @@ class DateProfile:
 
     def _resolve_age_window(self) -> None:
         """Deriva janela de ano de nascimento a partir da idade."""
-        base = _CURRENT_YEAR - self.age
+        base = _CURRENT_YEAR - self.age  # type: ignore[operator]
         # pessoa com X anos pode ter nascido em base ou base-1
         self.year_min = base - 1
         self.year_max = base
@@ -115,7 +115,7 @@ class DateProfile:
             return range(self.year, self.year + 1)
         return range(0)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Converte para dicionário compatível com o formato legado do profiler."""
         return {
             "birth_day":   self.day,
@@ -130,7 +130,7 @@ class DateProfile:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "DateProfile":
+    def from_dict(cls, d: dict[str, Any]) -> "DateProfile":
         """Reconstrói DateProfile a partir de dicionário do perfil."""
         return cls(
             mode=DateMode(d.get("birth_mode", "skip")),
@@ -275,7 +275,7 @@ def date_profile_from_age_sign(age_raw: str, sign_raw: str, locale: str = "en") 
     return DateProfile(mode=DateMode.AGE_SIGN, age=age, sign_index=sign_idx, locale=locale)
 
 
-def date_profile_from_yaml(entry: dict | str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_yaml(entry: dict[str, Any] | str, locale: str = "en") -> Optional[DateProfile]:
     """
     Cria DateProfile a partir de entrada YAML.
 
@@ -409,16 +409,16 @@ def build_date_tokens(dp: DateProfile, locale: Optional[str] = None) -> list[str
         idx = dp.sign_index
         # nome principal no locale ativo
         names = get_zodiac_names(active_locale)
-        if 0 <= idx < len(names):
-            add(names[idx])
+        if 0 <= idx < len(names):  # type: ignore[operator]
+            add(names[idx])  # type: ignore[index]
         # variações/aliases no locale ativo
-        for alt in get_zodiac_alts(active_locale, idx):
+        for alt in get_zodiac_alts(active_locale, idx):  # type: ignore[arg-type]
             add(alt)
         # elemento e regente
-        el = get_element_for_sign(idx, active_locale)
+        el = get_element_for_sign(idx, active_locale)  # type: ignore[arg-type]
         if el:
             add(el)
-        pl = get_planet_for_sign(idx, active_locale)
+        pl = get_planet_for_sign(idx, active_locale)  # type: ignore[arg-type]
         if pl:
             add(pl)
 

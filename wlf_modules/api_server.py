@@ -34,6 +34,7 @@ import sys
 import time
 import uuid
 from typing import Any, AsyncGenerator, Optional
+from typing import Any, Generator
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ _MAX_LIMIT = 10_000_000  # 10M per request
 
 # ── Request / response models ─────────────────────────────────────────────────
 
-def _parse_generate_body(body: dict) -> dict:
+def _parse_generate_body(body: dict[str, Any]) -> dict[str, Any]:
     """Validate and normalise the /v1/generate request body."""
     engines = body.get("engines", ["markov"])
     if not isinstance(engines, list):
@@ -76,7 +77,7 @@ def _parse_generate_body(body: dict) -> dict:
 
 # ── FastAPI application ───────────────────────────────────────────────────────
 
-def _make_fastapi_app(api_key: str = ""):
+def _make_fastapi_app(api_key: str = "") -> Generator[str, None, None]:
     try:
         from fastapi import Depends, FastAPI, Header, HTTPException, Request
         from fastapi.responses import JSONResponse, StreamingResponse
@@ -94,12 +95,12 @@ def _make_fastapi_app(api_key: str = ""):
         redoc_url="/v1/redoc",
     )
 
-    def _check_key(x_wlf_key: str = Header(default="")):
+    def _check_key(x_wlf_key: str = Header(default="")) -> None:
         if api_key and x_wlf_key != api_key:
             raise HTTPException(status_code=401, detail="Invalid API key")
 
-    @app.get("/v1/status")
-    def status():
+    @app.get("/v1/status")  # type: ignore[untyped-decorator]
+    def status() -> dict[str, Any]:
         try:
             import psutil
             ram = psutil.virtual_memory()
@@ -114,8 +115,8 @@ def _make_fastapi_app(api_key: str = ""):
             "uptime": time.time(),
         }
 
-    @app.get("/v1/engines")
-    def list_engines(_: None = Depends(_check_key)):
+    @app.get("/v1/engines")  # type: ignore[untyped-decorator]
+    def list_engines(_: None = Depends(_check_key)) -> dict[str, Any]:
         return {
             "engines": [
                 "markov", "pcfg", "semantic", "mask", "prince",
@@ -127,8 +128,8 @@ def _make_fastapi_app(api_key: str = ""):
             "disclaimer": _DISCLAIMER,
         }
 
-    @app.post("/v1/generate")
-    async def generate(request: Request, _: None = Depends(_check_key)):
+    @app.post("/v1/generate")  # type: ignore[untyped-decorator]
+    async def generate(request: Request, _: None = Depends(_check_key)) -> Generator[str, None, None]:
         try:
             body = await request.json()
         except Exception:
@@ -149,7 +150,7 @@ def _make_fastapi_app(api_key: str = ""):
             gen = _dispatch_generation(params)
             for pw in gen:
                 if params["format"] == "ndjson":
-                    row: dict = {"pw": pw}
+                    row: dict[str, Any] = {"pw": pw}
                     if params["explain"]:
                         from wlf_modules.explainer import explain
                         exp = explain(pw, "api", 0.5)
@@ -170,19 +171,19 @@ def _make_fastapi_app(api_key: str = ""):
             }).encode() + b"\n"
 
         if params["stream"]:
-            return StreamingResponse(_stream(), media_type="application/x-ndjson")
+            return StreamingResponse(_stream(), media_type="application/x-ndjson")  # type: ignore[no-any-return]
         else:
             # collect all into a list
             results = list(_dispatch_generation(params))[:params["limit"]]
-            return JSONResponse({
+            return JSONResponse({  # type: ignore[no-any-return]
                 "request_id": req_id,
                 "count": len(results),
                 "passwords": results,
                 "disclaimer": _DISCLAIMER,
             })
 
-    @app.get("/v1/sessions")
-    def list_sessions(_: None = Depends(_check_key)):
+    @app.get("/v1/sessions")  # type: ignore[untyped-decorator]
+    def list_sessions(_: None = Depends(_check_key)) -> Any:
         try:
             from wlf_modules.session_manager import SessionManager
             mgr = SessionManager()
@@ -191,8 +192,8 @@ def _make_fastapi_app(api_key: str = ""):
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
 
-    @app.post("/v1/sessions/{session_id}/resume")
-    async def resume_session(session_id: str, _: None = Depends(_check_key)):
+    @app.post("/v1/sessions/{session_id}/resume")  # type: ignore[untyped-decorator]
+    async def resume_session(session_id: str, _: None = Depends(_check_key)) -> Any:
         try:
             from wlf_modules.session_manager import SessionManager
             mgr = SessionManager()
@@ -201,10 +202,10 @@ def _make_fastapi_app(api_key: str = ""):
         except Exception as exc:
             raise HTTPException(status_code=404, detail=str(exc))
 
-    return app
+    return app  # type: ignore[no-any-return]
 
 
-def _dispatch_generation(params: dict):
+def _dispatch_generation(params: dict[str, Any]) -> Generator[str, None, None]:
     """Yield passwords by dispatching to the requested engines."""
     ctx = {
         "limit": params["limit"],
@@ -237,87 +238,87 @@ def _dispatch_generation(params: dict):
             logger.warning("Engine %s failed: %s", engine_name, exc)
 
 
-def _engine_factory(name: str, profile: dict, ctx: dict, limit: int, min_len: int, max_len: int):
+def _engine_factory(name: str, profile: dict[str, Any], ctx: dict[str, Any], limit: int, min_len: int, max_len: int) -> Generator[str, None, None]:
     """Create and run an engine generator."""
     if name == "markov":
         from wlf_modules.markov_engine import MarkovModel
         mm = MarkovModel(order=3)
         seeds = _profile_to_seeds(profile)
         if seeds:
-            mm.train(seeds)
-        yield from ((w, 0.5) for w in mm.generate(max_candidates=limit))
+            mm.train(seeds)  # type: ignore[arg-type]
+        yield from ((w, 0.5) for w in mm.generate(max_candidates=limit))  # type: ignore[misc]
 
     elif name in ("gan", "neural"):
         from wlf_modules.gan_engine import GANPasswordEngine
         eng = GANPasswordEngine()
-        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)
+        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)  # type: ignore[misc]
 
     elif name == "vae":
         from wlf_modules.vae_engine import VAEPasswordEngine
-        eng = VAEPasswordEngine()
-        yield from eng.generate(max_candidates=limit)
+        eng = VAEPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "transformer":
         from wlf_modules.transformer_engine import TransformerPasswordEngine
-        eng = TransformerPasswordEngine()
-        yield from eng.generate(max_candidates=limit)
+        eng = TransformerPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "diffusion":
         from wlf_modules.diffusion_engine import DiffusionPasswordEngine
-        eng = DiffusionPasswordEngine()
-        yield from eng.generate(max_candidates=limit)
+        eng = DiffusionPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "masked_lm":
         from wlf_modules.masked_lm_engine import MaskedLMEngine
-        eng = MaskedLMEngine()
-        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)
+        eng = MaskedLMEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)  # type: ignore[misc]
 
     elif name == "br_deep":
         from wlf_modules.br_deep_engine import BRDeepEngine
-        eng = BRDeepEngine(profile=profile)
-        yield from eng.generate(max_candidates=limit)
+        eng = BRDeepEngine(profile=profile)  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "bayesian":
         from wlf_modules.bayesian_full import BayesianFullEngine
-        eng = BayesianFullEngine(profile=profile)
-        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)
+        eng = BayesianFullEngine(profile=profile)  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)  # type: ignore[misc]
 
     elif name == "map_elites":
         from wlf_modules.map_elites import MAPElites
-        eng = MAPElites()
-        yield from eng.generate(max_candidates=limit)
+        eng = MAPElites()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "genetic":
         from wlf_modules.genetic_engine import GeneticPasswordEngine
-        eng = GeneticPasswordEngine()
-        yield from eng.generate(max_candidates=limit)
+        eng = GeneticPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit)  # type: ignore[misc]
 
     elif name == "tcn":
         from wlf_modules.tcn_engine import TCNPasswordEngine
-        eng = TCNPasswordEngine()
-        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)
+        eng = TCNPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)  # type: ignore[misc]
 
     elif name == "flow":
         from wlf_modules.flow_engine import FlowPasswordEngine
-        eng = FlowPasswordEngine()
-        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)
+        eng = FlowPasswordEngine()  # type: ignore[assignment]
+        yield from eng.generate(max_candidates=limit, min_len=min_len, max_len=max_len)  # type: ignore[misc]
 
     elif name == "temporal_drift":
         from wlf_modules.temporal_drift import TemporalDriftEngine
-        eng = TemporalDriftEngine()
-        yield from eng.generate(profile=profile, max_candidates=limit)
+        eng = TemporalDriftEngine()  # type: ignore[assignment]
+        yield from eng.generate(profile=profile, max_candidates=limit)  # type: ignore[call-arg, misc]
 
     elif name == "domain_pcfg":
         from wlf_modules.domain_pcfg import DomainPCFG
         sector = profile.get("sector", "generic")
-        eng = DomainPCFG(sector=sector)
-        yield from eng.generate(profile=profile, max_candidates=limit)
+        eng = DomainPCFG(sector=sector)  # type: ignore[assignment]
+        yield from eng.generate(profile=profile, max_candidates=limit)  # type: ignore[call-arg, misc]
 
     else:
         logger.warning("Unknown engine: %s", name)
 
 
-def _profile_to_seeds(profile: dict) -> list[str]:
+def _profile_to_seeds(profile: dict[str, Any]) -> list[str]:
     seeds = []
     name = profile.get("full_name", "") or profile.get("short_name", "")
     if name:
@@ -328,7 +329,7 @@ def _profile_to_seeds(profile: dict) -> list[str]:
 
 # ── aiohttp fallback ──────────────────────────────────────────────────────────
 
-def _make_aiohttp_app(api_key: str = ""):
+def _make_aiohttp_app(api_key: str = "") -> Any:
     try:
         from aiohttp import web
     except ImportError as exc:
@@ -337,20 +338,20 @@ def _make_aiohttp_app(api_key: str = ""):
             "pip install wordlistxpl-forge[api]"
         ) from exc
 
-    async def _check(request):
+    async def _check(request: Any) -> None:
         if api_key:
             key = request.headers.get("X-WLF-Key") or request.rel_url.query.get("key", "")
             if key != api_key:
                 raise web.HTTPUnauthorized(text="Invalid API key")
 
-    async def status(request):
+    async def status(request: Any) -> Any:
         return web.json_response({"status": "ok", "version": "2.0.0", "disclaimer": _DISCLAIMER})
 
-    async def engines(request):
+    async def engines(request: Any) -> Any:
         await _check(request)
         return web.json_response({"engines": ["markov","pcfg","semantic","mask","br_deep","bayesian","genetic","map_elites"]})
 
-    async def generate(request):
+    async def generate(request: Any) -> Any:
         await _check(request)
         body = await request.json()
         params = _parse_generate_body(body)

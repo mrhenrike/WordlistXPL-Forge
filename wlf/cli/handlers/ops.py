@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 
+from pathlib import Path
+
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
 )

@@ -32,7 +32,7 @@ import re
 import time
 from itertools import product
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ def _clean(text: str) -> str:
 
 # ── Name parsing ───────────────────────────────────────────────────────────────
 
-def parse_full_name(full_name: str) -> dict:
+def parse_full_name(full_name: str) -> dict[str, Any]:
     """
     Parse a full name string into structured components.
 
@@ -117,7 +117,7 @@ def parse_full_name(full_name: str) -> dict:
         preceding = raw_parts[last_idx_in_raw - 1]
         if preceding.lower() in particles:
             # Collect consecutive particles before last
-            parts_before = []
+            parts_before: list[str] = []
             j = last_idx_in_raw - 1
             while j >= 0 and raw_parts[j].lower() in particles:
                 parts_before.insert(0, raw_parts[j])
@@ -154,7 +154,7 @@ def parse_full_name(full_name: str) -> dict:
 #
 # Ordering follows common corporate AD username frequency.
 # Username format patterns. Operator-supplied names drive generation.
-CORPORATE_PATTERNS: list[dict] = [
+CORPORATE_PATTERNS: list[dict[str, Any]] = [
     # ── Tier 1: Highest frequency (fn.ln in energy/utilities and similar) ──
     {"id": "fn_sep_ln",        "desc": "firstname.lastname",                  "fmt": "{fn}{sep}{ln}"},
     # ── Tier 2: No-separator variants (filn common in energy/utilities) ───
@@ -220,7 +220,7 @@ CORPORATE_PATTERNS: list[dict] = [
 # Generic sector templates. Real target names are never stored.
 # At runtime, usernames/passwords are derived from the domain and company
 # strings the operator supplies, not from a hardcoded org list.
-KNOWN_BR_DOMAIN_PATTERNS: dict[str, dict] = {
+KNOWN_BR_DOMAIN_PATTERNS: dict[str, dict[str, Any]] = {
     "acme.example": {"primary": "fn.ln", "secondary": "filn", "notes": "energy sector; contractors often use externo.acme.example"},
     "externo.acme.example": {"primary": "fn.ln", "secondary": "filn", "notes": "third-party/contractors"},
     "acme.local": {"primary": "fn.ln", "secondary": None, "notes": "AD local domain"},
@@ -493,7 +493,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext in (".xlsx", ".xls"):
         try:
-            import openpyxl
+            import openpyxl  # type: ignore[import-untyped]
             wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
             for ws in wb.worksheets:
                 for row in ws.iter_rows(values_only=True):
@@ -505,7 +505,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext == ".pdf":
         try:
-            import pdfplumber
+            import pdfplumber  # type: ignore[import-not-found]
             with pdfplumber.open(filepath) as pdf:
                 for page in pdf.pages:
                     text = page.extract_text() or ""
@@ -515,7 +515,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext in (".docx",):
         try:
-            import docx
+            import docx  # type: ignore[import-not-found]
             doc = docx.Document(filepath)
             for para in doc.paragraphs:
                 if para.text.strip():
@@ -604,8 +604,8 @@ def search_names_google_dorks(
         List of candidate name strings found.
     """
     try:
-        import requests
-        from bs4 import BeautifulSoup
+        import requests  # type: ignore[import-untyped]
+        from bs4 import BeautifulSoup  # type: ignore[import-not-found]
     except ImportError:
         logger.error("requests and beautifulsoup4 required. Install: pip install requests beautifulsoup4")
         return []
@@ -1143,7 +1143,7 @@ def generate_combo_list(
 
 # ── Interactive wizard ─────────────────────────────────────────────────────────
 
-def interactive_domain_users_wizard() -> dict:
+def interactive_domain_users_wizard() -> dict[str, Any]:
     """
     Interactive wizard to collect parameters for domain username generation.
 
@@ -1258,7 +1258,7 @@ def interactive_domain_users_wizard() -> dict:
     }
 
 
-def run_domain_users(params: dict) -> Generator[str, None, None]:
+def run_domain_users(params: dict[str, Any]) -> Generator[str, None, None]:
     """
     Execute domain user generation based on wizard parameters.
 

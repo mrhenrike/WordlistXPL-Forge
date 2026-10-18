@@ -20,14 +20,15 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
 
-_ISP_PATTERNS: Optional[dict] = None
+_ISP_PATTERNS: Optional[dict[str, Any]] = None
 _WORD_BANKS: dict[int, list[str]] = {}
 
 
@@ -66,7 +67,7 @@ def _resolve_data(filename: str) -> Path:
     return _REPO_ROOT / "data" / filename
 
 
-def _load_isp_patterns() -> dict:
+def _load_isp_patterns() -> dict[str, Any]:
     """Load ISP patterns from behavior_patterns.json."""
     global _ISP_PATTERNS
     if _ISP_PATTERNS is not None:
@@ -116,7 +117,7 @@ def list_isps() -> list[str]:
     return sorted(_load_isp_patterns().keys())
 
 
-def get_isp_info(isp: str) -> Optional[dict]:
+def get_isp_info(isp: str) -> Optional[dict[str, Any]]:
     """Return pattern info for a specific ISP."""
     patterns = _load_isp_patterns()
     return patterns.get(isp)
@@ -231,7 +232,7 @@ def generate_isp_keyspace(
     elif direction == "reverse":
         gen = _reverse()
     else:
-        gen = itertools.chain(_forward(), _reverse())
+        gen = itertools.chain(_forward(), _reverse())  # type: ignore[assignment]
 
     for candidate in gen:
         yield candidate
@@ -240,7 +241,7 @@ def generate_isp_keyspace(
             return
 
 
-def handle_isp_keygen(args: object, _ctx: dict) -> None:
+def handle_isp_keygen(args: object, _ctx: dict[str, Any]) -> None:
     """CLI handler for the isp-keygen subcommand."""
     if getattr(args, "list_isps", False):
         isps = list_isps()

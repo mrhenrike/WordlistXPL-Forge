@@ -21,7 +21,7 @@ from __future__ import annotations
 import itertools
 import logging
 import re
-from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Union, Any
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class IwlgenEngine:
     def generate(
         self,
         keywords: List[str],
-        config: Optional[Dict] = None,
+        config: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Generate a deduplicated wordlist from keywords and config.
 

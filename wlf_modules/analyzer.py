@@ -25,7 +25,8 @@ import logging
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ def _classify_composition(entry: str) -> str:
 def analyze_wordlist(
     filepath: str,
     top_n: int = 20,
-) -> dict:
+) -> dict[str, Any]:
     """
     Analisa uma wordlist e retorna métricas estatísticas.
 
@@ -127,7 +128,7 @@ def analyze_wordlist(
 
     # Distribuição de comprimentos
     lengths = [len(e) for e in entries]
-    length_dist: Counter = Counter(lengths)
+    length_dist: Counter[str] = Counter[str](lengths)  # type: ignore[arg-type]
     min_len = min(lengths) if lengths else 0
     max_len = max(lengths) if lengths else 0
     avg_len = sum(lengths) / len(lengths) if lengths else 0
@@ -160,7 +161,7 @@ def analyze_wordlist(
     len_gt8 = sum(1 for l in lengths if l > 8)
 
     # Last digit histogram (pipal parity)
-    last_digit_hist: Counter = Counter()
+    last_digit_hist: Counter[str] = Counter[str]()
     trailing_1 = 0
     trailing_2 = 0
     trailing_3 = 0
@@ -174,12 +175,12 @@ def analyze_wordlist(
                     trailing_3 += 1
 
     # Char set ordering (pipal parity: stringdigit, digitstring, etc.)
-    ordering: Counter = Counter()
+    ordering: Counter[str] = Counter[str]()
     for e in entries:
         ordering[_classify_ordering(e)] += 1
 
     # Char set composition (15 pipal categories)
-    composition: Counter = Counter()
+    composition: Counter[str] = Counter[str]()
     for e in entries:
         composition[_classify_composition(e)] += 1
 
@@ -236,7 +237,7 @@ def analyze_wordlist(
     }
 
 
-def format_report(metrics: dict, filepath: str) -> str:
+def format_report(metrics: dict[str, Any], filepath: str) -> str:
     """
     Formata métricas de análise em relatório texto.
 
@@ -305,7 +306,7 @@ def _char_to_mask_token(ch: str) -> str:
 def analyze_masks(
     filepath: str,
     top_n: int = 20,
-) -> dict:
+) -> dict[str, Any]:
     """
     Analisa máscaras de senha estilo Hashcat a partir de uma wordlist.
 
@@ -323,7 +324,7 @@ def analyze_masks(
     if not path.exists():
         raise FileNotFoundError(f"Wordlist não encontrada: {filepath}")
 
-    mask_counter: Counter = Counter()
+    mask_counter: Counter[str] = Counter[str]()
     with path.open(encoding="utf-8", errors="replace") as f:
         for line in f:
             entry = line.rstrip("\n\r")
@@ -390,7 +391,7 @@ def extract_base_words_ranked(
     if not path.exists():
         raise FileNotFoundError(f"Wordlist not found: {filepath}")
 
-    counter: Counter = Counter()
+    counter: Counter[str] = Counter[str]()
     with path.open(encoding="utf-8", errors="replace") as f:
         for line in f:
             entry = line.rstrip("\n\r")
@@ -416,7 +417,7 @@ def analyze_char_position_frequency(
     if not path.exists():
         raise FileNotFoundError(f"Wordlist not found: {filepath}")
 
-    pos_freq: dict[int, Counter] = {i: Counter() for i in range(max_positions)}
+    pos_freq: dict[int, Counter[str]] = {i: Counter[str]() for i in range(max_positions)}
 
     with path.open(encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -427,7 +428,7 @@ def analyze_char_position_frequency(
     return {pos: dict(cnt.most_common(20)) for pos, cnt in pos_freq.items() if cnt}
 
 
-def export_stats_json(metrics: dict, filepath: str, mask_data: Optional[dict] = None) -> str:
+def export_stats_json(metrics: dict[str, Any], filepath: str, mask_data: Optional[dict[str, Any]] = None) -> str:
     """
     Exporta métricas de análise em formato JSON.
 
@@ -439,7 +440,7 @@ def export_stats_json(metrics: dict, filepath: str, mask_data: Optional[dict] = 
     Returns:
         String JSON formatada.
     """
-    export: dict = {
+    export: dict[str, Any] = {
         "source": filepath,
         "summary": {
             "total": metrics["total"],
@@ -474,7 +475,7 @@ def export_stats_json(metrics: dict, filepath: str, mask_data: Optional[dict] = 
     return json.dumps(export, ensure_ascii=False, indent=2)
 
 
-def export_stats_csv(metrics: dict, mask_data: Optional[dict] = None) -> str:
+def export_stats_csv(metrics: dict[str, Any], mask_data: Optional[dict[str, Any]] = None) -> str:
     """
     Exporta distribuição de comprimento e top senhas em formato CSV.
 
@@ -521,9 +522,9 @@ def export_stats_csv(metrics: dict, mask_data: Optional[dict] = None) -> str:
 
 
 def export_stats_markdown(
-    metrics: dict,
+    metrics: dict[str, Any],
     filepath: str,
-    mask_data: Optional[dict] = None,
+    mask_data: Optional[dict[str, Any]] = None,
 ) -> str:
     """
     Export analysis metrics as Markdown tables.
@@ -591,7 +592,7 @@ def export_stats_markdown(
     return "\n".join(lines)
 
 
-def format_mask_report(mask_data: dict) -> str:
+def format_mask_report(mask_data: dict[str, Any]) -> str:
     """
     Formata relatório de análise de máscaras Hashcat.
 
@@ -649,7 +650,7 @@ def _mask_complexity(mask: str) -> int:
 
 
 def maskgen_optindex(
-    mask_data: dict,
+    mask_data: dict[str, Any],
     pps: int = 0,
     target_time_hrs: float = 1.0,
     use_gpu: bool = False,
@@ -657,7 +658,7 @@ def maskgen_optindex(
     min_occurrence: int = 1,
     max_complexity: int = 0,
     hide_rare_pct: float = 0.0,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Rank masks by PACK optindex (coverage / crack cost) with time-budget.
 
     Implements the PACK maskgen optindex ranking: masks with high occurrence
@@ -704,7 +705,7 @@ def maskgen_optindex(
 
     budget_secs = target_time_hrs * 3600.0 if target_time_hrs > 0 else float("inf")
 
-    ranked: list[dict] = []
+    ranked: list[dict[str, Any]] = []
     for mask, count in freq.items():
         if count < min_occurrence:
             continue
@@ -743,7 +744,7 @@ def maskgen_optindex(
 
 
 def export_masks_csv_pack(
-    mask_optindex: list[dict],
+    mask_optindex: list[dict[str, Any]],
     filepath: Optional[str] = None,
 ) -> str:
     """Export maskgen_optindex result as PACK-compatible CSV.
@@ -788,7 +789,7 @@ def export_masks_csv_pack(
 
 
 def format_maskgen_report(
-    mask_optindex: list[dict],
+    mask_optindex: list[dict[str, Any]],
     top_n: int = 20,
     show_budget_only: bool = False,
 ) -> str:

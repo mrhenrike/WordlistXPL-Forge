@@ -29,6 +29,7 @@ from collections import Counter, deque
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
+from typing import Any
 
 
 STRATEGIES = (
@@ -67,8 +68,8 @@ class BatchRecord:
 @dataclass
 class CorpusBehavior:
     """Running statistics of the generated population."""
-    structure_counts: Counter = field(default_factory=Counter)
-    length_dist: Counter = field(default_factory=Counter)
+    structure_counts: Counter[str] = field(default_factory=Counter[str])
+    length_dist: Counter[str] = field(default_factory=Counter[str])
     charset_usage: dict[str, float] = field(default_factory=dict)
     total_seen: int = 0
     temporal_drift_score: float = 0.0
@@ -76,7 +77,7 @@ class CorpusBehavior:
     def update(self, candidates: list[str]) -> None:
         for pw in candidates:
             self.total_seen += 1
-            self.length_dist[len(pw)] += 1
+            self.length_dist[len(pw)] += 1  # type: ignore[index]
             template = _structure_template(pw)
             self.structure_counts[template] += 1
         self._update_charset(candidates)
@@ -125,7 +126,7 @@ def _structure_template(pw: str) -> str:
     return "".join(parts)
 
 
-def _extract_context_features(profile: dict, sector: Optional[str] = None) -> list[float]:
+def _extract_context_features(profile: dict[str, Any], sector: Optional[str] = None) -> list[float]:
     """Convert profile + sector into a numeric feature vector."""
     has_name      = 1.0 if profile.get("full_name") or profile.get("short_name") else 0.0
     has_pet       = 1.0 if profile.get("pets") else 0.0
@@ -255,7 +256,7 @@ class PBMPFull:
 
     def __init__(
         self,
-        profile: Optional[dict] = None,
+        profile: Optional[dict[str, Any]] = None,
         sector: Optional[str] = None,
         model_path: Optional[str] = None,
         history_window: int = 50,

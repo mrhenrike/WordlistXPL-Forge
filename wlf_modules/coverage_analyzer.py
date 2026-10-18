@@ -16,7 +16,7 @@ import re
 import zlib
 from collections import Counter
 from pathlib import Path
-from typing import Iterable, Iterator, Optional
+from typing import Iterable, Iterator, Optional, Any
 
 _REPO = Path(__file__).resolve().parents[1]
 
@@ -117,7 +117,7 @@ def analyze_cover(
     corpus: Path,
     sample_size: int = 1000,
     seed: int = 42,
-) -> dict:
+) -> dict[str, Any]:
     """Sample corpus and summarize structural families + engine hints."""
     sample = reservoir_sample(corpus, sample_size, seed=seed)
     structs = Counter(structure_mask(s) for s in sample)
@@ -154,7 +154,7 @@ def analyze_cover(
 def replay_hit_rate(
     candidates: Iterable[str],
     bloom: _Bloom,
-) -> dict:
+) -> dict[str, Any]:
     """Measure how many generated candidates appear in bloom(sample of corpus)."""
     total = 0
     hits = 0
@@ -213,7 +213,7 @@ def generate_pattern_candidates(
     return out
 
 
-def handle_cover(args, _ctx: dict) -> None:
+def handle_cover(args: Any, _ctx: dict[str, Any]) -> None:
     kind = getattr(args, "kind", "passwords") or "passwords"
     corpus = Path(getattr(args, "corpus", "") or _default_corpus(kind))
     sample_size = int(getattr(args, "sample", 1000) or 1000)
@@ -246,7 +246,7 @@ def handle_cover(args, _ctx: dict) -> None:
         print(f"[+] Wrote {out}")
 
 
-def handle_replay(args, _ctx: dict) -> None:
+def handle_replay(args: Any, _ctx: dict[str, Any]) -> None:
     kind = getattr(args, "kind", "passwords") or "passwords"
     corpus = Path(getattr(args, "corpus", "") or _default_corpus(kind))
     bloom_n = int(getattr(args, "bloom_sample", 200_000) or 200_000)

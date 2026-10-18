@@ -24,7 +24,7 @@ from __future__ import annotations
 import logging
 import math
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ _MASK_CLASSES = {
 }
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -61,24 +61,24 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len: int = 32):
+def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len: int = 32) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class CausalSelfAttention(nn.Module):
-        def __init__(self):
+    class CausalSelfAttention(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.attn = nn.MultiheadAttention(d_model, n_heads, batch_first=True)
             self.register_buffer("mask", torch.tril(torch.ones(max_len, max_len)).bool())
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             T = x.shape[1]
             mask = ~self.mask[:T, :T]
             out, _ = self.attn(x, x, x, attn_mask=mask)
             return out
 
-    class Block(nn.Module):
-        def __init__(self):
+    class Block(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.ln1 = nn.LayerNorm(d_model)
             self.attn = CausalSelfAttention()
@@ -89,13 +89,13 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
                 nn.Linear(d_model * 4, d_model),
             )
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             x = x + self.attn(self.ln1(x))
             x = x + self.ff(self.ln2(x))
             return x
 
-    class CharGPT(nn.Module):
-        def __init__(self):
+    class CharGPT(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, d_model)
             self.pos = nn.Embedding(max_len, d_model)
@@ -103,7 +103,7 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
             self.ln_f = nn.LayerNorm(d_model)
             self.head = nn.Linear(d_model, _VOCAB_SIZE, bias=False)
 
-        def forward(self, x):
+        def forward(self, x: Any) -> Any:
             T = x.shape[1]
             pos = torch.arange(T, device=x.device).unsqueeze(0)
             h = self.emb(x) + self.pos(pos)
@@ -114,7 +114,7 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
     return CharGPT()
 
 
-def _parse_mask_pattern(pattern: str) -> list[Optional[set]]:
+def _parse_mask_pattern(pattern: str) -> list[Optional[set[int]]]:
     """Convert hashcat-style mask to per-position allowed index sets. None = any."""
     allowed = []
     i = 0
@@ -128,10 +128,10 @@ def _parse_mask_pattern(pattern: str) -> list[Optional[set]]:
             idx = _CHAR_TO_IDX.get(c)
             allowed.append({idx} if idx else set(_CHAR_TO_IDX.values()))
             i += 1
-    return allowed
+    return allowed  # type: ignore[return-value]
 
 
-def _sample(logits, temperature: float, allowed_indices: Optional[set] = None):
+def _sample(logits: Any, temperature: float, allowed_indices: Optional[set[int]] = None) -> Any:
     torch = _require_torch()
     import torch.nn.functional as F
     if allowed_indices:
@@ -145,7 +145,7 @@ def _sample(logits, temperature: float, allowed_indices: Optional[set] = None):
     return int(torch.multinomial(probs, 1).item())
 
 
-def _fallback_generate(max_candidates: int, prefix: str, min_len: int, max_len: int):
+def _fallback_generate(max_candidates: int, prefix: str, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
     import random, string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
@@ -182,12 +182,12 @@ class TransformerPasswordEngine:
         self._hf_tokenizer = None
         self._loaded = False
 
-    def _get_device(self):
+    def _get_device(self) -> Generator[Any, None, None]:
         try:
             torch = _require_torch()
-            return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            return torch.device("cuda" if torch.cuda.is_available() else "cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None
+            return None  # type: ignore[return-value]
 
     def load(self, path: Optional[str] = None) -> bool:
         path = path or self.model_path
@@ -201,7 +201,7 @@ class TransformerPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             logger.info("Transformer model loaded from %s", path)
             return True
@@ -253,12 +253,10 @@ class TransformerPasswordEngine:
             max_candidates, min_len, max_len, temperature, prefix, pattern, batch_size
         )
 
-    def _generate_custom(
-        self, max_candidates, min_len, max_len, temperature, prefix, pattern, batch_size
-    ) -> Generator[tuple[str, float], None, None]:
+    def _generate_custom(self, max_candidates: Any, min_len: Any, max_len: Any, temperature: Any, prefix: Any, pattern: Any, batch_size: Any) -> Generator[tuple[str, float], None, None]:
         torch = _require_torch()
         device = self._get_device() or torch.device("cpu")
-        model = self._model.to(device).eval()
+        model = self._model.to(device).eval()  # type: ignore[attr-defined]
         mask_allowed = _parse_mask_pattern(pattern) if pattern else None
         prefix_indices = [_CHAR_TO_IDX.get(c, 2) for c in (prefix or "")]
         count = 0
@@ -305,18 +303,16 @@ class TransformerPasswordEngine:
                     if max_candidates and count >= max_candidates:
                         return
 
-    def _generate_hf(
-        self, max_candidates, min_len, max_len, temperature, prefix
-    ) -> Generator[tuple[str, float], None, None]:
+    def _generate_hf(self, max_candidates: Any, min_len: Any, max_len: Any, temperature: Any, prefix: Any) -> Generator[tuple[str, float], None, None]:
         try:
             import torch
             tok = self._hf_tokenizer
             mod = self._hf_model
             prompt = prefix or ""
-            inputs = tok(prompt, return_tensors="pt")
+            inputs = tok(prompt, return_tensors="pt")  # type: ignore[misc]
             count = 0
             while not max_candidates or count < max_candidates:
-                out = mod.generate(
+                out = mod.generate(  # type: ignore[attr-defined]
                     **inputs,
                     max_new_tokens=max_len,
                     temperature=temperature,
@@ -324,7 +320,7 @@ class TransformerPasswordEngine:
                     num_return_sequences=min(32, max_candidates - count),
                 )
                 for seq in out:
-                    pw = tok.decode(seq, skip_special_tokens=True).strip()
+                    pw = tok.decode(seq, skip_special_tokens=True).strip()  # type: ignore[attr-defined]
                     if pw and min_len <= len(pw) <= max_len:
                         yield (pw, 0.7)
                         count += 1

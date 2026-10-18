@@ -24,7 +24,7 @@ import itertools
 import re
 import string
 from dataclasses import dataclass, field
-from typing import Generator, Iterator, Optional
+from typing import Generator, Iterator, Optional, Any
 
 
 # ── Year / date patterns ──────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ class TemporalDriftEngine:
     def generate(
         self,
         seed_words: Optional[list[str]] = None,
-        profile: Optional[dict] = None,
+        profile: Optional[dict[str, Any]] = None,
         max_candidates: int = 200_000,
     ) -> Generator[tuple[str, float], None, None]:
         """Generate temporally-drifted candidates from seed words."""

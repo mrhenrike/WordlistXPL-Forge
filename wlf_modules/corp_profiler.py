@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 from wlf_modules.profiler import (
     ACCENT_MAP,
@@ -102,7 +102,7 @@ def _slogan_tokens(text: str, do_leet: bool) -> list[str]:
 
 # ── Interactive wizard ────────────────────────────────────────────────────────
 
-def interactive_corp_profile() -> dict:
+def interactive_corp_profile() -> dict[str, Any]:
     """
     Full interactive corporate profiling wizard.
 
@@ -114,7 +114,7 @@ def interactive_corp_profile() -> dict:
     print("=" * 58)
     print("  Press Enter to skip any field.\n")
 
-    profile: dict = {}
+    profile: dict[str, Any] = {}
 
     # ── Identity ──────────────────────────────────────────────
     print("[ COMPANY IDENTITY ]")
@@ -181,7 +181,7 @@ def interactive_corp_profile() -> dict:
 # ── Generation ────────────────────────────────────────────────────────────────
 
 def generate_from_corp_profile(
-    profile: dict,
+    profile: dict[str, Any],
     leet_mode: Optional[str] = None,
     min_len: int = 6,
     max_len: int = 32,

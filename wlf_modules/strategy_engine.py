@@ -47,7 +47,7 @@ def _softmax(scores: dict[str, float]) -> dict[str, float]:
     return {k: v / z for k, v in ex.items()}
 
 
-def plan_from_profile(profile: dict, has_model_markov: bool = False,
+def plan_from_profile(profile: dict[str, Any], has_model_markov: bool = False,
                       has_model_pcfg: bool = False,
                       has_neural: bool = False) -> StrategyPlan:
     """Derive engine mix from a personal/corporate profile dict."""
@@ -100,7 +100,7 @@ def plan_from_profile(profile: dict, has_model_markov: bool = False,
     return StrategyPlan(weights=weights, engines=engines, rationale=notes)
 
 
-def _engine_spec(name: str, weight: float, profile: dict) -> dict[str, Any]:
+def _engine_spec(name: str, weight: float, profile: dict[str, Any]) -> dict[str, Any]:
     depth = int(profile.get("depth") or 3)
     limit = max(1_000, int(50_000 * weight * (depth / 3)))
     base = {"strategy": name, "weight": round(weight, 4), "limit": limit}
@@ -125,7 +125,7 @@ def _engine_spec(name: str, weight: float, profile: dict) -> dict[str, Any]:
     return base
 
 
-def bayesian_structure_priors(profile: dict) -> dict[str, float]:
+def bayesian_structure_priors(profile: dict[str, Any]) -> dict[str, float]:
     """TarGuess-lite: P(H|E) over structure hypotheses given profile evidence."""
     hyps = {
         "NAME_YEAR": 0.2,

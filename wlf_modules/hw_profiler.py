@@ -49,20 +49,20 @@ class HWProfile:
     cpu_threads:  int  = 1    # logical threads (hyperthreading)
     ram_total_mb: int  = 0
     ram_avail_mb: int  = 0
-    gpus:         list = field(default_factory=list)
+    gpus: list[str] = field(default_factory=list)
     best_backend: str  = "cpu"     # cuda | rocm | opencl | metal | cpu
     compute_mode: str  = "auto"    # auto | cpu | gpu | hybrid
 
     def has_gpu(self) -> bool:
         """Return True if at least one non-CPU GPU is detected."""
-        return any(g.backend != "cpu" for g in self.gpus)
+        return any(g.backend != "cpu" for g in self.gpus)  # type: ignore[attr-defined]
 
     def gpu_count(self) -> int:
-        return len([g for g in self.gpus if g.backend != "cpu"])
+        return len([g for g in self.gpus if g.backend != "cpu"])  # type: ignore[attr-defined]
 
     def primary_gpu(self) -> Optional[GPUDevice]:
-        gpus = [g for g in self.gpus if g.backend != "cpu"]
-        return gpus[0] if gpus else None
+        gpus = [g for g in self.gpus if g.backend != "cpu"]  # type: ignore[attr-defined]
+        return gpus[0] if gpus else None  # type: ignore[return-value]
 
     def recommended_threads(self) -> int:
         """
@@ -73,7 +73,7 @@ class HWProfile:
         return max(1, min(self.cpu_threads, 16))
 
     def one_liner(self) -> str:
-        gpu_info = f" | GPU: {self.primary_gpu().one_liner()}" if self.has_gpu() else " | No GPU"
+        gpu_info = f" | GPU: {self.primary_gpu().one_liner()}" if self.has_gpu() else " | No GPU"  # type: ignore[union-attr]
         return (
             f"CPU: {self.cpu_model} ({self.cpu_cores}c/{self.cpu_threads}t) "
             f"| RAM: {self.ram_total_mb}MB{gpu_info} "
@@ -136,12 +136,12 @@ class HWProfiler:
             if sys_plat == "Windows":
                 import winreg
                 try:
-                    key = winreg.OpenKey(
-                        winreg.HKEY_LOCAL_MACHINE,
+                    key = winreg.OpenKey(  # type: ignore[attr-defined]
+                        winreg.HKEY_LOCAL_MACHINE,  # type: ignore[attr-defined]
                         r"HARDWARE\DESCRIPTION\System\CentralProcessor\0",
                     )
-                    profile.cpu_model = winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
-                    winreg.CloseKey(key)
+                    profile.cpu_model = winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()  # type: ignore[attr-defined]
+                    winreg.CloseKey(key)  # type: ignore[attr-defined]
                 except Exception:
                     profile.cpu_model = platform.processor() or "Unknown"
             elif sys_plat == "Linux":
@@ -194,7 +194,7 @@ class HWProfiler:
                         ]
                     ms = MEMSTATUS()
                     ms.dwLength = ctypes.sizeof(ms)
-                    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(ms))
+                    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(ms))  # type: ignore[attr-defined]
                     profile.ram_total_mb = ms.ullTotalPhys // (1024 * 1024)
                     profile.ram_avail_mb = ms.ullAvailPhys // (1024 * 1024)
             except Exception as exc:
@@ -215,7 +215,7 @@ class HWProfiler:
             for line in out.strip().splitlines():
                 parts = [p.strip() for p in line.split(",")]
                 if len(parts) >= 4:
-                    profile.gpus.append(GPUDevice(
+                    profile.gpus.append(GPUDevice(  # type: ignore[arg-type]
                         index       = int(parts[0]) if parts[0].isdigit() else 0,
                         name        = parts[1],
                         vram_mb     = int(parts[2]) if parts[2].isdigit() else 0,
@@ -238,7 +238,7 @@ class HWProfiler:
                 for i, line in enumerate(out.strip().splitlines()[1:]):
                     parts = line.split(",")
                     if len(parts) >= 2:
-                        profile.gpus.append(GPUDevice(
+                        profile.gpus.append(GPUDevice(  # type: ignore[arg-type]
                             index=i, name=parts[-1].strip(),
                             vram_mb=0, driver="rocm",
                             compute_cap="", vendor="amd", backend="rocm",
@@ -253,7 +253,7 @@ class HWProfiler:
                 if torch.cuda.is_available():
                     for i in range(torch.cuda.device_count()):
                         props = torch.cuda.get_device_properties(i)
-                        profile.gpus.append(GPUDevice(
+                        profile.gpus.append(GPUDevice(  # type: ignore[arg-type]
                             index=i, name=props.name,
                             vram_mb=props.total_memory // (1024 * 1024),
                             driver="", vendor="nvidia",
@@ -261,7 +261,7 @@ class HWProfiler:
                             backend="cuda",
                         ))
                 elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-                    profile.gpus.append(GPUDevice(
+                    profile.gpus.append(GPUDevice(  # type: ignore[arg-type]
                         index=0, name="Apple Metal (MPS)",
                         vram_mb=0, driver="metal",
                         compute_cap="", vendor="apple", backend="metal",
@@ -272,11 +272,11 @@ class HWProfiler:
         # ── OpenCL fallback ──────────────────────────────────────────────────
         if not profile.gpus:
             try:
-                import pyopencl as cl
+                import pyopencl as cl  # type: ignore[import-not-found]
                 for i, plat in enumerate(cl.get_platforms()):
                     for dev in plat.get_devices(device_type=cl.device_type.GPU):
                         vram = getattr(dev, "global_mem_size", 0) // (1024 * 1024)
-                        profile.gpus.append(GPUDevice(
+                        profile.gpus.append(GPUDevice(  # type: ignore[arg-type]
                             index=i, name=dev.name.strip(),
                             vram_mb=vram, driver=plat.name.strip(),
                             compute_cap="", vendor="opencl", backend="opencl",
@@ -292,8 +292,8 @@ class HWProfiler:
             return
 
         priority = {"cuda": 0, "rocm": 1, "metal": 2, "opencl": 3, "cpu": 99}
-        best = min(profile.gpus, key=lambda g: priority.get(g.backend, 99))
-        profile.best_backend = best.backend
+        best = min(profile.gpus, key=lambda g: priority.get(g.backend, 99))  # type: ignore[attr-defined]
+        profile.best_backend = best.backend  # type: ignore[attr-defined]
 
 
 # ── Singleton helper ──────────────────────────────────────────────────────────

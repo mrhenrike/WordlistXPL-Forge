@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 
+from pathlib import Path
+
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
 )
+from typing import Any, Generator
+
 from wlf.cli.utils import (
     _info, _ok, _warn, _err, _write_output,
     _effective_len_bounds, _format_bytes, _check_disk_space,
@@ -61,7 +65,7 @@ def cmd_strategy(args: argparse.Namespace) -> None:
                 vars_ = eng.get("vars") or {}
                 tmpls = eng.get("templates") or ["{company}#{pet}{yy}"]
 
-                def _g():
+                def _g() -> Generator[str, None, None]:
                     for t in tmpls:
                         mapping = {
                             k: expand_variable(k, str(v))
@@ -136,7 +140,7 @@ def cmd_sysinfo(args: argparse.Namespace) -> None:
 
     if hw.has_gpu():
         for gpu in hw.gpus:
-            print(f"  GPU   : {gpu.one_liner()}")
+            print(f"  GPU   : {gpu.one_liner()}")  # type: ignore[attr-defined]
     else:
         print("  GPU   : None detected (CPU-only mode)")
 
@@ -287,7 +291,7 @@ def cmd_train(args: argparse.Namespace) -> None:
 
 
 
-def cmd_pipeline(args) -> None:
+def cmd_pipeline(args: argparse.Namespace) -> None:
     """Run a YAML pipeline spec file."""
     pipeline_file = getattr(args, "pipeline_file", None)
     if not pipeline_file:
@@ -303,7 +307,7 @@ def cmd_pipeline(args) -> None:
 
 
 
-def cmd_session(args) -> None:
+def cmd_session(args: argparse.Namespace) -> None:
     """Manage sessions: list / show / resume."""
     from wlf_modules.session_manager import SessionManager
     import time as _time
@@ -361,7 +365,7 @@ def cmd_session(args) -> None:
 
 
 
-def cmd_serve(args) -> None:
+def cmd_serve(args: argparse.Namespace) -> None:
     """Start the REST API server."""
     host = getattr(args, "host", None) or "127.0.0.1"
     port = int(getattr(args, "port", None) or 8771)
@@ -376,7 +380,7 @@ def cmd_serve(args) -> None:
 
 
 
-def cmd_plugin(args) -> None:
+def cmd_plugin(args: argparse.Namespace) -> None:
     """Plugin management: list, run, discover."""
     from wlf_modules.plugin_manager import auto_discover, describe_all, run_plugin, list_plugins
     sub = getattr(args, "plugin_sub", None) or "list"
@@ -390,7 +394,7 @@ def cmd_plugin(args) -> None:
             _warn("Usage: wlf plugin run <name>")
             return
         auto_discover()
-        profile = {}
+        profile: dict[str, Any] = {}
         limit = _GLOBAL_CTX.get("limit") or 10_000
         gen = (pw for pw, _ in run_plugin(name, profile, {**_GLOBAL_CTX, "limit": limit}))
         _write_output(gen, getattr(args, "output", None), stream=True)

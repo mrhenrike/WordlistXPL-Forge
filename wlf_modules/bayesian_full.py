@@ -26,6 +26,7 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Generator, Optional
+from typing import Any
 
 
 # ── Grammar types ─────────────────────────────────────────────────────────────
@@ -62,11 +63,11 @@ def _structure_key(pw: str) -> str:
 @dataclass
 class DirichletCounts:
     """Maintains pseudocounts for Dirichlet posterior P(x | counts)."""
-    counts: Counter = field(default_factory=Counter)
+    counts: Counter[str] = field(default_factory=Counter[str])
     alpha: float = 0.5   # Dirichlet concentration (smoothing)
 
     def update(self, item: str, weight: float = 1.0) -> None:
-        self.counts[item] += weight
+        self.counts[item] += weight  # type: ignore[assignment]
 
     def prob(self, item: str) -> float:
         total = sum(self.counts.values()) + self.alpha * max(len(self.counts), 1)
@@ -204,7 +205,7 @@ class BayesianFullEngine:
 
     def __init__(
         self,
-        profile: Optional[dict] = None,
+        profile: Optional[dict[str, Any]] = None,
         alpha: float = 0.5,
         seed: Optional[int] = None,
     ) -> None:
@@ -281,7 +282,7 @@ class BayesianFullEngine:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _context_from_profile(profile: dict) -> DemographicContext:
+def _context_from_profile(profile: dict[str, Any]) -> DemographicContext:
     ctx = DemographicContext()
     ctx.country = profile.get("country", "")
     ctx.sector  = profile.get("sector", "")
@@ -293,7 +294,7 @@ def _context_from_profile(profile: dict) -> DemographicContext:
     return ctx
 
 
-def _bootstrap_from_profile(grammar: BayesianGrammar, profile: dict, rng: random.Random) -> None:
+def _bootstrap_from_profile(grammar: BayesianGrammar, profile: dict[str, Any], rng: random.Random) -> None:
     """Seed grammar with profile-derived word/date/keyword patterns."""
     seed_pws = []
     name = profile.get("full_name", "") or profile.get("short_name", "")

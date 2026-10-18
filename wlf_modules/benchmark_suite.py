@@ -27,7 +27,7 @@ import re
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # ── MAYA pattern set (r1-r19) ─────────────────────────────────────────────────
 # 19 structural password patterns used in the MAYA benchmark (IEEE S&P 2026).
 # Each pattern captures a structural class of real passwords found in leaks.
-MAYA_PATTERNS: dict[str, re.Pattern] = {
+MAYA_PATTERNS: dict[str, re.Pattern[str]] = {
     "r1":  re.compile(r"^[a-z]+$"),
     "r2":  re.compile(r"^[A-Z]+$"),
     "r3":  re.compile(r"^[0-9]+$"),
@@ -84,7 +84,7 @@ def _shannon_entropy(text_sample: str) -> float:
     return entropy
 
 
-def _jaccard_index(set_a: set, set_b: set) -> float:
+def _jaccard_index(set_a: set[int], set_b: set[str]) -> float:
     """Compute Jaccard similarity index between two sets."""
     if not set_a and not set_b:
         return 1.0
@@ -106,14 +106,14 @@ class BenchmarkResult:
         self.efficiency: float = 0.0
         self.duplicate_rate: float = 0.0
         self.diversity_index: float = 0.0
-        self.length_coverage: dict[int, dict] = {}
+        self.length_coverage: dict[int, dict[str, Any]] = {}
         self.charset_coverage: dict[str, float] = {}
         self.crack_time_estimates: dict[str, str] = {}
         self.top_hits: list[str] = []
         self.top_misses: list[str] = []
         self.elapsed_seconds: float = 0.0
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dictionary."""
         return {
             "total_candidates": self.total_candidates,
@@ -402,7 +402,7 @@ def benchmark_known_targets(
     wordlist_path: str,
     targets: list[str],
     max_candidates: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """
     Verifica se alvos conhecidos estão na wordlist gerada.
 
@@ -453,7 +453,7 @@ def benchmark_known_targets_generator(
     generator: Generator[str, None, None],
     targets: list[str],
     max_candidates: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """
     Variante streaming de benchmark_known_targets: consome um gerador.
 
@@ -496,7 +496,7 @@ def compare_generators(
     max_candidates: int = 0,
     max_reference: int = 0,
     include_jaccard: bool = True,
-) -> dict[str, dict]:
+) -> dict[str, dict[str, Any]]:
     """
     Compara múltiplos geradores contra o mesmo conjunto de referência.
 
@@ -530,7 +530,7 @@ def compare_generators(
     # Load all wordlists into hit-sets (intersection with reference)
     hit_sets: dict[str, set[str]] = {}
     cand_sets: dict[str, set[str]] = {}
-    results: dict[str, dict] = {}
+    results: dict[str, dict[str, Any]] = {}
 
     for label, wl_path in wordlist_paths.items():
         if not Path(wl_path).exists():
@@ -566,7 +566,7 @@ def compare_generators(
             jaccard_row: dict[str, float] = {}
             for j, lb in enumerate(labels):
                 if i != j:
-                    jaccard_row[lb] = round(_jaccard_index(cand_sets[la], cand_sets[lb]), 4)
+                    jaccard_row[lb] = round(_jaccard_index(cand_sets[la], cand_sets[lb]), 4)  # type: ignore[arg-type]
             if la in results:
                 results[la]["jaccard_vs_others"] = jaccard_row
                 results[la]["mergeability_vs"] = {
@@ -603,10 +603,10 @@ def mergeability_index(matches_a: set[str], matches_b: set[str]) -> float:
 def matches_per_pattern(
     wordlist_path: str,
     reference_path: str,
-    patterns: Optional[dict[str, re.Pattern]] = None,
+    patterns: Optional[dict[str, re.Pattern[str]]] = None,
     max_candidates: int = 0,
     max_reference: int = 0,
-) -> dict[str, dict]:
+) -> dict[str, dict[str, Any]]:
     """Count matches per MAYA structural pattern (r1-r19).
 
     For each pattern, reports how many passwords in the reference belong to
@@ -627,7 +627,7 @@ def matches_per_pattern(
     ref_set: set[str] = set()
     ref_path = Path(reference_path)
     if not ref_path.exists():
-        return {"error": f"Reference not found: {reference_path}"}
+        return {"error": f"Reference not found: {reference_path}"}  # type: ignore[dict-item]
 
     with ref_path.open("r", encoding="utf-8", errors="ignore") as fh:
         for line in fh:
@@ -650,7 +650,7 @@ def matches_per_pattern(
 
     wl_path = Path(wordlist_path)
     if not wl_path.exists():
-        return {"error": f"Wordlist not found: {wordlist_path}"}
+        return {"error": f"Wordlist not found: {wordlist_path}"}  # type: ignore[dict-item]
 
     hits_by_pattern: dict[str, set[str]] = {pid: set() for pid in pat}
     total = 0
@@ -667,7 +667,7 @@ def matches_per_pattern(
             if max_candidates and total >= max_candidates:
                 break
 
-    result: dict[str, dict] = {}
+    result: dict[str, dict[str, Any]] = {}
     for pid in pat:
         rc = len(ref_by_pattern[pid])
         hc = len(hits_by_pattern[pid])
@@ -686,7 +686,7 @@ def multi_model_greedy_rank(
     reference_path: str,
     max_candidates: int = 0,
     max_reference: int = 0,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Greedy model selection ranking (MAYA multi_models_attack).
 
     At each iteration, selects the generator that adds the most new hits to the
@@ -742,7 +742,7 @@ def multi_model_greedy_rank(
     if not hit_sets:
         return [{"error": "no valid wordlists provided"}]
 
-    ranking: list[dict] = []
+    ranking: list[dict[str, Any]] = []
     remaining = set(hit_sets.keys())
     cumulative: set[str] = set()
 
@@ -777,8 +777,8 @@ def multi_model_greedy_rank(
 
 
 def format_maya_report(
-    per_pattern: dict[str, dict],
-    greedy_rank: Optional[list[dict]] = None,
+    per_pattern: dict[str, dict[str, Any]],
+    greedy_rank: Optional[list[dict[str, Any]]] = None,
 ) -> str:
     """Format matches_per_pattern and multi_model_greedy_rank as a text report."""
     lines = [
@@ -824,7 +824,7 @@ def mask_distribution(
     wordlist_path: str,
     top_n: int = 20,
     max_candidates: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """
     Calcula distribuição de masks estilo Hashcat para uma wordlist.
 
@@ -855,7 +855,7 @@ def mask_distribution(
                 parts.append("?s")
         return "".join(parts)
 
-    mask_counts: Counter = Counter()
+    mask_counts: Counter[str] = Counter[str]()
     total = 0
 
     wl_path = Path(wordlist_path)
@@ -882,7 +882,7 @@ def mask_distribution(
     }
 
 
-def stress_crc32_dedup(line_count: int = 150_000) -> dict:
+def stress_crc32_dedup(line_count: int = 150_000) -> dict[str, Any]:
     """Stress-test streaming CRC32 dedup with synthetic unique lines."""
     import time
 
@@ -906,7 +906,7 @@ def stress_crc32_dedup(line_count: int = 150_000) -> dict:
     }
 
 
-def format_crc32_stress_report(result: dict) -> str:
+def format_crc32_stress_report(result: dict[str, Any]) -> str:
     """Format CRC32 dedup stress test results."""
     return "\n".join([
         "=" * 60,
@@ -923,7 +923,7 @@ def format_crc32_stress_report(result: dict) -> str:
     ])
 
 
-def format_known_targets_report(result: dict) -> str:
+def format_known_targets_report(result: dict[str, Any]) -> str:
     """Formata resultado de benchmark_known_targets como texto legível."""
     lines = [
         "=" * 60,
@@ -951,7 +951,7 @@ def format_known_targets_report(result: dict) -> str:
     return "\n".join(lines)
 
 
-def format_compare_report(results: dict[str, dict]) -> str:
+def format_compare_report(results: dict[str, dict[str, Any]]) -> str:
     """Formata resultado de compare_generators como tabela texto."""
     lines = [
         "=" * 60,
@@ -974,7 +974,7 @@ def format_compare_report(results: dict[str, dict]) -> str:
     return "\n".join(lines)
 
 
-def handle_benchmark(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_benchmark(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for wordlist benchmarking.
 
     Args:
@@ -1015,4 +1015,4 @@ def handle_benchmark(args, ctx: dict) -> Optional[Generator[str, None, None]]:
             json.dump(result.to_dict(), fh, indent=2, ensure_ascii=False)
         logger.info("JSON report saved: %s", output_json)
 
-    return iter([result.describe()])
+    return iter([result.describe()])  # type: ignore[return-value]

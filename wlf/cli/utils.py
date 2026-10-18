@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 from wlf.cli.context import (
     Fore, Style, _TQDM, _tqdm, _GLOBAL_CTX, is_shutdown, logger,
@@ -91,7 +91,7 @@ def _write_output(
             pbar = None
 
         for word in generator:
-            reason = gov.check(shutdown_flag=_SHUTDOWN_REQUESTED)
+            reason = gov.check(shutdown_flag=_SHUTDOWN_REQUESTED)  # type: ignore[name-defined]
             if reason != STOP_OK:
                 if reason == STOP_SHUTDOWN:
                     _warn(f"Graceful shutdown - wrote {count:,} entries before stopping.")
@@ -179,7 +179,7 @@ def _count_generator_entries(
 
 
 def _profile_preview_and_confirm(
-    profile: dict,
+    profile: dict[str, Any],
     leet_mode: str,
     output_path: str,
 ) -> Optional[tuple[int, float]]:
@@ -335,7 +335,7 @@ def _confirm_large(estimate: int, threshold: int = 10_000_000) -> bool:
 # ── Command handlers ─────────────────────────────────────────────────────────
 
 
-def _resolve_path(p: str):
+def _resolve_path(p: str) -> Any:
     """Resolve a path relative to wlf.py location or cwd."""
     from pathlib import Path
     pp = Path(p)
@@ -350,7 +350,7 @@ def _resolve_path(p: str):
 
 
 
-def _load_profile_file(path: str) -> dict:
+def _load_profile_file(path: str) -> dict[str, Any]:
     """Load a profile from JSON or YAML."""
     p = Path(path)
     if not p.exists():
@@ -359,7 +359,7 @@ def _load_profile_file(path: str) -> dict:
     suffix = p.suffix.lower()
     if suffix in (".yaml", ".yml"):
         try:
-            import yaml  # type: ignore
+            import yaml
             data = yaml.safe_load(text) or {}
         except ImportError:
             from wlf_modules.profiler import load_profile_yaml

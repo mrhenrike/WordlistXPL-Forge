@@ -21,7 +21,7 @@ from __future__ import annotations
 import itertools
 import logging
 import random
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ class BRDeepEngine:
 
     def __init__(
         self,
-        profile: Optional[str | dict] = None,
+        profile: Optional[str | dict[str, Any]] = None,
         sector: Optional[str] = None,
         include_cpf_patterns: bool = True,
         include_cnpj_patterns: bool = True,

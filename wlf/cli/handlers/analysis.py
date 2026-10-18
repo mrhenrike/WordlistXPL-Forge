@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 
+from pathlib import Path
+
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
 )
+from typing import Optional, Any
+
 from wlf.cli.utils import (
     _info, _ok, _warn, _err, _write_output,
     _effective_len_bounds, _format_bytes, _check_disk_space,
@@ -31,7 +35,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
         _err(str(e))
         return
 
-    mask_data: Optional[dict] = None
+    mask_data: Optional[dict[str, Any]] = None
     do_masks = getattr(args, "masks", False)
     if do_masks:
         _info("Running Hashcat mask analysis...")
@@ -415,7 +419,7 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
 
 
 
-def cmd_score(args) -> None:
+def cmd_score(args: argparse.Namespace) -> None:
     """Score and explain a password."""
     pw = getattr(args, "password", None) or (getattr(args, "args", [None])[0] if hasattr(args, "args") else None)
     if not pw:
@@ -427,7 +431,7 @@ def cmd_score(args) -> None:
 
 
 
-def cmd_explain_cmd(args) -> None:
+def cmd_explain_cmd(args: argparse.Namespace) -> None:
     """Alias for score — explain a password."""
     cmd_score(args)
 

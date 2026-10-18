@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ _MASK_IDX = _VOCAB_SIZE  # special [MASK] token
 _TOTAL_VOCAB = _VOCAB_SIZE + 1
 
 
-def _require_torch():
+def _require_torch() -> Any:
     try:
         import torch
         return torch
@@ -47,12 +47,12 @@ def _require_torch():
         raise RuntimeError(_INSTALL_HINT) from exc
 
 
-def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 20):
+def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 20) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class DenoisingNet(nn.Module):
-        def __init__(self):
+    class DenoisingNet(nn.Module):  # type: ignore[misc]
+        def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_TOTAL_VOCAB, d_model)
             self.time_emb = nn.Embedding(1001, d_model)
@@ -62,7 +62,7 @@ def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 2
             self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
             self.out = nn.Linear(d_model, _TOTAL_VOCAB)
 
-        def forward(self, x_t, t):
+        def forward(self, x_t: Any, t: Any) -> Any:
             x_emb = self.emb(x_t)
             t_emb = self.time_emb(t).unsqueeze(1).expand_as(x_emb)
             h = self.transformer(x_emb + t_emb)
@@ -71,7 +71,7 @@ def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 2
     return DenoisingNet()
 
 
-def _cosine_schedule(T: int = 1000):
+def _cosine_schedule(T: int = 1000) -> Any:
     """Cosine noise schedule for discrete diffusion."""
     import torch
     steps = torch.linspace(0, T, T + 1)
@@ -81,7 +81,7 @@ def _cosine_schedule(T: int = 1000):
     return betas.clamp(0.0001, 0.9999)
 
 
-def _fallback_generate(max_candidates: int, min_len: int, max_len: int):
+def _fallback_generate(max_candidates: int, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
     import random, string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
@@ -127,7 +127,7 @@ class DiffusionPasswordEngine:
             state = torch.load(path, map_location="cpu", weights_only=True)
             if "model" in state:
                 state = state["model"]
-            self._model.load_state_dict(state)
+            self._model.load_state_dict(state)  # type: ignore[attr-defined]
             self._loaded = True
             logger.info("Diffusion model loaded from %s", path)
             return True
@@ -135,7 +135,7 @@ class DiffusionPasswordEngine:
             logger.warning("Could not load diffusion model: %s", exc)
             return False
 
-    def _reverse_step(self, torch, model, x_t, t_idx: int, betas):
+    def _reverse_step(self, torch: Any, model: Any, x_t: Any, t_idx: int, betas: Any) -> Generator[Any, None, None]:
         """One reverse diffusion step: x_t → x_{t-1}."""
         import torch.nn.functional as F
         t_tensor = torch.full((x_t.shape[0],), t_idx, dtype=torch.long, device=x_t.device)
@@ -148,7 +148,7 @@ class DiffusionPasswordEngine:
         beta_t = betas[t_idx - 1].item() if t_idx > 0 else 0.0
         mask = (torch.rand_like(x_t.float()) < beta_t)
         x_prev = torch.where(mask, x_t, x_0_pred)
-        return x_prev, probs
+        return x_prev, probs  # type: ignore[return-value]
 
     def generate(
         self,

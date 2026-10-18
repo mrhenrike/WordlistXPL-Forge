@@ -23,6 +23,7 @@ import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -81,11 +82,11 @@ class SessionManager:
         emitted: int = 0,
         bytes_written: int = 0,
         chunk_index: int = 0,
-        engine_states: Optional[dict] = None,
-        bandit_stats: Optional[dict] = None,
-        pbmp_weights: Optional[dict] = None,
-        pipeline_config: Optional[dict] = None,
-        global_ctx: Optional[dict] = None,
+        engine_states: Optional[dict[str, Any]] = None,
+        bandit_stats: Optional[dict[str, Any]] = None,
+        pbmp_weights: Optional[dict[str, Any]] = None,
+        pipeline_config: Optional[dict[str, Any]] = None,
+        global_ctx: Optional[dict[str, Any]] = None,
     ) -> Path:
         existing = self._try_load(session_id)
         now = time.time()
@@ -164,7 +165,7 @@ class SessionManager:
 
     # ── Resume helper ────────────────────────────────────────────────────────
 
-    def resume_ctx(self, session_id: str) -> dict:
+    def resume_ctx(self, session_id: str) -> dict[str, Any]:
         """Return a dict that can be merged into _GLOBAL_CTX to resume a session."""
         state = self.load(session_id)
         ctx = dict(state.global_ctx_snapshot)

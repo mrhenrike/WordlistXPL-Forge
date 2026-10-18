@@ -139,7 +139,7 @@ class AsyncGeneratorPipeline:
         if not self.slots:
             return
 
-        merge_q: queue.Queue = queue.Queue(maxsize=self.queue_size)
+        merge_q: queue.Queue[Any] = queue.Queue[Any](maxsize=self.queue_size)
         threads = []
         for slot in self.slots:
             t = threading.Thread(
@@ -193,7 +193,7 @@ class AsyncGeneratorPipeline:
 # ── Convenience builder ───────────────────────────────────────────────────────
 
 def build_pipeline(
-    engine_map: dict[str, dict],
+    engine_map: dict[str, dict[str, Any]],
     global_limit: int = 0,
     emit_scores: bool = False,
 ) -> AsyncGeneratorPipeline:

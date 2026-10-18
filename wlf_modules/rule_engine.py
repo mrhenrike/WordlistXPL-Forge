@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Generator, Iterable, Optional
+from typing import Generator, Iterable, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -284,7 +284,7 @@ def apply_rule(word: str, rule: str) -> Optional[str]:
     ops = parse_rule(rule)
     w: Optional[str] = word
     for func, args in ops:
-        w = _apply_op(w, func, args)
+        w = _apply_op(w, func, args)  # type: ignore[arg-type]
         if w is None:
             return None
     return w
@@ -347,7 +347,7 @@ def apply_rules_stream(
         for ops in compiled:
             w: Optional[str] = word
             for func, args in ops:
-                w = _apply_op(w, func, args)
+                w = _apply_op(w, func, args)  # type: ignore[arg-type]
                 if w is None:
                     break
             if w is None:
@@ -436,7 +436,7 @@ def _iter_wordfile(path: str) -> Generator[str, None, None]:
             yield line.rstrip("\n\r")
 
 
-def handle_rules(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_rules(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``rules`` command.
 
     Args:
@@ -465,7 +465,7 @@ def handle_rules(args, ctx: dict) -> Optional[Generator[str, None, None]]:
         return iter(convert_rule(r, to) for r in rules)
 
     if action == "optimize":
-        return iter(optimize_rules(rules))
+        return iter(optimize_rules(rules))  # type: ignore[return-value]
 
     # apply
     wordlist = getattr(args, "wordlist", None)

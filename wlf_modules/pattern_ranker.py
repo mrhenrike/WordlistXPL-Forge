@@ -21,7 +21,7 @@ from __future__ import annotations
 import collections
 import re
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Dict, Generator, List, Optional, Tuple, Any
 
 __version__ = "1.0.0"
 
@@ -135,7 +135,7 @@ def analyze_wordlist(
     wordlist_path: str,
     max_lines: int = 500_000,
     layout: str = "qwerty",
-) -> Dict:
+) -> Dict[str, Any]:
     """Analyze a wordlist file and produce statistics.
 
     Args:
@@ -165,7 +165,7 @@ def analyze_wordlist(
             if detect_ptbr_month(pwd):
                 ptbr_count += 1
 
-    top_masks = mask_counts.most_common(20)
+    top_masks = mask_counts.most_common(20)  # type: ignore[attr-defined]
     avg_walk = sum(walk_scores) / len(walk_scores) if walk_scores else 0.5
 
     return {

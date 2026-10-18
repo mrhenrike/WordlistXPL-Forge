@@ -116,7 +116,7 @@ def _apply_strip_vowels(word: str) -> list[str]:
     return [stripped] if stripped and stripped != word else []
 
 
-_RULE_FUNCS: dict[str, callable] = {
+_RULE_FUNCS: dict[str, callable] = {  # type: ignore[valid-type]
     "capitalize":     _apply_capitalize,
     "upper":          _apply_upper,
     "lower":          _apply_lower,
@@ -147,7 +147,7 @@ def apply_rules(
     """
     seen: set[str] = set()
 
-    active_funcs = []
+    active_funcs: list[str] = []
     for rule_name in rules:
         fn = _RULE_FUNCS.get(rule_name)
         if fn:
@@ -164,7 +164,7 @@ def apply_rules(
             yield word
 
         for fn in active_funcs:
-            variants = fn(word)
+            variants = fn(word)  # type: ignore[operator]
             for v in variants:
                 if v and v not in seen:
                     seen.add(v)
@@ -228,7 +228,7 @@ def capswap(word: str) -> Generator[str, None, None]:
         if lo == hi:
             pairs.append((ch,))
         else:
-            pairs.append((lo, hi))
+            pairs.append((lo, hi))  # type: ignore[arg-type]
 
     seen_h: set[int] = set()
     cap_limit = 128 if len(word) > 7 else 2 ** len(pairs)

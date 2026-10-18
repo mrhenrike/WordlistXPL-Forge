@@ -22,7 +22,8 @@ import re
 import string
 from collections import Counter
 from itertools import product as iterproduct
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +72,13 @@ class PasswordGene:
         self.year_used = self._detect_year()
         self.length_range = (max(self.length - 2, 4), self.length + 4)
 
-    def _segment(self, pwd: str) -> list[dict]:
+    def _segment(self, pwd: str) -> list[dict[str, Any]]:
         """Decompose password into typed segments: W(ord), D(igit), S(pecial).
 
         Leet chars are only part of a word if surrounded by alpha chars on both sides.
         Otherwise, they're treated as separators (S).
         """
-        segments: list[dict] = []
+        segments: list[dict[str, Any]] = []
         i = 0
         while i < len(pwd):
             c = pwd[i]
@@ -132,7 +133,7 @@ class PasswordGene:
     def _detect_year(self) -> Optional[str]:
         for seg in self.segments:
             if seg["type"] == "D" and len(seg["value"]) == 4 and seg["value"].startswith("20"):
-                return seg["value"]
+                return seg["value"]  # type: ignore[no-any-return]
         return None
 
     def get_base_words(self) -> list[str]:
@@ -170,7 +171,7 @@ class PasswordDNA:
 
     def _extract_separators(self) -> list[str]:
         """Find recurring separator characters."""
-        sep_counter: Counter = Counter()
+        sep_counter: Counter[str] = Counter[str]()
         for g in self.genes:
             for s in g.specials:
                 for ch in s:
@@ -255,7 +256,7 @@ def generate_from_dna(
     # Phase 1: Structure-based generation from observed patterns
     for struct, _ in dna.structures.most_common():
         yield from _generate_from_structure(
-            struct, words, numbers, seps, cap_funcs, dna, seen, min_len, max_len
+            struct, words, numbers, seps, cap_funcs, dna, seen, min_len, max_len  # type: ignore[arg-type]
         )
 
     # Phase 2: Word + separator + number (classic pattern)
@@ -322,7 +323,7 @@ def generate_from_dna(
         for word in words[:5]:
             for cap_fn in cap_funcs:
                 base = cap_fn(word)
-                yield from _positional_leet(base, seps, numbers[:10], seen, min_len, max_len)
+                yield from _positional_leet(base, seps, numbers[:10], seen, min_len, max_len)  # type: ignore[arg-type]
 
     # Phase 7: Original passwords + mutations of originals
     for gene in dna.genes:
@@ -343,10 +344,7 @@ def generate_from_dna(
                     yield r
 
 
-def _generate_from_structure(
-    struct: str, words: list, numbers: list, seps: list,
-    cap_funcs: list, dna, seen: set, min_len: int, max_len: int,
-) -> Generator[str, None, None]:
+def _generate_from_structure(struct: str, words: list[Any], numbers: list[str], seps: list[str], cap_funcs: list[Any], dna: Any, seen: set[int], min_len: int, max_len: int) -> Generator[str, None, None]:
     """Reconstruct passwords matching a given structural pattern."""
     for word in words[:12]:
         for cap_fn in cap_funcs:
@@ -360,12 +358,12 @@ def _generate_from_structure(
                             candidate += num
                         elif token_type == "S":
                             candidate += sep
-                    if candidate and candidate not in seen and min_len <= len(candidate) <= max_len:
-                        seen.add(candidate)
+                    if candidate and candidate not in seen and min_len <= len(candidate) <= max_len:  # type: ignore[comparison-overlap]
+                        seen.add(candidate)  # type: ignore[arg-type]
                         yield candidate
 
 
-def _get_cap_transforms(cap_counter: Counter) -> list:
+def _get_cap_transforms(cap_counter: Counter[str]) -> list[Any]:
     """Return capitalization functions based on DNA profile."""
     funcs = [str.lower]
     styles = [s for s, _ in cap_counter.most_common()]
@@ -418,7 +416,7 @@ def _leet_variants(word: str, exhaustive: bool = False) -> list[str]:
 
 
 def _positional_leet(
-    word: str, seps: list, numbers: list, seen: set,
+    word: str, seps: list[Any], numbers: list[str], seen: set[int],
     min_len: int, max_len: int,
 ) -> Generator[str, None, None]:
     """Generate all positional leet combinations for a word (elpscrk-style)."""
@@ -438,7 +436,7 @@ def _positional_leet(
         if count > 500:
             break
         candidate = "".join(combo)
-        if candidate in seen:
+        if candidate in seen:  # type: ignore[comparison-overlap]
             continue
         for sep in seps[:2]:
             for num in numbers[:5]:
@@ -451,7 +449,7 @@ def _positional_leet(
 
 # ── CLI Handler ───────────────────────────────────────────────────────────────
 
-def handle_password_dna(args, ctx: dict) -> tuple:
+def handle_password_dna(args: Any, ctx: dict[str, Any]) -> tuple[Any, ...]:
     """CLI handler: analyze passwords and return (dna, generator).
 
     Returns:

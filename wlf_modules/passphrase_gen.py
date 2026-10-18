@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import secrets
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +123,7 @@ def generate(
         yield phrase
 
 
-def handle_passphrase(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_passphrase(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``passphrase`` command."""
     words = _load_words(getattr(args, "wordlist", None))
     count = int(getattr(args, "count", 20) or 20)

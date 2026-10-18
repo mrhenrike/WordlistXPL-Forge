@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Generator, Iterable, Optional
+from typing import Generator, Iterable, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +296,7 @@ def _iter_words(wordlist: Optional[str], keywords: Optional[list[str]]) -> Gener
         yield kw
 
 
-def handle_affix(args, ctx: dict) -> Optional[Generator[str, None, None]]:
+def handle_affix(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
     """CLI handler for the ``affix`` composite-affix mutation layer.
 
     Args:

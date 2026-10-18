@@ -36,7 +36,7 @@ import math
 import random
 import statistics
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple, Any
 
 __version__ = "1.0.0"
 
@@ -173,8 +173,8 @@ def _path_length(node: _IsoNode, x: List[float], current_depth: int) -> float:
         return current_depth + c
 
     if x[node.feature_idx] < node.split_value:
-        return _path_length(node.left, x, current_depth + 1)
-    return _path_length(node.right, x, current_depth + 1)
+        return _path_length(node.left, x, current_depth + 1)  # type: ignore[arg-type]
+    return _path_length(node.right, x, current_depth + 1)  # type: ignore[arg-type]
 
 
 def _iso_forest_scores(
@@ -339,7 +339,7 @@ def deleet(password: str, aggressive: bool = False) -> str:
     return result
 
 
-def policy_check(password: str) -> dict:
+def policy_check(password: str) -> dict[str, Any]:
     """Check password compliance against common policy rules.
 
     Implements Windows-complexity-style and OWASP checks, similar to
