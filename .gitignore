@@ -23,6 +23,8 @@ id_rsa.*
 *.credentials
 credentials.json
 secrets.json
+.hibp-key
+.intelx-key
 
 # Operator-local notes and personal lists
 personal_profile.lst

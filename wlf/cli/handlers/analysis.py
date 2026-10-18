@@ -462,6 +462,32 @@ def cmd_compare(args: argparse.Namespace) -> None:
             print(line)
 
 
+def cmd_hibp(args: argparse.Namespace) -> None:
+    """Handler for HIBP breach checking."""
+    from wlf_modules.hibp_checker import handle_hibp
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf hibp <wordlist>")
+        return
+
+    offline = getattr(args, "offline", None)
+    mode = "offline" if offline else "online (HIBP API)"
+    _info(f"HIBP check ({mode}): {wordlist}")
+    gen = handle_hibp(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("HIBP check failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
 def cmd_cluster(args: argparse.Namespace) -> None:
     """Handler for password clustering / classification."""
     from wlf_modules.cluster_engine import handle_cluster
