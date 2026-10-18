@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, BANNER, logger,
@@ -112,8 +113,24 @@ def main() -> None:
             _info("Exiting.")
         return
 
-    # Dispatch to subcommand handler
-    handlers = {
+    _handlers = _build_dispatch_table()
+    fn = _handlers.get(args.command)
+    if fn is not None:
+        try:
+            fn(args)
+        except KeyboardInterrupt:
+            print("\n")
+            _warn("Interrupted by user.")
+    else:
+        parser.print_help()
+
+
+_HandlerFn = Callable[..., object]
+
+
+def _build_dispatch_table() -> dict[str, _HandlerFn]:
+    """Build the full command -> handler dispatch table."""
+    handlers: dict[str, _HandlerFn] = {
         "charset":    cmd_charset,
         "pattern":    cmd_pattern,
         "profile":    cmd_profile,
@@ -210,15 +227,7 @@ def main() -> None:
     handlers["vae-interp"]    = cmd_vae_interp
     handlers["test"]          = cmd_test
 
-    handler = handlers.get(args.command)
-    if handler:
-        try:
-            handler(args)
-        except KeyboardInterrupt:
-            print("\n")
-            _warn("Interrupted by user.")
-    else:
-        parser.print_help()
+    return handlers
 
 
 # ── v2.0 command handlers ─────────────────────────────────────────────────────
