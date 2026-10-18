@@ -396,6 +396,18 @@ def cmd_kwalk(args: argparse.Namespace) -> None:
 
 
 
+def cmd_rule_mine(args: argparse.Namespace) -> None:
+    """Handler for rule mining from cracked passwords."""
+    from wlf_modules.rule_miner import handle_rule_mine
+    gen = handle_rule_mine(args, _GLOBAL_CTX)
+    if gen:
+        count = 0
+        for line in gen:
+            print(line)
+            count += 1
+        _ok(f"Rule mining complete: {count} rules found")
+
+
 def cmd_phonetic(args: argparse.Namespace) -> None:
     """Handler for phonetic similarity generation."""
     from wlf_modules.phonetic_engine import handle_phonetic
