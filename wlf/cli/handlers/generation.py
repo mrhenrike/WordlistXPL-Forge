@@ -420,6 +420,19 @@ def cmd_finetune_data(args: argparse.Namespace) -> None:
         _ok(f"Fine-tune dataset: {count:,} samples generated")
 
 
+def cmd_nflow(args: argparse.Namespace) -> None:
+    """Handler for normalizing flow password generation."""
+    from wlf_modules.nflow_engine import handle_nflow
+    gen = handle_nflow(args, _GLOBAL_CTX)
+    if gen:
+        if getattr(args, "interpolate_a", None):
+            for line in gen:
+                print(line)
+        else:
+            count = _write_output(gen, args.output)
+            _ok(f"NFlow generation complete: {count:,} candidates")
+
+
 def cmd_phonetic(args: argparse.Namespace) -> None:
     """Handler for phonetic similarity generation."""
     from wlf_modules.phonetic_engine import handle_phonetic
