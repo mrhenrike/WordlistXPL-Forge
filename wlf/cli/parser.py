@@ -1500,6 +1500,30 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Max candidates (default: 10000)")
     p_ph.add_argument("-o", "--output", help="Output file")
 
+    # ── rule-mine ────────────────────────────────────────────────────────
+    p_rm = sub.add_parser(
+        "rule-mine",
+        help="Mine hashcat rules from plaintext passwords (inverse of rulegen)",
+        description=(
+            "Given a wordlist of cracked passwords, automatically derive the\n"
+            "hashcat rules that transform base words into those passwords.\n\n"
+            "Examples:\n"
+            "  wlf.py rule-mine --wordlist cracked.txt -o mined.rule\n"
+            "  wlf.py rule-mine --wordlist cracked.txt --dictionary english.txt\n"
+            "  wlf.py rule-mine --wordlist passwords.lst --min-confidence 3"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_rm.add_argument("--wordlist", required=True, metavar="FILE",
+                       help="Plaintext password file to analyze")
+    p_rm.add_argument("--dictionary", metavar="FILE",
+                       help="Base word dictionary for matching (optional)")
+    p_rm.add_argument("--max-rules", dest="max_rules", type=int, default=200,
+                       help="Max rules to output (default: 200)")
+    p_rm.add_argument("--min-confidence", dest="min_confidence", type=int, default=2,
+                       help="Min pair count for a rule to be reported (default: 2)")
+    p_rm.add_argument("-o", "--output", help="Output .rule file")
+
     # ── rulegen ──────────────────────────────────────────────────────────
     p_rg = sub.add_parser(
         "rulegen",

@@ -259,6 +259,19 @@ def _phonetic_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     )
 
 
+@register_engine("rule_miner")
+def _rule_miner_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.rule_miner import mine_from_file
+    p = stage.get("params") or {}
+    wordlist = p.get("wordlist", "")
+    dictionary = p.get("dictionary")
+    max_rules = int(p.get("max_rules", 200))
+    min_conf = int(p.get("min_confidence", 2))
+    rules = mine_from_file(wordlist, dictionary_file=dictionary,
+                           max_rules=max_rules, min_confidence=min_conf)
+    return (rule for rule, _count in rules)
+
+
 # ── Pipeline execution ─────────────────────────────────────────────────────────
 
 class PipelineDSL:
