@@ -103,11 +103,13 @@ def list_plugins() -> list[WLFPlugin]:
 
 # ── Discovery ─────────────────────────────────────────────────────────────────
 
-def discover(plugin_dir: Optional[Path] = None) -> list[str]:
+def discover(plugin_dir: Optional[Path] = None, validate: bool = True) -> list[str]:
     """Scan plugin_dir for .py files and load them.  Returns list of loaded names."""
     d = plugin_dir or _PLUGIN_DIR
     if not d.exists():
         return []
+    if validate:
+        _validate_manifests(d)
     loaded = []
     for p in d.glob("*.py"):
         if p.name.startswith("_"):
@@ -178,3 +180,14 @@ def describe_all() -> str:
     if not _REGISTRY:
         return "No plugins loaded."
     return "\n".join(p.describe() for p in _REGISTRY.values())
+
+
+def _validate_manifests(plugin_dir: Path) -> None:
+    """Validate plugin.yaml manifests before loading code."""
+    for manifest_path in plugin_dir.glob("*/plugin.yaml"):
+        try:
+            from wlf_modules.plugin_schema import load_and_validate
+            load_and_validate(manifest_path)
+            logger.debug("Manifest valid: %s", manifest_path)
+        except Exception as exc:
+            logger.warning("Manifest validation failed for %s: %s", manifest_path, exc)
