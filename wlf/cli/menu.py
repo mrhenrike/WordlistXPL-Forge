@@ -38,6 +38,7 @@ _CATEGORIES: list[dict[str, Any]] = [
             ("vae-interp", "VAE latent interpolation generation"),
             ("pbmp", "Probability-based mask permutation"),
             ("br-deep", "Brazilian deep cultural patterns"),
+            ("locale", "Regional/cultural patterns by locale"),
             ("br-names", "Brazilian name-based generation"),
             ("iwlgen", "Intelligent wordlist generation"),
             ("neural", "Neural network password generation"),
