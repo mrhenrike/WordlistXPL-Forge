@@ -27,7 +27,7 @@ from wlf.cli.handlers import (
     cmd_split, cmd_keyspace, cmd_neural, cmd_strength, cmd_hash_id,
     cmd_hash_gen, cmd_hcmask, cmd_osint, cmd_passphrase, cmd_evaluate,
     cmd_curate, cmd_pipeline, cmd_session, cmd_score, cmd_explain_cmd,
-    cmd_serve, cmd_br_deep, cmd_pbmp, cmd_evolve, cmd_graph_expand,
+    cmd_serve, cmd_br_deep, cmd_locale, cmd_pbmp, cmd_evolve, cmd_graph_expand,
     cmd_temporal_model, cmd_domain_pcfg, cmd_plugin, cmd_vae_interp,
     cmd_test,
 )
@@ -218,6 +218,7 @@ def _build_dispatch_table() -> dict[str, _HandlerFn]:
     handlers["explain"]       = cmd_explain_cmd
     handlers["serve"]         = cmd_serve
     handlers["br-deep"]       = cmd_br_deep
+    handlers["locale"]        = cmd_locale
     handlers["pbmp"]          = cmd_pbmp
     handlers["evolve"]        = cmd_evolve
     handlers["graph-expand"]  = cmd_graph_expand

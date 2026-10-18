@@ -2478,6 +2478,30 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Focus on CEP prefix (e.g. 01)")
     p_brd.add_argument("-o", "--output", help="Output file")
 
+    # ── locale ───────────────────────────────────────────────────────────
+    p_loc = sub.add_parser(
+        "locale",
+        help="Regional/cultural password patterns by locale",
+        description=(
+            "Generate password candidates using locale-specific cultural data\n"
+            "(names, slang, sports, holidays, institutions).\n\n"
+            "Available locales: en-us, en-gb, es, fr, de, pt-pt, pt-br\n\n"
+            "Examples:\n"
+            "  wlf.py locale --code en-us -o us_passwords.lst\n"
+            "  wlf.py locale --code es --limit 10000\n"
+            "  wlf.py locale --code de -o german.lst\n"
+            "  wlf.py locale --list"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_loc.add_argument("--code", metavar="LOCALE",
+                       help="Locale code (en-us, en-gb, es, fr, de, pt-pt, pt-br)")
+    p_loc.add_argument("--list", dest="list_locales", action="store_true",
+                       help="List available locale codes and exit")
+    p_loc.add_argument("--profile-file", dest="profile_file", metavar="FILE",
+                       help="JSON/YAML profile file for locale-aware generation")
+    p_loc.add_argument("-o", "--output", help="Output file")
+
     p_pbmp = sub.add_parser(
         "pbmp",
         help="Full PBMP strategy distribution for a profile",

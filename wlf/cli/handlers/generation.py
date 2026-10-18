@@ -626,6 +626,36 @@ def cmd_br_deep(args: argparse.Namespace) -> None:
 
 
 
+def cmd_locale(args: argparse.Namespace) -> None:
+    """Regional/cultural password generation by locale."""
+    try:
+        from wlf_modules.locales import get_engine, list_locales
+        if getattr(args, "list_locales", False):
+            for lc in list_locales():
+                eng = get_engine(lc)
+                name = eng.locale_name if eng else lc
+                _ok(f"  {lc:8s}  {name}")
+            return
+        code = getattr(args, "code", None)
+        if not code:
+            _err("locale: --code or --list required")
+            return
+        profile: dict[str, Any] = {}
+        profile_file = getattr(args, "profile_file", None)
+        if profile_file:
+            profile = _load_profile_file(profile_file)
+        limit = int(_GLOBAL_CTX.get("limit") or 100_000)
+        eng = get_engine(code, profile=profile, max_candidates=limit)
+        if eng is None:
+            _err(f"locale: unknown code '{code}'. Use --list to see available locales")
+            return
+        gen = (pw for pw, _ in eng.generate())
+        count = _write_output(gen, getattr(args, "output", None))
+        _ok(f"locale[{code}]: {count:,} candidates")
+    except Exception as exc:
+        _err(f"locale error: {exc}")
+
+
 def cmd_pbmp(args: argparse.Namespace) -> None:
     """Show PBMP strategy distribution for a profile."""
     try:
