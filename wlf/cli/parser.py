@@ -605,6 +605,23 @@ def build_parser() -> argparse.ArgumentParser:
                        default="text", help="Output format (default: text)")
     p_cl.add_argument("-o", "--output", help="Save report to file")
 
+    # ── hibp ─────────────────────────────────────────────────────────────
+    p_hb = sub.add_parser("hibp", help="Check passwords against HIBP Pwned Passwords")
+    p_hb.add_argument("wordlist", help="Wordlist to check")
+    p_hb.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_hb.add_argument("--min-count", type=int, default=0, dest="min_count",
+                       help="Minimum breach count to report (default: 0 = all)")
+    p_hb.add_argument("--offline", metavar="HASH_FILE",
+                       help="Offline HIBP hash file (SHA-1:count per line)")
+    p_hb.add_argument("--api-key-file", dest="api_key_file", metavar="FILE",
+                       help="Path to HIBP API key file (default: .hibp-key or ~/.hibp-key)")
+    p_hb.add_argument("--output-breached", dest="output_breached", metavar="FILE",
+                       help="Save breached passwords to file (pw:count)")
+    p_hb.add_argument("--output-clean", dest="output_clean", metavar="FILE",
+                       help="Save clean (not breached) passwords to file")
+    p_hb.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")
