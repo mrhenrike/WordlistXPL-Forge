@@ -646,6 +646,21 @@ def build_parser() -> argparse.ArgumentParser:
                        default="text", help="Output format (default: text)")
     p_hm.add_argument("-o", "--output", help="Save report to file")
 
+    # ── intelx ───────────────────────────────────────────────────────────
+    p_ix = sub.add_parser("intelx", help="Search IntelX for leaked credentials/data")
+    p_ix.add_argument("--query", help="Search term (email, domain, credential)")
+    p_ix.add_argument("--query-file", dest="query_file", metavar="FILE",
+                       help="File with search terms (one per line)")
+    p_ix.add_argument("--api-key-file", dest="api_key_file", metavar="FILE",
+                       help="IntelX API key file (default: .intelx-key or ~/.intelx-key)")
+    p_ix.add_argument("--type", dest="type", choices=["all", "leak", "paste", "darknet", "document", "whois"],
+                       default="all", help="Result type filter (default: all)")
+    p_ix.add_argument("--max-results", type=int, default=100, dest="max_results",
+                       help="Maximum results per query (default: 100)")
+    p_ix.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_ix.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")

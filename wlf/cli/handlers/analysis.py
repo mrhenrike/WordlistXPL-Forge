@@ -488,6 +488,31 @@ def cmd_hibp(args: argparse.Namespace) -> None:
             print(line)
 
 
+def cmd_intelx(args: argparse.Namespace) -> None:
+    """Handler for IntelX leak/breach search."""
+    from wlf_modules.intelx_checker import handle_intelx
+
+    query = getattr(args, "query", None)
+    query_file = getattr(args, "query_file", None)
+    if not query and not query_file:
+        _warn("Usage: wlf intelx --query <term> or --query-file <file>")
+        return
+
+    _info("IntelX search")
+    gen = handle_intelx(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("IntelX search failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
 def cmd_hcmon(args: argparse.Namespace) -> None:
     """Handler for Hashcat/JtR cracking session monitoring."""
     from wlf_modules.hashcat_monitor import handle_hcmon
