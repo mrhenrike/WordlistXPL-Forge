@@ -39,17 +39,49 @@ _CAPITALIZATION_PATTERNS = {
 
 # ── Detection rules leves (pcfg_cracker parity) ─────────────────────────────
 
-_KB_ROWS: list[str] = [
-    "1234567890",
-    "qwertyuiop",
-    "asdfghjkl",
-    "zxcvbnm",
-]
+_KB_LAYOUTS: dict[str, list[str]] = {
+    "qwerty": [
+        "1234567890",
+        "qwertyuiop",
+        "asdfghjkl",
+        "zxcvbnm",
+    ],
+    "azerty": [
+        "1234567890",
+        "azertyuiop",
+        "qsdfghjklm",
+        "wxcvbn",
+    ],
+    "qwertz": [
+        "1234567890",
+        "qwertzuiop",
+        "asdfghjkl",
+        "yxcvbnm",
+    ],
+    "abnt2": [
+        "1234567890",
+        "qwertyuiop",
+        "asdfghjkl",
+        "zxcvbnm",
+    ],
+    "dvorak": [
+        "1234567890",
+        "pyfgcrl",
+        "aoeuidhtns",
+        "qjkxbmwvz",
+    ],
+    "colemak": [
+        "1234567890",
+        "qwfpgjluy",
+        "arstdhneio",
+        "zxcvbkm",
+    ],
+}
 
-# Precomputed adjacency pairs (both directions, lowercase)
 _KB_ADJACENT: frozenset[tuple[str, str]] = frozenset(
     pair
-    for row in _KB_ROWS
+    for rows in _KB_LAYOUTS.values()
+    for row in rows
     for i in range(len(row) - 1)
     for pair in [(row[i], row[i + 1]), (row[i + 1], row[i])]
 )
@@ -72,8 +104,9 @@ _PHONE_RE = re.compile(r"^\+?[0-9]{7,15}$")
 
 
 def detect_keyboard_walk(segment: str, min_run: int = 3) -> bool:
-    """Detect QWERTY/QWERTZ/AZERTY keyboard walk patterns in a segment.
+    """Detect keyboard walk patterns across all supported layouts.
 
+    Checks QWERTY, AZERTY, QWERTZ, ABNT2, Dvorak and Colemak adjacency.
     Returns True if there is a run of at least *min_run* characters where
     every consecutive pair is horizontally adjacent on a keyboard row.
     """
