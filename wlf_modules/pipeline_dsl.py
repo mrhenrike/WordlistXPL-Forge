@@ -272,6 +272,24 @@ def _rule_miner_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return (rule for rule, _count in rules)
 
 
+@register_engine("finetune")
+def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.finetune_engine import FinetuneEngine, load_passwords
+    p = stage.get("params") or {}
+    wordlist = p.get("wordlist", "")
+    passwords = load_passwords(wordlist, max_load=int(p.get("max_load", 100_000)))
+    engine = FinetuneEngine(
+        passwords=passwords,
+        fmt=str(p.get("format", "alpaca")),
+        augment=bool(p.get("augment", True)),
+        seed=int(p.get("seed", 42)),
+    )
+    import json
+    return (json.dumps(s, ensure_ascii=False) for s in engine.generate(
+        max_samples=stage.get("limit", 0),
+    ))
+
+
 # ── Pipeline execution ─────────────────────────────────────────────────────────
 
 class PipelineDSL:
