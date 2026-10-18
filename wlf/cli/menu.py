@@ -1,244 +1,254 @@
-"""Interactive menu for wlf."""
+"""Interactive menu for wlf — categorized with submenus."""
 from __future__ import annotations
 
 import argparse
 import sys
+from typing import Any, Optional
 
 from wlf.cli.context import Fore, Style
 from wlf.cli.utils import _info, _warn
 
 
-MENU = f"""
-{Fore.CYAN}=== MAIN MENU ==={Style.RESET_ALL}
+_CATEGORIES: list[dict[str, Any]] = [
+    {
+        "key": "G",
+        "title": "Generation",
+        "commands": [
+            ("charset", "Generate by charset and length"),
+            ("pattern", "Generate by template with variables"),
+            ("phrase", "Phrase-initials password generator"),
+            ("mutate", "Mutate an existing password"),
+            ("num2text", "Convert digits to text words"),
+            ("leet", "Leet speak variants"),
+            ("leet-perm", "Full leet permutation generator"),
+            ("combiner", "Combine multiple wordlists (cartesian)"),
+            ("pcfg", "PCFG-based password generation"),
+            ("markov", "Markov chain password generation"),
+            ("kwalk", "Keyboard walk pattern generation"),
+            ("phonetic", "Phonetic/Soundex password variants"),
+            ("prince", "PRINCE attack wordlist generation"),
+            ("passphrase", "Diceware-style passphrase generator"),
+            ("nflow", "Normalizing flow password generation"),
+            ("combo", "Credential combo (user:pass) generation"),
+            ("corp-conv", "Corporate convention patterns"),
+            ("evolve", "Evolutionary password generation"),
+            ("graph-expand", "Graph-based token expansion"),
+            ("temporal-model", "Temporal pattern generation"),
+            ("domain-pcfg", "Domain-specific PCFG generation"),
+            ("vae-interp", "VAE latent interpolation generation"),
+            ("pbmp", "Probability-based mask permutation"),
+            ("br-deep", "Brazilian deep cultural patterns"),
+            ("br-names", "Brazilian name-based generation"),
+            ("iwlgen", "Intelligent wordlist generation"),
+            ("neural", "Neural network password generation"),
+            ("finetune-data", "LLM fine-tune dataset generation"),
+        ],
+    },
+    {
+        "key": "A",
+        "title": "Analysis & Detection",
+        "commands": [
+            ("analyze", "Statistical analysis of wordlist"),
+            ("compare", "Compare two wordlists (overlap metrics)"),
+            ("cluster", "Password clustering/classification"),
+            ("entropy", "Entropy distribution visualization"),
+            ("strength", "Password strength estimation"),
+            ("score", "Score passwords against models"),
+            ("evaluate", "Evaluate wordlist quality"),
+            ("anomaly-score", "Anomaly scoring for passwords"),
+            ("pattern-rank", "Pattern frequency ranking"),
+            ("maya-rank", "MAYA probabilistic ranking"),
+            ("password-dna", "Password DNA structural analysis"),
+            ("dna-extract", "Extract DNA patterns from wordlist"),
+            ("cover", "Coverage analysis against target set"),
+            ("benchmark", "Benchmark engine performance"),
+            ("hash-id", "Identify hash type"),
+            ("hash-gen", "Generate hashes from passwords"),
+            ("hcmask", "Generate hashcat mask files"),
+            ("maskgen", "Mask generation from wordlist"),
+            ("explain", "Explain a wlf command or pipeline"),
+        ],
+    },
+    {
+        "key": "B",
+        "title": "Breach & External Integration",
+        "commands": [
+            ("hibp", "HIBP breach check (k-Anonymity)"),
+            ("intelx", "IntelX breach/leak search"),
+            ("hcmon", "Hashcat / John the Ripper monitor"),
+            ("default-creds", "Default credentials database"),
+            ("isp-keygen", "ISP default WiFi key generator"),
+        ],
+    },
+    {
+        "key": "O",
+        "title": "OSINT & Profiling",
+        "commands": [
+            ("profile", "Interactive personal target profiling"),
+            ("corp", "Interactive corporate target profiling"),
+            ("corp-users", "Corporate domain user/pass generation"),
+            ("corp-prefixes", "Corporate prefix username generation"),
+            ("phone", "Phone number wordlist generation"),
+            ("scrape", "Web scraping wordlist extraction"),
+            ("scrape-target", "Targeted web scraping"),
+            ("ocr", "Extract text from image via OCR"),
+            ("extract", "Extract wordlist from files"),
+            ("dns", "DNS/subdomain fuzzing wordlist"),
+            ("pharma", "Brazilian pharmacy/health patterns"),
+            ("cupp", "Common User Passwords Profiler"),
+            ("osint", "OSINT-based wordlist generation"),
+            ("osint-perm", "OSINT permutation engine"),
+        ],
+    },
+    {
+        "key": "P",
+        "title": "Operations & Processing",
+        "commands": [
+            ("merge", "Merge and deduplicate wordlists"),
+            ("sanitize", "Clean wordlist (dedupe/sort/filter)"),
+            ("dedup", "Deduplicate wordlist"),
+            ("subtract", "Subtract one wordlist from another"),
+            ("split", "Split wordlist into parts"),
+            ("reverse", "Reverse line order"),
+            ("affix", "Add prefix/suffix to wordlist"),
+            ("mangle", "Apply hashcat-style mangling rules"),
+            ("rules", "Apply rule file to wordlist"),
+            ("rulegen", "Generate rules from wordlist"),
+            ("rule-mine", "Mine hashcat rules from pairs"),
+            ("xor", "XOR encryption / brute-force"),
+            ("curate", "Curate and filter wordlist"),
+            ("improve", "Improve wordlist quality"),
+            ("replay", "Replay a recorded session"),
+            ("emit", "Emit raw candidates to stdout"),
+            ("keyspace", "Calculate keyspace size"),
+        ],
+    },
+    {
+        "key": "I",
+        "title": "Infrastructure & ML",
+        "commands": [
+            ("train", "Train ML pattern model"),
+            ("strategy", "Generate cracking strategy"),
+            ("bandit", "Multi-armed bandit engine routing"),
+            ("pipeline", "Run pipeline DSL script"),
+            ("session", "Manage sessions"),
+            ("serve", "Start API server"),
+            ("plugin", "Manage plugins"),
+            ("sysinfo", "Show hardware profile and compute"),
+            ("test", "Run built-in tests"),
+        ],
+    },
+]
 
-  {Fore.GREEN}[1]{Style.RESET_ALL}  charset     - Generate by charset and length
-  {Fore.GREEN}[2]{Style.RESET_ALL}  pattern     - Generate by template with variables
-  {Fore.GREEN}[3]{Style.RESET_ALL}  profile     - Interactive personal target profiling
-  {Fore.GREEN}[4]{Style.RESET_ALL}  corp        - Interactive corporate target profiling
-  {Fore.GREEN}[5]{Style.RESET_ALL}  corp-users  - Corporate domain user/password generation
-  {Fore.GREEN}[6]{Style.RESET_ALL}  phone       - Generate phone number wordlists
-  {Fore.GREEN}[7]{Style.RESET_ALL}  scrape      - Web scraping wordlist extraction
-  {Fore.GREEN}[8]{Style.RESET_ALL}  ocr         - Extract text from image via OCR
-  {Fore.GREEN}[9]{Style.RESET_ALL}  extract     - Extract wordlist from files (pdf/xlsx/docx/img)
-  {Fore.GREEN}[10]{Style.RESET_ALL} leet        - Leet speak variants (basic/medium/aggressive/custom)
-  {Fore.GREEN}[11]{Style.RESET_ALL} xor         - XOR encryption / brute-force
-  {Fore.GREEN}[12]{Style.RESET_ALL} analyze     - Statistical analysis of wordlist
-  {Fore.GREEN}[13]{Style.RESET_ALL} merge       - Merge and deduplicate wordlists
-  {Fore.GREEN}[14]{Style.RESET_ALL} dns         - DNS/subdomain fuzzing wordlist
-  {Fore.GREEN}[15]{Style.RESET_ALL} pharma      - Brazilian pharmacy and health plan patterns
-  {Fore.GREEN}[16]{Style.RESET_ALL} sanitize    - Clean wordlist (dedupe, sort, filter, remove blanks/#)
-  {Fore.GREEN}[17]{Style.RESET_ALL} reverse     - Reverse line order (tac)
-  {Fore.GREEN}[18]{Style.RESET_ALL} corp-prefixes - Corporate prefix username generation
-  {Fore.GREEN}[19]{Style.RESET_ALL} train       - Train ML pattern model
-  {Fore.GREEN}[20]{Style.RESET_ALL} sysinfo     - Show hardware profile and compute backend
-  {Fore.GREEN}[21]{Style.RESET_ALL} mangle      - Apply hashcat-style mangling rules
-  {Fore.GREEN}[22]{Style.RESET_ALL} default-creds - Query default credentials database (IoT/routers/SNMP)
-  {Fore.GREEN}[23]{Style.RESET_ALL} isp-keygen    - ISP default WiFi password keyspace generator
-  {Fore.GREEN}[24]{Style.RESET_ALL} phrase        - Phrase-initials password generator (@0x90 style)
-  {Fore.GREEN}[25]{Style.RESET_ALL} mutate        - Mutate an existing password (case/leet/prefix/suffix)
-  {Fore.GREEN}[26]{Style.RESET_ALL} num2text      - Convert digits to text words and generate variations
-  {Fore.GREEN}[0]{Style.RESET_ALL}  Exit
-"""
 
+def _print_main_menu() -> None:
+    """Print categorized main menu."""
+    print(f"\n{Fore.CYAN}=== MAIN MENU ==={Style.RESET_ALL}\n")
+    for cat in _CATEGORIES:
+        count = len(cat["commands"])
+        print(
+            f"  {Fore.GREEN}[{cat['key']}]{Style.RESET_ALL}  "
+            f"{cat['title']:<35s} ({count} commands)"
+        )
+    print(f"\n  {Fore.GREEN}[Q]{Style.RESET_ALL}  Quit")
+    print(
+        f"\n  {Fore.YELLOW}Tip:{Style.RESET_ALL} Type a command name directly "
+        f"(e.g. 'charset') to run it, or a category letter for submenu.\n"
+    )
+
+
+def _print_category_menu(cat: dict[str, Any]) -> None:
+    """Print commands within a category."""
+    print(f"\n{Fore.CYAN}=== {cat['title'].upper()} ==={Style.RESET_ALL}\n")
+    for i, (cmd, desc) in enumerate(cat["commands"], 1):
+        print(f"  {Fore.GREEN}[{i:2d}]{Style.RESET_ALL}  {cmd:<20s} {desc}")
+    print(f"\n  {Fore.GREEN}[B]{Style.RESET_ALL}   Back to main menu")
+    print()
+
+
+def _find_command(name: str) -> Optional[str]:
+    """Find a command by name across all categories."""
+    name_lower = name.lower().strip()
+    for cat in _CATEGORIES:
+        cmds: list[tuple[str, str]] = cat["commands"]
+        for cmd, _ in cmds:
+            if cmd == name_lower:
+                return cmd
+    return None
+
+
+def _run_command(cmd_name: str) -> None:
+    """Import and run a command handler by name."""
+    from wlf.cli.main import _build_dispatch_table
+    dispatch = _build_dispatch_table()
+
+    fn = dispatch.get(cmd_name)
+    if fn is None:
+        _warn(f"Command '{cmd_name}' not found in dispatch table.")
+        return
+
+    ns = argparse.Namespace(output=None, command=cmd_name)
+
+    out_path = input("  Output file (Enter for stdout): ").strip() or None
+    ns.output = out_path
+
+    try:
+        fn(ns)
+    except (TypeError, AttributeError):
+        _warn(
+            f"Interactive mode for '{cmd_name}' needs CLI flags. "
+            f"Run: python wlf.py {cmd_name} --help"
+        )
+    except KeyboardInterrupt:
+        print("\n")
+        _warn("Interrupted.")
 
 
 def interactive_menu() -> None:
-    """Display and process the main interactive menu."""
-    from wlf.cli.handlers import (
-        cmd_charset, cmd_pattern, cmd_profile, cmd_corp, cmd_corp_users,
-        cmd_phone, cmd_scrape, cmd_ocr, cmd_extract, cmd_leet, cmd_xor,
-        cmd_analyze, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
-        cmd_reverse, cmd_phrase, cmd_mutate,
-    )
+    """Display and process the categorized interactive menu."""
+    _print_main_menu()
+    choice = input(f"{Fore.CYAN}Select: {Style.RESET_ALL}").strip()
 
-    print(MENU)
-    choice = input(f"{Fore.CYAN}Select an option: {Style.RESET_ALL}").strip()
+    if not choice:
+        return
 
-    if choice == "0":
-        _info("Exiting wlf.py.")
+    if choice.upper() in ("Q", "0"):
+        _info("Exiting wlf.")
         sys.exit(0)
 
-    ns = argparse.Namespace(output=None)
-    if choice != "3":
-        ns.output = input("  Output file (Enter for stdout): ").strip() or None
+    direct = _find_command(choice)
+    if direct:
+        _run_command(direct)
+        return
 
-    if choice == "1":
-        ns.charset = input("  Charset (built-in name or chars): ").strip() or "lalpha"
-        ns.min_len = int(input("  Min length: ").strip() or "6")
-        ns.max_len = int(input("  Max length: ").strip() or "8")
-        ns.charset_file = None
-        ns.pattern = None
-        ns.create_charset = None
-        cmd_charset(ns)
+    cat_match = None
+    for cat in _CATEGORIES:
+        if choice.upper() == cat["key"]:
+            cat_match = cat
+            break
 
-    elif choice == "2":
-        ns.template = input("  Template (e.g. XX{cod}@corp.example.com): ").strip()
-        ns.template_file = None
-        ns.vars = []
-        while True:
-            v = input("  Variable (name=value, Enter to stop): ").strip()
-            if not v:
+    if not cat_match:
+        _warn(f"Invalid option: {choice}")
+        return
+
+    while True:
+        _print_category_menu(cat_match)
+        sub = input(f"{Fore.CYAN}Select: {Style.RESET_ALL}").strip()
+
+        if not sub or sub.upper() == "B":
+            break
+
+        if sub.isdigit():
+            idx = int(sub) - 1
+            if 0 <= idx < len(cat_match["commands"]):
+                cmd_name = cat_match["commands"][idx][0]
+                _run_command(cmd_name)
                 break
-            ns.vars.append(v)
-        cmd_pattern(ns)
-
-    elif choice == "3":
-        ns.name = None
-        ns.nick = None
-        ns.birth = None
-        cmd_profile(ns)
-
-    elif choice == "4":
-        ns.leet = input("  Leet mode (basic/medium/aggressive/none): ").strip() or "basic"
-        cmd_corp(ns)
-
-    elif choice == "5":
-        # corp-users interactive - delegate entirely to wizard
-        ns.domain = None
-        cmd_corp_users(ns)
-
-    elif choice == "6":
-        ns.country = input("  Country (e.g. brazil, usa, uk): ").strip() or None
-        ns.state = input("  State/region (e.g. SP, NY): ").strip() or None
-        ns.ddi = input("  DDI override (or Enter): ").strip() or None
-        ns.ddd = input("  DDD/area code override (or Enter): ").strip() or None
-        ns.type = input("  Type [mobile/landline/both]: ").strip() or "both"
-        ns.pattern = input("  Custom pattern (X=digit, or Enter): ").strip() or None
-        ns.formats = input("  Formats (e164,local,bare - comma-sep): ").strip() or "e164,local"
-        cmd_phone(ns)
-
-    elif choice == "7":
-        ns.url = input("  URL to crawl: ").strip()
-        ns.depth = int(input("  Depth (default 2): ").strip() or "2")
-        ns.min_word = int(input("  Min word length (6): ").strip() or "6")
-        ns.max_word = int(input("  Max word length (32): ").strip() or "32")
-        ns.emails = input("  Extract emails? [y/N]: ").strip().lower() in ("y", "yes")
-        ns.meta = input("  Extract metadata? [y/N]: ").strip().lower() in ("y", "yes")
-        ns.auth = None
-        ns.delay = 0.5
-        ns.proxy = None
-        ns.user_agent = None
-        ns.headers = None
-        ns.no_stopwords = False
-        ns.stopwords_file = None
-        cmd_scrape(ns)
-
-    elif choice == "8":
-        ns.image = input("  Image path: ").strip()
-        ns.lang = input("  OCR languages (default: pt,en): ").strip() or "pt,en"
-        cmd_ocr(ns)
-
-    elif choice == "9":
-        files_raw = input("  Files (space-separated): ").strip()
-        ns.files = files_raw.split()
-        ns.min_len = int(input("  Min length (4): ").strip() or "4")
-        ns.max_len = int(input("  Max length (64): ").strip() or "64")
-        cmd_extract(ns)
-
-    elif choice == "10":
-        ns.word = input("  Base word: ").strip()
-        ns.mode = input("  Mode (basic/medium/aggressive/custom): ").strip() or "basic"
-        ns.custom_map = ""
-        if ns.mode == "custom":
-            ns.custom_map = input("  Mapping (e.g. a=@,4;t=7;s=$): ").strip()
-        ns.max_results = int(input("  Max results (10000): ").strip() or "10000")
-        cmd_leet(ns)
-
-    elif choice == "11":
-        sub = input("  [1] Brute-force  [2] Encrypt  [3] Decrypt: ").strip()
-        ns.brute = None
-        ns.encrypt = None
-        ns.decrypt = None
-        ns.key = None
-        if sub == "1":
-            ns.brute = input("  Hex string: ").strip()
-        elif sub == "2":
-            ns.encrypt = input("  Text to encrypt: ").strip()
-            ns.key = input("  Key: ").strip()
-        elif sub == "3":
-            ns.decrypt = input("  Encrypted hex: ").strip()
-            ns.key = input("  Key: ").strip()
-        cmd_xor(ns)
-
-    elif choice == "12":
-        ns.wordlist = input("  Wordlist to analyze: ").strip()
-        ns.top = int(input("  Top N (20): ").strip() or "20")
-        ns.masks = input("  Run Hashcat mask analysis? [y/N]: ").strip().lower() in ("y", "yes")
-        ns.base_words = False
-        ns.base_output = None
-        ns.format = "text"
-        cmd_analyze(ns)
-
-    elif choice == "13":
-        files_raw = input("  Files to merge (space-separated): ").strip()
-        ns.files = files_raw.split()
-        ns.min_len = int(input("  Min length (6): ").strip() or "6")
-        ns.max_len = int(input("  Max length (128): ").strip() or "128")
-        ns.no_numeric = input("  Remove purely numeric? [y/N]: ").strip().lower() in ("y", "yes")
-        ns.filter = None
-        ns.no_dedupe = False
-        ns.sort = input("  Sort (alpha/length/random or Enter to skip): ").strip() or None
-        cmd_merge(ns)
-
-    elif choice == "14":
-        ns.domain = input("  Target domain: ").strip()
-        ns.wordlist = input("  Words file (or Enter): ").strip() or None
-        ns.words = []
-        ns.template = None
-        ns.template_file = None
-        ns.domain_list = None
-        ns.separator = None
-        ns.match_regex = None
-        ns.filter_regex = None
-        ns.no_prefixes = False
-        ns.no_suffixes = False
-        cmd_dns(ns)
-
-    elif choice == "15":
-        ns.codes = input("  Store codes (e.g. 1200-1300 or 1200,1201, Enter for default): ").strip() or None
-        cmd_pharma(ns)
-
-    elif choice == "16":
-        ns.wordlist = input("  Wordlist to sanitize: ").strip()
-        ns.sort = input("  Sort (alpha/alpha-rev/length/length-rev/random or Enter): ").strip() or None
-        min_raw = input("  Min length (Enter to skip): ").strip()
-        max_raw = input("  Max length (Enter to skip): ").strip()
-        ns.min_len = int(min_raw) if min_raw else None
-        ns.max_len = int(max_raw) if max_raw else None
-        ns.filter = input("  Include regex (Enter to skip): ").strip() or None
-        ns.exclude = input("  Exclude regex (Enter to skip): ").strip() or None
-        ns.keep_blank = False
-        ns.keep_comments = False
-        ns.no_dedupe = False
-        ns.inplace = input("  Overwrite original? [y/N]: ").strip().lower() in ("y", "yes")
-        if not ns.inplace:
-            ns.output = input("  Output file (Enter for stdout): ").strip() or None
-        cmd_sanitize(ns)
-
-    elif choice == "17":
-        ns.wordlist = input("  Wordlist to reverse: ").strip()
-        ns.inplace = input("  Overwrite original? [y/N]: ").strip().lower() in ("y", "yes")
-        if not ns.inplace:
-            ns.output = input("  Output file (Enter for stdout): ").strip() or None
-        cmd_reverse(ns)
-
-    elif choice == "24":
-        ns.phrase = input("  Phrase (e.g. 'é mais fácil pedir do que tentar quebrar'): ").strip()
-        ns.prefixes = input("  Extra prefixes (comma-sep, EMPTY for '', or Enter): ").strip() or None
-        ns.suffixes = input("  Extra suffixes (comma-sep, EMPTY for '', or Enter): ").strip() or None
-        cmd_phrase(ns)
-
-    elif choice == "25":
-        ns.password = input("  Existing password to mutate: ").strip()
-        ns.leet_mode = input("  Leet mode [basic/v2/v3/all/none] (default: all): ").strip() or "all"
-        ns.prefixes = input("  Extra prefixes (comma-sep, EMPTY for '', or Enter to use defaults): ").strip() or None
-        ns.suffixes = input("  Extra suffixes (comma-sep, EMPTY for '', or Enter to use defaults): ").strip() or None
-        min_raw = input("  Min length (default: 1): ").strip()
-        max_raw = input("  Max length (default: 128): ").strip()
-        ns.min_len = int(min_raw) if min_raw.isdigit() else 1
-        ns.max_len = int(max_raw) if max_raw.isdigit() else 128
-        cmd_mutate(ns)
-
-    else:
-        _warn("Invalid option.")
-
+            else:
+                _warn("Invalid number.")
+        else:
+            direct2 = _find_command(sub)
+            if direct2:
+                _run_command(direct2)
+                break
+            _warn(f"Invalid option: {sub}")
