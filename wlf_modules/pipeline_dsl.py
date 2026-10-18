@@ -293,6 +293,25 @@ def _nflow_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     )
 
 
+@register_engine("corp_convention")
+def _corp_conv_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.corp_convention import CorpConventionEngine
+    p = stage.get("params") or {}
+    corp_names = [str(n) for n in (p.get("corp_names") or ["Corp"])]
+    years = [str(y) for y in (p.get("years") or [])] or None
+    patterns = [str(pt) for pt in (p.get("patterns") or [])] or None
+    engine = CorpConventionEngine(
+        corp_names=corp_names,
+        years=years,
+        patterns=patterns,
+    )
+    return engine.generate(
+        limit=stage.get("limit", 0),
+        min_len=gcfg.get("min_len", 6),
+        max_len=gcfg.get("max_len", 32),
+    )
+
+
 @register_engine("combo")
 def _combo_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.combo_engine import ComboEngine
