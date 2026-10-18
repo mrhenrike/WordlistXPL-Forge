@@ -157,6 +157,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--safe-default-limit", dest="safe_default_limit", action="store_true",
         help="If --limit is 0, cap at 5,000,000 candidates (nuclear-safe default).",
     )
+    parser.add_argument(
+        "--checkpoint", dest="checkpoint", action="store_true",
+        help="Auto-save session checkpoint every 100k candidates (resumable).",
+    )
+    parser.add_argument(
+        "--resume", dest="resume_id", metavar="SESSION_ID",
+        help="Resume a previously checkpointed session by ID.",
+    )
 
     sub = parser.add_subparsers(dest="command", help="Operation mode")
 
