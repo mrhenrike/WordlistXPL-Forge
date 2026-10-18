@@ -568,6 +568,99 @@ def build_parser() -> argparse.ArgumentParser:
                        default="text", help="Output format: text, json, csv, markdown (default: text)")
     p_an.add_argument("-o", "--output", help="Save report to file")
 
+    # ── compare ──────────────────────────────────────────────────────────
+    p_cmp = sub.add_parser("compare", help="Compare two wordlists (overlap metrics)")
+    p_cmp.add_argument("file_a", help="First wordlist")
+    p_cmp.add_argument("file_b", help="Second wordlist")
+    p_cmp.add_argument("--format", choices=["text", "json", "csv"],
+                        default="text", help="Output format (default: text)")
+    p_cmp.add_argument("--case-insensitive", action="store_true",
+                        dest="case_insensitive",
+                        help="Case-insensitive comparison")
+    p_cmp.add_argument("--sample", type=int, default=0, metavar="N",
+                        help="Reservoir sample N entries per file (for large wordlists)")
+    p_cmp.add_argument("--output-common", dest="output_common", metavar="FILE",
+                        help="Save common entries to file")
+    p_cmp.add_argument("--output-only-a", dest="output_only_a", metavar="FILE",
+                        help="Save entries only in A to file")
+    p_cmp.add_argument("--output-only-b", dest="output_only_b", metavar="FILE",
+                        help="Save entries only in B to file")
+    p_cmp.add_argument("-o", "--output", help="Save report to file")
+
+    # ── cluster ──────────────────────────────────────────────────────────
+    p_cl = sub.add_parser("cluster", help="Cluster/classify passwords by structure")
+    p_cl.add_argument("wordlist", help="Wordlist to cluster")
+    p_cl.add_argument("--algorithm", choices=["kmeans", "dbscan"],
+                       default="kmeans", help="Clustering algorithm (default: kmeans)")
+    p_cl.add_argument("--clusters", type=int, default=5, metavar="K",
+                       help="Number of clusters for K-means (default: 5)")
+    p_cl.add_argument("--eps", type=float, default=0.3,
+                       help="DBSCAN epsilon radius (default: 0.3)")
+    p_cl.add_argument("--min-samples", type=int, default=3, dest="min_samples",
+                       help="DBSCAN min samples (default: 3)")
+    p_cl.add_argument("--seed", type=int, default=42, help="Random seed")
+    p_cl.add_argument("--label", action="store_true",
+                       help="Classify only (no clustering) — label each password by type")
+    p_cl.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_cl.add_argument("-o", "--output", help="Save report to file")
+
+    # ── hibp ─────────────────────────────────────────────────────────────
+    p_hb = sub.add_parser("hibp", help="Check passwords against HIBP Pwned Passwords")
+    p_hb.add_argument("wordlist", help="Wordlist to check")
+    p_hb.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_hb.add_argument("--min-count", type=int, default=0, dest="min_count",
+                       help="Minimum breach count to report (default: 0 = all)")
+    p_hb.add_argument("--offline", metavar="HASH_FILE",
+                       help="Offline HIBP hash file (SHA-1:count per line)")
+    p_hb.add_argument("--api-key-file", dest="api_key_file", metavar="FILE",
+                       help="Path to HIBP API key file (default: .hibp-key or ~/.hibp-key)")
+    p_hb.add_argument("--output-breached", dest="output_breached", metavar="FILE",
+                       help="Save breached passwords to file (pw:count)")
+    p_hb.add_argument("--output-clean", dest="output_clean", metavar="FILE",
+                       help="Save clean (not breached) passwords to file")
+    p_hb.add_argument("-o", "--output", help="Save report to file")
+
+    # ── entropy ──────────────────────────────────────────────────────────
+    p_ent = sub.add_parser("entropy", help="Entropy distribution analysis and visualization")
+    p_ent.add_argument("wordlist", help="Wordlist to analyze")
+    p_ent.add_argument("--bins", type=int, default=20,
+                        help="Histogram bins (default: 20)")
+    p_ent.add_argument("--classify", action="store_true",
+                        help="Show per-password classification by strength band")
+    p_ent.add_argument("--format", choices=["text", "json", "csv"],
+                        default="text", help="Output format (default: text)")
+    p_ent.add_argument("-o", "--output", help="Save report to file")
+
+    # ── hcmon (cracker monitor) ──────────────────────────────────────────
+    p_hm = sub.add_parser("hcmon", help="Monitor Hashcat/JtR cracking sessions")
+    p_hm.add_argument("--tool", choices=["hashcat", "john"],
+                       default="hashcat", help="Cracking tool (default: hashcat)")
+    p_hm.add_argument("--session", help="Session name")
+    p_hm.add_argument("--status-file", dest="status_file", metavar="FILE",
+                       help="Status output file (text or JSON)")
+    p_hm.add_argument("--restore-file", dest="restore_file", metavar="FILE",
+                       help="Restore/rec file path")
+    p_hm.add_argument("--format", choices=["text", "json"],
+                       default="text", help="Output format (default: text)")
+    p_hm.add_argument("-o", "--output", help="Save report to file")
+
+    # ── intelx ───────────────────────────────────────────────────────────
+    p_ix = sub.add_parser("intelx", help="Search IntelX for leaked credentials/data")
+    p_ix.add_argument("--query", help="Search term (email, domain, credential)")
+    p_ix.add_argument("--query-file", dest="query_file", metavar="FILE",
+                       help="File with search terms (one per line)")
+    p_ix.add_argument("--api-key-file", dest="api_key_file", metavar="FILE",
+                       help="IntelX API key file (default: .intelx-key or ~/.intelx-key)")
+    p_ix.add_argument("--type", dest="type", choices=["all", "leak", "paste", "darknet", "document", "whois"],
+                       default="all", help="Result type filter (default: all)")
+    p_ix.add_argument("--max-results", type=int, default=100, dest="max_results",
+                       help="Maximum results per query (default: 100)")
+    p_ix.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_ix.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")
@@ -1338,6 +1431,14 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Explicit extra linking words to use as connectors (comma-separated)")
     p_cb.add_argument("--assume-yes", dest="assume_yes", action="store_true",
                        help="Skip the linking-words confirmation prompt (for automation)")
+    p_cb.add_argument("--theme", metavar="NAME",
+                       help="Inject keywords from a theme pack (starwars, marvel, gaming, sports, anime, music, hacking, ctf)")
+    p_cb.add_argument("--nouns", metavar="LANG",
+                       help="Inject nouns from built-in dictionary (en, pt, all)")
+    p_cb.add_argument("--fixed-suffix", dest="fixed_suffix", metavar="STR",
+                       help="Append fixed string to each keyword (bypasses permutation)")
+    p_cb.add_argument("--fixed-prefix", dest="fixed_prefix", metavar="STR",
+                       help="Prepend fixed string to each keyword (bypasses permutation)")
     p_cb.add_argument("--min-len", dest="min_len", type=int, default=1,
                        help="Minimum output length (default: 1)")
     p_cb.add_argument("--max-len", dest="max_len", type=int, default=64,
@@ -2376,6 +2477,30 @@ def build_parser() -> argparse.ArgumentParser:
     p_brd.add_argument("--cep-prefix", dest="cep_prefix", metavar="XX",
                        help="Focus on CEP prefix (e.g. 01)")
     p_brd.add_argument("-o", "--output", help="Output file")
+
+    # ── locale ───────────────────────────────────────────────────────────
+    p_loc = sub.add_parser(
+        "locale",
+        help="Regional/cultural password patterns by locale",
+        description=(
+            "Generate password candidates using locale-specific cultural data\n"
+            "(names, slang, sports, holidays, institutions).\n\n"
+            "Available locales: en-us, en-gb, es, fr, de, pt-pt, pt-br\n\n"
+            "Examples:\n"
+            "  wlf.py locale --code en-us -o us_passwords.lst\n"
+            "  wlf.py locale --code es --limit 10000\n"
+            "  wlf.py locale --code de -o german.lst\n"
+            "  wlf.py locale --list"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_loc.add_argument("--code", metavar="LOCALE",
+                       help="Locale code (en-us, en-gb, es, fr, de, pt-pt, pt-br)")
+    p_loc.add_argument("--list", dest="list_locales", action="store_true",
+                       help="List available locale codes and exit")
+    p_loc.add_argument("--profile-file", dest="profile_file", metavar="FILE",
+                       help="JSON/YAML profile file for locale-aware generation")
+    p_loc.add_argument("-o", "--output", help="Output file")
 
     p_pbmp = sub.add_parser(
         "pbmp",
