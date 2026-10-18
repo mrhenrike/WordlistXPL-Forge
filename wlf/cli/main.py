@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 
 from wlf.cli.context import (
     Fore, Style, _GLOBAL_CTX, BANNER, logger,
@@ -14,7 +15,7 @@ from wlf.cli.menu import interactive_menu
 from wlf.cli.handlers import (
     cmd_charset, cmd_pattern, cmd_profile, cmd_corp, cmd_corp_users,
     cmd_phone, cmd_scrape, cmd_ocr, cmd_extract, cmd_leet, cmd_leet_perm,
-    cmd_xor, cmd_analyze, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
+    cmd_xor, cmd_analyze, cmd_compare, cmd_cluster, cmd_entropy, cmd_hcmon, cmd_hibp, cmd_intelx, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
     cmd_reverse, cmd_train, cmd_corp_prefixes, cmd_sysinfo, cmd_mangle,
     cmd_improve, cmd_maya_rank, cmd_default_creds, cmd_isp_keygen,
     cmd_password_dna, cmd_dna_extract, cmd_cover, cmd_replay, cmd_emit,
@@ -26,7 +27,7 @@ from wlf.cli.handlers import (
     cmd_split, cmd_keyspace, cmd_neural, cmd_strength, cmd_hash_id,
     cmd_hash_gen, cmd_hcmask, cmd_osint, cmd_passphrase, cmd_evaluate,
     cmd_curate, cmd_pipeline, cmd_session, cmd_score, cmd_explain_cmd,
-    cmd_serve, cmd_br_deep, cmd_pbmp, cmd_evolve, cmd_graph_expand,
+    cmd_serve, cmd_br_deep, cmd_locale, cmd_pbmp, cmd_evolve, cmd_graph_expand,
     cmd_temporal_model, cmd_domain_pcfg, cmd_plugin, cmd_vae_interp,
     cmd_test,
 )
@@ -112,8 +113,24 @@ def main() -> None:
             _info("Exiting.")
         return
 
-    # Dispatch to subcommand handler
-    handlers = {
+    _handlers = _build_dispatch_table()
+    fn = _handlers.get(args.command)
+    if fn is not None:
+        try:
+            fn(args)
+        except KeyboardInterrupt:
+            print("\n")
+            _warn("Interrupted by user.")
+    else:
+        parser.print_help()
+
+
+_HandlerFn = Callable[..., object]
+
+
+def _build_dispatch_table() -> dict[str, _HandlerFn]:
+    """Build the full command -> handler dispatch table."""
+    handlers: dict[str, _HandlerFn] = {
         "charset":    cmd_charset,
         "pattern":    cmd_pattern,
         "profile":    cmd_profile,
@@ -127,6 +144,12 @@ def main() -> None:
         "leet-perm":  cmd_leet_perm,
         "xor":      cmd_xor,
         "analyze":  cmd_analyze,
+        "compare":  cmd_compare,
+        "cluster":  cmd_cluster,
+        "entropy":  cmd_entropy,
+        "hcmon":    cmd_hcmon,
+        "hibp":     cmd_hibp,
+        "intelx":   cmd_intelx,
         "merge":    cmd_merge,
         "dns":      cmd_dns,
         "pharma":   cmd_pharma,
@@ -195,6 +218,7 @@ def main() -> None:
     handlers["explain"]       = cmd_explain_cmd
     handlers["serve"]         = cmd_serve
     handlers["br-deep"]       = cmd_br_deep
+    handlers["locale"]        = cmd_locale
     handlers["pbmp"]          = cmd_pbmp
     handlers["evolve"]        = cmd_evolve
     handlers["graph-expand"]  = cmd_graph_expand
@@ -204,15 +228,7 @@ def main() -> None:
     handlers["vae-interp"]    = cmd_vae_interp
     handlers["test"]          = cmd_test
 
-    handler = handlers.get(args.command)
-    if handler:
-        try:
-            handler(args)
-        except KeyboardInterrupt:
-            print("\n")
-            _warn("Interrupted by user.")
-    else:
-        parser.print_help()
+    return handlers
 
 
 # ── v2.0 command handlers ─────────────────────────────────────────────────────

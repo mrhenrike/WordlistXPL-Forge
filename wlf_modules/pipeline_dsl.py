@@ -328,6 +328,50 @@ def _combo_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     return engine.generate(limit=stage.get("limit", 0))
 
 
+@register_engine("cluster")
+def _cluster_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.cluster_engine import ClusterEngine, _load_passwords
+    p = stage.get("params") or {}
+    wordlist = p.get("wordlist", "")
+    if not wordlist:
+        logger.error("cluster engine requires params.wordlist")
+        return iter([])
+    passwords = _load_passwords(wordlist, max_load=int(p.get("max_load", 200_000)))
+    engine = ClusterEngine(
+        passwords=passwords,
+        algorithm=str(p.get("algorithm", "kmeans")),
+        n_clusters=int(p.get("clusters", 5)),
+        eps=float(p.get("eps", 0.3)),
+        min_samples=int(p.get("min_samples", 3)),
+        seed=int(p.get("seed", 42)),
+    )
+    labels = engine.cluster()
+    return (f"{passwords[i]}\t{labels[i]}" for i in range(len(passwords)))
+
+
+@register_engine("compare")
+def _compare_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
+    from wlf_modules.compare_engine import CompareEngine
+    p = stage.get("params") or {}
+    file_a = str(p.get("file_a", ""))
+    file_b = str(p.get("file_b", ""))
+    if not file_a or not file_b:
+        logger.error("compare engine requires params.file_a and params.file_b")
+        return iter([])
+    engine = CompareEngine(
+        path_a=file_a,
+        path_b=file_b,
+        case_insensitive=bool(p.get("case_insensitive", False)),
+        sample=int(p.get("sample", 0)),
+    )
+    output = str(p.get("output", "common"))
+    if output == "only_a":
+        return engine.iter_only_a()
+    if output == "only_b":
+        return engine.iter_only_b()
+    return engine.iter_common()
+
+
 @register_engine("finetune")
 def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
     from wlf_modules.finetune_engine import FinetuneEngine, load_passwords

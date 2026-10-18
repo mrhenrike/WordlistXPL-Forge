@@ -436,3 +436,147 @@ def cmd_explain_cmd(args: argparse.Namespace) -> None:
     cmd_score(args)
 
 
+def cmd_compare(args: argparse.Namespace) -> None:
+    """Handler for wordlist comparison / overlap metrics."""
+    from wlf_modules.compare_engine import handle_compare
+
+    file_a = getattr(args, "file_a", None)
+    file_b = getattr(args, "file_b", None)
+
+    if not file_a or not file_b:
+        _warn("Usage: wlf compare <file_a> <file_b>")
+        return
+
+    _info(f"Comparing: {file_a} vs {file_b}")
+    gen = handle_compare(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Comparison failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
+def cmd_hibp(args: argparse.Namespace) -> None:
+    """Handler for HIBP breach checking."""
+    from wlf_modules.hibp_checker import handle_hibp
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf hibp <wordlist>")
+        return
+
+    offline = getattr(args, "offline", None)
+    mode = "offline" if offline else "online (HIBP API)"
+    _info(f"HIBP check ({mode}): {wordlist}")
+    gen = handle_hibp(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("HIBP check failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
+def cmd_intelx(args: argparse.Namespace) -> None:
+    """Handler for IntelX leak/breach search."""
+    from wlf_modules.intelx_checker import handle_intelx
+
+    query = getattr(args, "query", None)
+    query_file = getattr(args, "query_file", None)
+    if not query and not query_file:
+        _warn("Usage: wlf intelx --query <term> or --query-file <file>")
+        return
+
+    _info("IntelX search")
+    gen = handle_intelx(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("IntelX search failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
+def cmd_hcmon(args: argparse.Namespace) -> None:
+    """Handler for Hashcat/JtR cracking session monitoring."""
+    from wlf_modules.hashcat_monitor import handle_hcmon
+
+    tool = getattr(args, "tool", "hashcat")
+    _info(f"Cracker monitor ({tool})")
+    gen = handle_hcmon(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("No status data found. Provide --session, --status-file, or --restore-file.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
+def cmd_entropy(args: argparse.Namespace) -> None:
+    """Handler for entropy distribution visualization."""
+    from wlf_modules.entropy_viz import handle_entropy
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf entropy <wordlist>")
+        return
+
+    _info(f"Entropy analysis: {wordlist}")
+    gen = handle_entropy(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Entropy analysis failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+
+
+def cmd_cluster(args: argparse.Namespace) -> None:
+    """Handler for password clustering / classification."""
+    from wlf_modules.cluster_engine import handle_cluster
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf cluster <wordlist>")
+        return
+
+    _info(f"Clustering: {wordlist}")
+    gen = handle_cluster(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Clustering failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+

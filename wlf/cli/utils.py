@@ -91,7 +91,7 @@ def _write_output(
             pbar = None
 
         for word in generator:
-            reason = gov.check(shutdown_flag=_SHUTDOWN_REQUESTED)  # type: ignore[name-defined]
+            reason = gov.check(shutdown_flag=is_shutdown())
             if reason != STOP_OK:
                 if reason == STOP_SHUTDOWN:
                     _warn(f"Graceful shutdown - wrote {count:,} entries before stopping.")

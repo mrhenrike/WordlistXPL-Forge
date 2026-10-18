@@ -43,6 +43,8 @@ def combine_keywords(
     affix_specials: Optional[list[str]] = None,
     min_length: int = 1,
     max_length: int = 64,
+    fixed_suffix: Optional[str] = None,
+    fixed_prefix: Optional[str] = None,
 ) -> Generator[str, None, None]:
     """Generate keyword combination wordlist.
 
@@ -62,6 +64,8 @@ def combine_keywords(
             only to purely numeric tails to keep the keyspace bounded.
         min_length: Minimum output length.
         max_length: Maximum output length.
+        fixed_suffix: Append this string to every keyword (bypasses permutation).
+        fixed_prefix: Prepend this string to every keyword (bypasses permutation).
 
     Yields:
         Combined keyword strings.
@@ -80,6 +84,35 @@ def combine_keywords(
             seen.add(s)
             return s
         return None
+
+    if fixed_suffix or fixed_prefix:
+        pfx = fixed_prefix or ""
+        sfx = fixed_suffix or ""
+        for kw in keywords:
+            for conn in conns:
+                candidate = f"{pfx}{conn}{kw}{conn}{sfx}".strip()
+                r = emit(candidate)
+                if r:
+                    yield r
+                if use_titlecase:
+                    tc = f"{pfx}{conn}{kw.capitalize()}{conn}{sfx}".strip()
+                    if tc != candidate:
+                        r = emit(tc)
+                        if r:
+                            yield r
+                if use_leet:
+                    leet = _leetify(candidate)
+                    if leet != candidate:
+                        r = emit(leet)
+                        if r:
+                            yield r
+            for tail in tails:
+                if tail:
+                    candidate = f"{pfx}{kw}{sfx}{tail}"
+                    r = emit(candidate)
+                    if r:
+                        yield r
+        return
 
     base_combos: list[str] = []
 
@@ -197,6 +230,24 @@ def handle_combiner(args: Any, ctx: dict[str, Any]) -> None:
             logger.error("Keywords file not found: %s", args.keywords_file)
             return
 
+    theme_name = getattr(args, "theme", None)
+    if theme_name:
+        from wlf_modules.theme_packs import get_theme
+        theme_kws = get_theme(theme_name)
+        if not theme_kws:
+            from wlf_modules.theme_packs import list_themes
+            logger.error(
+                "Theme '%s' not found. Available: %s",
+                theme_name, ", ".join(list_themes()),
+            )
+            return
+        keywords.extend(theme_kws)
+
+    nouns_lang = getattr(args, "nouns", None)
+    if nouns_lang:
+        from wlf_modules.noun_dictionary import get_nouns
+        keywords.extend(get_nouns(nouns_lang))
+
     if not keywords:
         logger.error("No keywords provided. Use positional args or --keywords-file.")
         return
@@ -225,6 +276,9 @@ def handle_combiner(args: Any, ctx: dict[str, Any]) -> None:
     if getattr(args, "affix_specials", None):
         affix_specials = [s.strip() for s in args.affix_specials.split(",") if s.strip()]
 
+    fixed_suffix = getattr(args, "fixed_suffix", None)
+    fixed_prefix = getattr(args, "fixed_prefix", None)
+
     gen = combine_keywords(
         keywords,
         connectors=connectors,
@@ -238,6 +292,8 @@ def handle_combiner(args: Any, ctx: dict[str, Any]) -> None:
         affix_specials=affix_specials,
         min_length=getattr(args, "min_len", 1),
         max_length=getattr(args, "max_len", 64),
+        fixed_suffix=fixed_suffix,
+        fixed_prefix=fixed_prefix,
     )
 
     return gen  # type: ignore[return-value]
