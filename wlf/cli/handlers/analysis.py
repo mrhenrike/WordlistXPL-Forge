@@ -462,3 +462,26 @@ def cmd_compare(args: argparse.Namespace) -> None:
             print(line)
 
 
+def cmd_cluster(args: argparse.Namespace) -> None:
+    """Handler for password clustering / classification."""
+    from wlf_modules.cluster_engine import handle_cluster
+
+    wordlist = getattr(args, "wordlist", None)
+    if not wordlist:
+        _warn("Usage: wlf cluster <wordlist>")
+        return
+
+    _info(f"Clustering: {wordlist}")
+    gen = handle_cluster(args, _GLOBAL_CTX)
+    if gen is None:
+        _err("Clustering failed.")
+        return
+
+    output = getattr(args, "output", None)
+    if output:
+        count = _write_output(gen, output)
+        _ok(f"Report saved to {output}")
+    else:
+        for line in gen:
+            print(line)
+

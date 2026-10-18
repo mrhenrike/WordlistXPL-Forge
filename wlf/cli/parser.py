@@ -587,6 +587,24 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Save entries only in B to file")
     p_cmp.add_argument("-o", "--output", help="Save report to file")
 
+    # ── cluster ──────────────────────────────────────────────────────────
+    p_cl = sub.add_parser("cluster", help="Cluster/classify passwords by structure")
+    p_cl.add_argument("wordlist", help="Wordlist to cluster")
+    p_cl.add_argument("--algorithm", choices=["kmeans", "dbscan"],
+                       default="kmeans", help="Clustering algorithm (default: kmeans)")
+    p_cl.add_argument("--clusters", type=int, default=5, metavar="K",
+                       help="Number of clusters for K-means (default: 5)")
+    p_cl.add_argument("--eps", type=float, default=0.3,
+                       help="DBSCAN epsilon radius (default: 0.3)")
+    p_cl.add_argument("--min-samples", type=int, default=3, dest="min_samples",
+                       help="DBSCAN min samples (default: 3)")
+    p_cl.add_argument("--seed", type=int, default=42, help="Random seed")
+    p_cl.add_argument("--label", action="store_true",
+                       help="Classify only (no clustering) — label each password by type")
+    p_cl.add_argument("--format", choices=["text", "json", "csv"],
+                       default="text", help="Output format (default: text)")
+    p_cl.add_argument("-o", "--output", help="Save report to file")
+
     # ── merge ─────────────────────────────────────────────────────────────
     p_mg = sub.add_parser("merge", help="Merge and deduplicate wordlists")
     p_mg.add_argument("files", nargs="+", help="Input wordlists")
