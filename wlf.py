@@ -10,6 +10,8 @@ Usage:
   python wlf.py                  # interactive menu
   python wlf.py charset 6 8 abc  # CLI subcommand
 """
+VERSION = "2.0.0"
+
 from wlf.cli.main import main
 
 if __name__ == "__main__":

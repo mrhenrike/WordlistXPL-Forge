@@ -189,7 +189,8 @@ class BRDeepEngine:
     def _profile_tokens(self) -> list[str]:
         tokens = []
         p = self.profile
-        for field in ("full_name","short_name","nickname","company_name"):
+        for field in ("full_name","short_name","nickname","company_name",
+                      "first_name","last_name","surname"):
             v = p.get(field)
             if v:
                 tokens.append(str(v).lower().replace(" ", ""))
@@ -359,6 +360,21 @@ class BRDeepEngine:
             if max_candidates and count >= max_candidates:
                 return
 
+        # Diminutive forms from profile names (high priority — before generic generators)
+        for token in profile_tokens:
+            lower = token.lower().replace("_", "")
+            for suffix_strip, suffix_add in _DIMINUTIVE_RULES:
+                if suffix_strip and lower.endswith(suffix_strip):
+                    dim = lower[:-len(suffix_strip)] + suffix_add
+                elif not suffix_strip:
+                    dim = lower + suffix_add
+                else:
+                    continue
+                if _emit(dim, 0.8):
+                    yield (dim, 0.8)
+                if max_candidates and count >= max_candidates:
+                    return
+
         # CPF patterns
         if self.include_cpf_patterns:
             for cand in _cpf_patterns():
@@ -418,7 +434,7 @@ class BRDeepEngine:
             if max_candidates and count >= max_candidates:
                 return
 
-        # Diminutive forms (G4)
+        # Diminutive forms from generic BR names (G4)
         for cand in self._diminutives():
             if _emit(cand, 0.55):
                 yield (cand, 0.55)

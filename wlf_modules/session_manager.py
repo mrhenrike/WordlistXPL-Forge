@@ -58,9 +58,10 @@ class SessionManager:
 
     @staticmethod
     def new_id(label: str = "") -> str:
-        ts = int(time.time())
-        h = hashlib.sha1(f"{ts}{label}".encode(), usedforsecurity=False).hexdigest()[:6]  # noqa: S324
-        return f"{ts}-{h}"
+        ts_ns = time.time_ns()
+        h = hashlib.sha1(f"{ts_ns}{label}".encode(), usedforsecurity=False).hexdigest()[:6]  # noqa: S324
+        ts_sec = ts_ns // 1_000_000_000
+        return f"{ts_sec}-{h}"
 
     def _path(self, session_id: str) -> Path:
         return self.session_dir / f"{session_id}.json"
