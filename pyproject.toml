@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wordlistxpl-forge"
+name = "wordlistxpl"
 version = "2.0.0"
 description = "WordlistXPL-Forge. Wordlist generation toolkit for authorized pentest and red team operations. Member of the XPL-Forge suite."
 readme = "README.md"
@@ -85,7 +85,8 @@ Issues = "https://github.com/mrhenrike/WordlistXPL-Forge/issues"
 Changelog = "https://github.com/mrhenrike/WordlistXPL-Forge/releases"
 
 [project.scripts]
-wlf = "wlf:main"
+wlf        = "wlf:main"
+wordlistxpl = "wlf:main"
 
 [tool.setuptools]
 py-modules = ["wlf"]
