@@ -89,7 +89,6 @@ THIRD_PARTY_COMPONENTS.md
 .githooks/
 
 # CI/CD and contributor metadata stay local
-.github/workflows/
 .github/dependabot.yml
 .github/CODEOWNERS
 CODEOWNERS
