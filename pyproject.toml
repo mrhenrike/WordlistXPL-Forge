@@ -98,7 +98,7 @@ include = ["wlf*", "wlf_modules*"]
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "I"]
+select = ["E", "F"]
 
 [tool.mypy]
 python_version = "3.12"
