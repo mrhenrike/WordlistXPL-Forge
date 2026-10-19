@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-informational?style=flat-square)](README.md#compatibility)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/License-XSRL--1.0-blue?style=flat-square)](LICENSE)
 [![XPL Suite](https://img.shields.io/badge/XPL--Forge-Suite-red?style=flat-square)](https://github.com/mrhenrike)
 [![Issues](https://img.shields.io/github/issues/mrhenrike/WordlistXPL-Forge?style=flat-square)](https://github.com/mrhenrike/WordlistXPL-Forge/issues)
 [![Last Commit](https://img.shields.io/github/last-commit/mrhenrike/WordlistXPL-Forge?style=flat-square)](https://github.com/mrhenrike/WordlistXPL-Forge/commits)
@@ -611,7 +611,7 @@ The model stores **only structural patterns**: no PII, passwords, or company nam
 
 ---
 
-**License:** BSD-3-Clause License - Copyright (c) 2026 União Geek
+**License:** XSRL-1.0 - Copyright (c) 2024-2026 Andre Henrike de Oliveira / Uniao Geek
 **Created by:** André Henrique ([@mrhenrike](https://github.com/mrhenrike)) | [União Geek](https://uniaogeek.com.br/)
 
 [Leia em Português](README.pt-BR.md) - [Command coverage](docs/commands.md) - [Wiki](../../wiki)
