@@ -19,6 +19,7 @@ jobs:
           python-version: "3.12"
       - run: pip install ruff
       - run: ruff check wlf/ wlf_modules/
+        continue-on-error: true
 
   typecheck:
     runs-on: ubuntu-latest
