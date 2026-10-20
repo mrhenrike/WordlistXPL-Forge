@@ -21,7 +21,8 @@ from __future__ import annotations
 import itertools
 import logging
 import re
-from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Union, Any
+from collections.abc import Iterable, Iterator, Sequence
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Default leet substitution table
 # ---------------------------------------------------------------------------
 
-_DEFAULT_REPLACEMENTS: List[tuple[str, str]] = [
+_DEFAULT_REPLACEMENTS: list[tuple[str, str]] = [
     ("a", "@"),
     ("a", "4"),
     ("e", "3"),
@@ -75,9 +76,9 @@ class IwlgenEngine:
 
     def generate(
         self,
-        keywords: List[str],
-        config: Optional[Dict[str, Any]] = None,
-    ) -> List[str]:
+        keywords: list[str],
+        config: dict[str, Any] | None = None,
+    ) -> list[str]:
         """Generate a deduplicated wordlist from keywords and config.
 
         Args:
@@ -88,16 +89,16 @@ class IwlgenEngine:
             Sorted, deduplicated list of generated strings.
         """
         cfg = config or {}
-        connectors: List[str] = cfg.get("connectors", ["", ".", "_", "-", "@"])
+        connectors: list[str] = cfg.get("connectors", ["", ".", "_", "-", "@"])
         do_leet: bool = bool(cfg.get("leet", False))
         do_abbr: bool = bool(cfg.get("abbreviation", False))
         do_reverse: bool = bool(cfg.get("reverse", False))
         do_lower: bool = bool(cfg.get("to_lower", True))
-        num_tails: List[str] = cfg.get("num_tails", [])
-        tails: List[str] = cfg.get("tails", [""])
+        num_tails: list[str] = cfg.get("num_tails", [])
+        tails: list[str] = cfg.get("tails", [""])
         min_len: int = int(cfg.get("min_length", 1))
         max_len: int = int(cfg.get("max_length", 64))
-        replacements: List[tuple[str, str]] = cfg.get("replacements", _DEFAULT_REPLACEMENTS)
+        replacements: list[tuple[str, str]] = cfg.get("replacements", _DEFAULT_REPLACEMENTS)
 
         result: list[str] = list(all_perms(keywords, connectors))
 
@@ -136,7 +137,7 @@ def all_perms(
     keywords: Sequence[str],
     connectors: Sequence[str],
     leet: bool = False,
-    num_tails: Optional[Sequence[str]] = None,
+    num_tails: Sequence[str] | None = None,
     abbreviation: bool = False,
 ) -> Iterator[str]:
     """Yield all permutations of keywords joined by each connector.
@@ -173,8 +174,8 @@ def all_perms(
 
 def leetify(
     words: Sequence[str],
-    replacements: Optional[List[tuple[str, str]]] = None,
-) -> List[str]:
+    replacements: list[tuple[str, str]] | None = None,
+) -> list[str]:
     """Apply leet substitutions to a list of words.
 
     For each (original, replacement) pair, applies the substitution to
@@ -191,7 +192,7 @@ def leetify(
         should deduplicate).
     """
     subs = replacements or _DEFAULT_REPLACEMENTS
-    leeted: List[str] = []
+    leeted: list[str] = []
     words_list = list(words)
 
     # Single-substitution variants: one replacement at a time
@@ -217,8 +218,8 @@ def leetify(
 
 
 def _abbreviation_variants(
-    keywords: List[str],
-    connectors: List[str],
+    keywords: list[str],
+    connectors: list[str],
 ) -> Iterator[str]:
     """Yield abbreviation permutations.
 
@@ -250,8 +251,8 @@ def _abbreviation_variants(
 
 
 def _reverse_variants(
-    keywords: List[str],
-    connectors: List[str],
+    keywords: list[str],
+    connectors: list[str],
 ) -> Iterator[str]:
     """Yield element-reversal permutations.
 
@@ -310,8 +311,8 @@ def _expand_tail(spec: str) -> Iterator[str]:
 
 def _append_tails(
     words: Iterable[str],
-    num_tails: List[str],
-    tails: List[str],
+    num_tails: list[str],
+    tails: list[str],
 ) -> Iterator[str]:
     """Append tail combinations to each word."""
     effective_tails = tails if tails else [""]
@@ -327,10 +328,10 @@ def _append_tails(
 # ---------------------------------------------------------------------------
 
 
-def _unique(items: List[str]) -> List[str]:
+def _unique(items: list[str]) -> list[str]:
     """Return deduplicated list preserving insertion order."""
     seen: set[str] = set()
-    result: List[str] = []
+    result: list[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)

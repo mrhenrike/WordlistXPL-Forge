@@ -22,8 +22,9 @@ import json
 import logging
 import math
 from collections import Counter, defaultdict
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -257,7 +258,7 @@ class MarkovModel:
         return "\n".join(lines)
 
 
-def handle_markov(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_markov(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler: train or generate using Markov model.
 
     Args:

@@ -2,26 +2,28 @@
 from __future__ import annotations
 
 import argparse
-
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
+    _GLOBAL_CTX,
+    is_shutdown,
 )
 from wlf.cli.utils import (
-    _info, _ok, _warn, _err, _write_output,
-    _effective_len_bounds, _format_bytes, _check_disk_space,
-    _confirm_large, _count_generator_entries,
-    _profile_preview_and_confirm, _resolve_path, _load_profile_file,
+    _err,
+    _info,
+    _ok,
+    _profile_preview_and_confirm,
+    _warn,
+    _write_output,
 )
 
 
 def cmd_profile(args: argparse.Namespace) -> None:
     """Handler for personal profiling mode."""
-    from wlf_modules.profiler import interactive_profile, resolve_profile_output
-
     # ── Resolve locale: CLI --lang > YAML locale > session default ────────────
     from wlf_modules.i18n import set_session_locale as _set_locale
+    from wlf_modules.profiler import interactive_profile, resolve_profile_output
     _cli_lang = getattr(args, "lang", None)
     if _cli_lang:
         _set_locale(_cli_lang)
@@ -133,7 +135,11 @@ def cmd_profile(args: argparse.Namespace) -> None:
 
     # ── Pipeline execution ───────────────────────────────────────────────────
     try:
-        from wlf_modules.pipeline_engine import run_profile_pipeline, ProfilePipeline, PipelineConfig
+        from wlf_modules.pipeline_engine import (
+            PipelineConfig,
+            ProfilePipeline,
+            run_profile_pipeline,
+        )
         _use_pipeline = True
     except ImportError:
         _use_pipeline = False
@@ -207,7 +213,10 @@ def cmd_profile(args: argparse.Namespace) -> None:
 
 def cmd_corp(args: argparse.Namespace) -> None:
     """Handler for corporate profiling mode."""
-    from wlf_modules.corp_profiler import interactive_corp_profile, generate_from_corp_profile
+    from wlf_modules.corp_profiler import (
+        generate_from_corp_profile,
+        interactive_corp_profile,
+    )
 
     profile = interactive_corp_profile()
     leet_mode = getattr(args, "leet", "basic") or profile.get("leet_mode", "basic")
@@ -221,13 +230,12 @@ def cmd_corp(args: argparse.Namespace) -> None:
 def cmd_corp_users(args: argparse.Namespace) -> None:
     """Handler for corporate domain user/password generation."""
     from wlf_modules.domain_users import (
-        interactive_domain_users_wizard,
-        run_domain_users,
+        ALL_DOMAIN_SEPARATORS,
+        DOMAIN_SEPARATORS,
         collect_names_from_file,
         collect_names_online,
-        generate_subdomain_admin_users,
-        DOMAIN_SEPARATORS,
-        ALL_DOMAIN_SEPARATORS,
+        interactive_domain_users_wizard,
+        run_domain_users,
     )
 
     params: dict[str, Any] = {}
@@ -332,7 +340,7 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
     ml_model = None
     if use_ml:
         try:
-            from wlf_modules.ml_patterns import get_model, DEFAULT_MODEL_FILE
+            from wlf_modules.ml_patterns import DEFAULT_MODEL_FILE, get_model
             if DEFAULT_MODEL_FILE.exists():
                 ml_model = get_model()
                 if ml_model.is_trained():
@@ -377,7 +385,8 @@ def cmd_corp_users(args: argparse.Namespace) -> None:
 def cmd_phone(args: argparse.Namespace) -> None:
     """Handler for phone number wordlist generation."""
     from wlf_modules.phone_gen import (
-        generate_phones, interactive_phone_wizard, estimate_count, COUNTRIES,
+        generate_phones,
+        interactive_phone_wizard,
     )
 
     interactive = not any([
@@ -443,7 +452,7 @@ def cmd_phone(args: argparse.Namespace) -> None:
 
 def cmd_scrape(args: argparse.Namespace) -> None:
     """Handler for web scraping mode."""
-    from wlf_modules.web_scraper import WebScraper, DEFAULT_STOPWORDS
+    from wlf_modules.web_scraper import DEFAULT_STOPWORDS, WebScraper
 
     auth = None
     if args.auth:
@@ -600,14 +609,25 @@ def cmd_extract(args: argparse.Namespace) -> None:
 
 def cmd_dns(args: argparse.Namespace) -> None:
     """Handler for DNS wordlist generation (alterx + DNSCewl parity)."""
-    from wlf_modules.dns_wordlist import (
-        generate_subdomain_permutations, generate_from_template, load_words_from_file,
-        load_templates_from_yaml, generate_from_yaml_templates,
-        generate_multi_domain, filter_dns_output, clusterbomb_generate,
-        parse_fqdn, enrich_payloads, dnscewl_mutations, estimate_output,
-        PAYLOAD_WORD, PAYLOAD_NUMBER, PAYLOAD_REGION, DEFAULT_PATTERNS,
-    )
     from itertools import chain
+
+    from wlf_modules.dns_wordlist import (
+        DEFAULT_PATTERNS,
+        PAYLOAD_NUMBER,
+        PAYLOAD_REGION,
+        PAYLOAD_WORD,
+        clusterbomb_generate,
+        dnscewl_mutations,
+        enrich_payloads,
+        estimate_output,
+        filter_dns_output,
+        generate_from_template,
+        generate_multi_domain,
+        generate_subdomain_permutations,
+        load_templates_from_yaml,
+        load_words_from_file,
+        parse_fqdn,
+    )
 
     match_regex = getattr(args, "match_regex", None)
     filter_regex = getattr(args, "filter_regex", None)
@@ -649,7 +669,6 @@ def cmd_dns(args: argparse.Namespace) -> None:
         payloads.update(custom_payloads)
 
         patterns = DEFAULT_PATTERNS
-        extra_yaml_payloads: dict[str, Any] = {}
 
         template_file = getattr(args, "template_file", None)
         if template_file:
@@ -658,7 +677,6 @@ def cmd_dns(args: argparse.Namespace) -> None:
                 if yaml_templates:
                     patterns = yaml_templates  # type: ignore[assignment]
                 if yaml_payloads:
-                    extra_yaml_payloads = yaml_payloads  # type: ignore[assignment]
                     payloads.update(yaml_payloads)  # type: ignore[arg-type]
             except (FileNotFoundError, ImportError) as exc:
                 _err(str(exc))
@@ -733,7 +751,10 @@ def cmd_dns(args: argparse.Namespace) -> None:
 def cmd_pharma(args: argparse.Namespace) -> None:
     """Generate passwords and usernames for retail/pharmacy chain patterns."""
     from wlf_modules.pharma_gen import (
-        gen_passwords, gen_usernames, gen_both, _expand_id_range,
+        _expand_id_range,
+        gen_both,
+        gen_passwords,
+        gen_usernames,
     )
 
     brand  = getattr(args, "brand", None) or "BrandX"
@@ -798,10 +819,9 @@ def cmd_isp_keygen(args: argparse.Namespace) -> None:
 def cmd_corp_prefixes(args: argparse.Namespace) -> None:
     """Handler for corporate username prefix generation."""
     from wlf_modules.corp_prefixes import (
-        load_prefix_config,
         generate_from_name,
-        get_all_prefixes,
         list_all_prefixes,
+        load_prefix_config,
     )
 
     try:
@@ -881,7 +901,7 @@ def cmd_corp_prefixes(args: argparse.Namespace) -> None:
 
 def cmd_osint_perm(args: argparse.Namespace) -> None:
     """Generate OSINT-based password candidates from target profile."""
-    from wlf_modules.osint_perm import OsintProfile, OsintPermGenerator
+    from wlf_modules.osint_perm import OsintPermGenerator, OsintProfile
 
     profile = OsintProfile(
         first_name=getattr(args, "first_name", "") or "",

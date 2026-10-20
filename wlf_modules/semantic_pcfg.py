@@ -9,7 +9,8 @@ Version: 1.0.0
 from __future__ import annotations
 
 import itertools
-from typing import Generator, Iterable, Any
+from collections.abc import Generator, Iterable
+from typing import Any
 
 
 def extract_semantic_banks(profile: dict[str, Any]) -> dict[str, list[str]]:

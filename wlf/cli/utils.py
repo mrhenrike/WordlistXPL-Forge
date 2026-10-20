@@ -1,15 +1,21 @@
 """Shared CLI utility functions."""
 from __future__ import annotations
 
-import os
 import sys
-import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 from wlf.cli.context import (
-    Fore, Style, _TQDM, _tqdm, _GLOBAL_CTX, is_shutdown, logger,
+    _GLOBAL_CTX,
+    _TQDM,
+    Fore,
+    Style,
+    _tqdm,
+    is_shutdown,
+    logger,
 )
+
 
 def _info(msg: str) -> None:
     print(f"{Fore.CYAN}[*]{Style.RESET_ALL} {msg}")
@@ -46,8 +52,8 @@ def _save_checkpoint(session_id: str, emitted: int, bytes_written: int, chunk_in
 
 def _write_output(
     generator: Generator[str, None, None],
-    output: Optional[str],
-    estimate: Optional[int] = None,
+    output: str | None,
+    estimate: int | None = None,
     min_len: int = 0,
     max_len: int = 9999,
     append: bool = False,
@@ -61,11 +67,11 @@ def _write_output(
     and graceful Ctrl+C shutdown.
     """
     from wlf_modules.resource_governor import (
-        STOP_OK,
         STOP_LIMIT,
-        STOP_TIMEOUT,
+        STOP_OK,
         STOP_RAM,
         STOP_SHUTDOWN,
+        STOP_TIMEOUT,
         governor_from_ctx,
     )
 
@@ -218,7 +224,7 @@ def _profile_preview_and_confirm(
     profile: dict[str, Any],
     leet_mode: str,
     output_path: str,
-) -> Optional[tuple[int, float]]:
+) -> tuple[int, float] | None:
     """
     Count profile entries, show size summary, optionally ask to proceed.
 
@@ -275,7 +281,7 @@ def _format_bytes(n: int) -> str:
 
 def _check_disk_space(
     output: str,
-    estimate: Optional[int] = None,
+    estimate: int | None = None,
     avg_entry_len: int = 14,
 ) -> bool:
     """
@@ -306,7 +312,7 @@ def _check_disk_space(
     warn_parts: list[str] = []
     needs_confirm = False
 
-    est_bytes: Optional[int] = None
+    est_bytes: int | None = None
     if estimate is not None and estimate > 0:
         est_bytes = estimate * avg_entry_len
 

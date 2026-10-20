@@ -26,12 +26,12 @@ import csv
 import json
 import logging
 import math
-import os
 import re
 import unicodedata
 from collections import Counter, defaultdict
+from collections.abc import Generator
 from pathlib import Path
-from typing import Optional, Any, Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +255,7 @@ class PatternModel:
         userid_col:      str = "userid",
         employeeid_col:  str = "employeeid",
         workemail_col:   str = "workemail",
-        domain_col:      Optional[str] = None,
+        domain_col:      str | None = None,
         max_rows:        int = 0,
     ) -> dict[str, Any]:
         """
@@ -275,7 +275,7 @@ class PatternModel:
         Returns:
             Training summary dict (counts only, no raw data).
         """
-        from wlf_modules.domain_users import CORPORATE_PATTERNS, ALL_DOMAIN_SEPARATORS
+        from wlf_modules.domain_users import ALL_DOMAIN_SEPARATORS, CORPORATE_PATTERNS
 
         # Build pattern classifier from CORPORATE_PATTERNS fmt strings
         pat_classifiers = _build_pattern_classifiers(CORPORATE_PATTERNS)
@@ -287,7 +287,6 @@ class PatternModel:
 
         processed = 0
         uid_found  = 0
-        pwd_found  = 0
 
         with open(path, encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
@@ -427,7 +426,7 @@ class PatternModel:
 
     # ── Serialization ─────────────────────────────────────────────────────────
 
-    def save(self, path: Optional[str] = None) -> str:
+    def save(self, path: str | None = None) -> str:
         """
         Serialize model to JSON.
 
@@ -524,7 +523,7 @@ class PatternModel:
                     out, self._total_uid_samples, self._total_pwd_samples)
         return str(out)
 
-    def load(self, path: Optional[str] = None) -> None:
+    def load(self, path: str | None = None) -> None:
         """
         Load a previously saved model from JSON.
 
@@ -823,7 +822,7 @@ def _classify_uid_to_pattern(local: str, classifiers: list[tuple[Any, ...]]) -> 
     return "?"
 
 
-def _extract_separator(local: str, seps: set[int]) -> Optional[str]:
+def _extract_separator(local: str, seps: set[int]) -> str | None:
     """Extract the first separator found in a username local-part."""
     for sep in (".", "_", "-"):
         if sep in local and sep in seps:  # type: ignore[comparison-overlap]
@@ -833,10 +832,10 @@ def _extract_separator(local: str, seps: set[int]) -> Optional[str]:
 
 # ── Convenience singleton ──────────────────────────────────────────────────────
 
-_MODEL_SINGLETON: Optional[PatternModel] = None
+_MODEL_SINGLETON: PatternModel | None = None
 
 
-def get_model(model_path: Optional[str] = None) -> PatternModel:
+def get_model(model_path: str | None = None) -> PatternModel:
     """
     Return the global PatternModel singleton, loading from disk if available.
 

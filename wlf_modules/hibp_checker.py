@@ -17,8 +17,9 @@ import hashlib
 import json
 import logging
 import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ _TIMEOUT = 10
 _DEFAULT_KEY_FILE = ".hibp-key"
 
 
-def _load_api_key(key_file: Optional[str] = None) -> Optional[str]:
+def _load_api_key(key_file: str | None = None) -> str | None:
     """Load HIBP API key from file or default location.
 
     Searches in order:
@@ -68,10 +69,10 @@ def _split_hash(sha1: str) -> tuple[str, str]:
 
 # ── Online check (HIBP API) ──────────────────────────────────────────────────
 
-def _fetch_range(prefix: str, api_key: Optional[str] = None) -> dict[str, int]:
+def _fetch_range(prefix: str, api_key: str | None = None) -> dict[str, int]:
     """Fetch HIBP range for a hash prefix. Returns {suffix: count}."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     url = f"{_HIBP_API}{prefix}"
     headers: dict[str, str] = {
@@ -200,12 +201,12 @@ class HIBPChecker:
 
     def __init__(
         self,
-        offline_file: Optional[str] = None,
-        api_key_file: Optional[str] = None,
+        offline_file: str | None = None,
+        api_key_file: str | None = None,
         delay: float = _REQUEST_DELAY,
     ) -> None:
         self.delay = delay
-        self._offline: Optional[_OfflineHashDB] = None
+        self._offline: _OfflineHashDB | None = None
         if offline_file:
             self._offline = _OfflineHashDB(offline_file)
         self._api_key = _load_api_key(api_key_file)
@@ -299,7 +300,7 @@ def _load_passwords(path: str, max_load: int = 100_000) -> list[str]:
 
 def handle_hibp(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for HIBP breach checking."""
     wordlist = getattr(args, "wordlist", None)
     fmt = getattr(args, "format", "text")

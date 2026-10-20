@@ -35,8 +35,9 @@ import datetime
 import itertools
 import logging
 import zlib
-from dataclasses import dataclass, field
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +80,8 @@ class ManglerOptions:
     nb: bool = True
     space: bool = False
     deduplicate: bool = True
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
+    min_length: int | None = None
+    max_length: int | None = None
     force_perms: bool = False
 
 

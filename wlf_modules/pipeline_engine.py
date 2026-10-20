@@ -19,9 +19,10 @@ from __future__ import annotations
 import logging
 import time
 import zlib
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,10 @@ class PipelineConfig:
         engines_raw = profile.get("engines")
         if engines_raw:
             try:
-                from wlf_modules.generation_engines import parse_engine_selection, resolve_engines
+                from wlf_modules.generation_engines import (
+                    parse_engine_selection,  # noqa: F401
+                    resolve_engines,
+                )
                 cfg.engine_ids = resolve_engines(str(engines_raw))
             except ImportError:
                 pass
@@ -154,7 +158,7 @@ class ProfilePipeline:
         pipeline.finalize()       # archive export
     """
 
-    def __init__(self, profile: dict[str, Any], config: Optional[PipelineConfig] = None) -> None:
+    def __init__(self, profile: dict[str, Any], config: PipelineConfig | None = None) -> None:
         self.profile = profile
         self.config = config or PipelineConfig.from_profile(profile)
         self._dedup = CRC32Deduplicator()
@@ -179,7 +183,7 @@ class ProfilePipeline:
             return False
         return True
 
-    def _emit(self, word: str) -> Optional[str]:
+    def _emit(self, word: str) -> str | None:
         """Filtra por len e dedup; retorna a palavra ou None."""
         word = word.strip()
         if not word:
@@ -268,7 +272,7 @@ class ProfilePipeline:
         if 28 not in engines:
             return
         try:
-            from wlf_modules.keyword_mutations import mutate, MutationMode
+            from wlf_modules.keyword_mutations import MutationMode, mutate
         except ImportError:
             logger.debug("keyword_mutations não disponível")
             return
@@ -303,7 +307,7 @@ class ProfilePipeline:
         if 11 not in engines:
             return
         try:
-            from wlf_modules.rsmangler_engine import mangle, ManglerOptions
+            from wlf_modules.rsmangler_engine import ManglerOptions, mangle
         except ImportError:
             logger.debug("rsmangler_engine não disponível")
             return
@@ -919,7 +923,7 @@ class ProfilePipeline:
 
         # Apply RSMangler pass
         try:
-            from wlf_modules.rsmangler_engine import mangle, ManglerOptions
+            from wlf_modules.rsmangler_engine import ManglerOptions, mangle
             opts = ManglerOptions(
                 perms=len(unique_words) <= 10,
                 force_perms=False,
@@ -999,7 +1003,7 @@ class ProfilePipeline:
             self._dedup.count_duped,
         )
 
-    def run_to_file(self, output_path: Optional[str] = None) -> dict[str, Any]:
+    def run_to_file(self, output_path: str | None = None) -> dict[str, Any]:
         """
         Executa o pipeline e escreve saída em arquivo.
 
@@ -1048,7 +1052,7 @@ class ProfilePipeline:
 
         return result
 
-    def run_feedback(self, wordlist_path: Optional[str] = None) -> dict[str, Any]:
+    def run_feedback(self, wordlist_path: str | None = None) -> dict[str, Any]:
         """
         Executa feedback loop: benchmark vs known_targets.
 
@@ -1160,7 +1164,11 @@ class ProfilePipeline:
     def _run_archive_export(self, wordlist_path: str) -> dict[str, Any]:
         """Pós-processa wordlist com sanitize/sort/export."""
         try:
-            from wlf_modules.archive_export import ExportOptions, ExportFormat, export_wordlist
+            from wlf_modules.archive_export import (
+                ExportFormat,
+                ExportOptions,
+                export_wordlist,
+            )
         except ImportError:
             logger.debug("archive_export não disponível")
             return {}
@@ -1231,8 +1239,8 @@ def _suggest_engines_for_misses(
 
 def run_profile_pipeline(
     profile: dict[str, Any],
-    config: Optional[PipelineConfig] = None,
-    output_path: Optional[str] = None,
+    config: PipelineConfig | None = None,
+    output_path: str | None = None,
 ) -> dict[str, Any]:
     """
     Executa o pipeline completo para um perfil e retorna estatísticas.

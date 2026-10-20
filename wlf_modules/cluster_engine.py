@@ -17,8 +17,9 @@ import logging
 import math
 import random
 from collections import Counter
+from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Any, Callable, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -297,8 +298,8 @@ class ClusterEngine:
         self.eps = eps
         self.min_samples = min_samples
         self.seed = seed
-        self._features: Optional[list[list[float]]] = None
-        self._labels: Optional[list[int]] = None
+        self._features: list[list[float]] | None = None
+        self._labels: list[int] | None = None
 
     def _extract_all(self) -> list[list[float]]:
         if self._features is None:
@@ -384,7 +385,7 @@ def _load_passwords(path: str, max_load: int = 200_000) -> list[str]:
 
 def handle_cluster(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for password clustering."""
     wordlist = getattr(args, "wordlist", None)
     algorithm = getattr(args, "algorithm", "kmeans")

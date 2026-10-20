@@ -16,19 +16,19 @@ from __future__ import annotations
 import json
 import logging
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
-_DB: Optional[dict[str, Any]] = None
-_DB_PATH: Optional[Path] = None
+_DB: dict[str, Any] | None = None
+_DB_PATH: Path | None = None
 
 
-def _resolve_db_path(explicit: Optional[str | Path] = None) -> Path:
+def _resolve_db_path(explicit: str | Path | None = None) -> Path:
     """Resolve default-creds JSON: --db, env, then EmbedXPL suite path."""
     if explicit:
         return Path(explicit)
@@ -50,11 +50,11 @@ def _resolve_db_path(explicit: Optional[str | Path] = None) -> Path:
     return candidates[0]
 
 
-def _load_db(explicit: Optional[str | Path] = None) -> dict[str, Any]:
+def _load_db(explicit: str | Path | None = None) -> dict[str, Any]:
     """Load and cache the credentials database."""
     global _DB, _DB_PATH
     db_path = _resolve_db_path(explicit)
-    if _DB is not None and _DB_PATH == db_path:
+    if _DB is not None and db_path == _DB_PATH:
         return _DB
     if not db_path.exists():
         logger.error(
@@ -66,7 +66,7 @@ def _load_db(explicit: Optional[str | Path] = None) -> dict[str, Any]:
         _DB = {"credentials": [], "snmp_communities": [], "snmpv3_defaults": []}
         _DB_PATH = db_path
         return _DB
-    with open(db_path, "r", encoding="utf-8") as f:
+    with open(db_path, encoding="utf-8") as f:
         _DB = json.load(f)
     _DB_PATH = db_path
     logger.info(
@@ -101,9 +101,9 @@ def list_categories() -> list[str]:
 
 
 def generate_credentials(
-    vendor: Optional[str] = None,
-    protocol: Optional[str] = None,
-    category: Optional[str] = None,
+    vendor: str | None = None,
+    protocol: str | None = None,
+    category: str | None = None,
     fmt: str = "combo",
 ) -> Generator[str, None, None]:
     """Generate credential entries filtered by vendor/protocol/category.

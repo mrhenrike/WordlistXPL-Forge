@@ -17,8 +17,9 @@ import hashlib
 import logging
 import queue
 import threading
-from dataclasses import dataclass, field
-from typing import Any, Callable, Generator, Optional, Sequence
+from collections.abc import Callable, Generator, Sequence
+from dataclasses import dataclass
+from typing import Any
 
 from wlf_modules.score_normalizer import MultiEngineNormalizer
 
@@ -32,7 +33,7 @@ _SENTINEL = object()  # poison pill for queues
 class _BloomFilter:
     """Simple double-hash Bloom filter.  ~9.6 bits/element at 1% FP rate."""
 
-    __slots__ = ("_bits", "_size", "_k")
+    __slots__ = ("_bits", "_k", "_size")
 
     def __init__(self, capacity: int = 10_000_000, fp_rate: float = 0.01) -> None:
         import math
@@ -42,14 +43,13 @@ class _BloomFilter:
         self._k = max(1, int((self._size / capacity) * math.log(2)))
 
     def _hashes(self, item: str) -> list[int]:
-        h1 = int(hashlib.md5(item.encode(), usedforsecurity=False).hexdigest(), 16)  # noqa: S324
-        h2 = int(hashlib.sha1(item.encode(), usedforsecurity=False).hexdigest(), 16)  # noqa: S324
+        h1 = int(hashlib.md5(item.encode(), usedforsecurity=False).hexdigest(), 16)
+        h2 = int(hashlib.sha1(item.encode(), usedforsecurity=False).hexdigest(), 16)
         return [(h1 + i * h2) % self._size for i in range(self._k)]
 
     def add(self, item: str) -> bool:
         """Add item; return True if it was already present (probable duplicate)."""
         bits = self._bits
-        sz = self._size
         already = True
         for h in self._hashes(item):
             byte_i, bit_i = divmod(h, 8)
@@ -68,7 +68,7 @@ class EngineSlot:
     factory: Callable[[], Generator[Any, None, None]]
     weight: float = 1.0
     limit: int = 0
-    raw_score_field: Optional[str] = None  # if engine yields (cand, score) tuples
+    raw_score_field: str | None = None  # if engine yields (cand, score) tuples
 
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ class AsyncGeneratorPipeline:
     def _worker(
         self,
         slot: EngineSlot,
-        out_q: "queue.Queue[tuple[float, str]]",
+        out_q: queue.Queue[tuple[float, str]],
     ) -> None:
         try:
             gen = slot.factory()

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ def load_and_validate(manifest_path: Path) -> dict[str, Any]:
     errors = validate_manifest(manifest)
     if errors:
         raise PluginValidationError(
-            f"Plugin manifest validation failed:\n" + "\n".join(f"  - {e}" for e in errors)
+            "Plugin manifest validation failed:\n" + "\n".join(f"  - {e}" for e in errors)
         )
 
     return manifest

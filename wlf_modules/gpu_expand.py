@@ -9,11 +9,9 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-import itertools
 import logging
 import string
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Generator, Iterable, Optional
+from collections.abc import Generator, Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +26,7 @@ MASK_SETS = {
 }
 
 
-def parse_mask(mask: str, custom1: Optional[str] = None) -> list[str]:
+def parse_mask(mask: str, custom1: str | None = None) -> list[str]:
     """Expand hashcat-style mask into per-position charsets."""
     slots: list[str] = []
     i = 0
@@ -59,7 +57,7 @@ def generate_mask_chunk(
     mask: str,
     start: int,
     count: int,
-    custom1: Optional[str] = None,
+    custom1: str | None = None,
 ) -> list[str]:
     """Generate `count` candidates starting at linear index `start` (CPU)."""
     slots = parse_mask(mask, custom1)
@@ -82,7 +80,7 @@ def generate_mask_chunk(
 
 def iter_mask(
     mask: str,
-    custom1: Optional[str] = None,
+    custom1: str | None = None,
     chunk_size: int = 65536,
     max_candidates: int = 0,
 ) -> Generator[str, None, None]:

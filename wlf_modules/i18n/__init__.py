@@ -14,21 +14,21 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Optional, Any
+from typing import Any
 
 from wlf_modules.i18n.locale import (
-    SUPPORTED_LOCALES,
     DEFAULT_LOCALE,
-    normalise_locale,
+    SUPPORTED_LOCALES,
     detect_locale_from_text,
+    get_element_for_sign,
     get_months,
     get_months_abbr,
-    get_zodiac_names,
+    get_planet_for_sign,
     get_zodiac_alts,
+    get_zodiac_names,
+    normalise_locale,
     sign_index_from_day_month,
     sign_index_from_name,
-    get_element_for_sign,
-    get_planet_for_sign,
 )
 from wlf_modules.i18n.prompts import get_catalog
 
@@ -63,7 +63,7 @@ def get_session_locale() -> str:
     return getattr(_session, "locale", DEFAULT_LOCALE)
 
 
-def t(key: str, locale: Optional[str] = None, **kwargs: Any) -> str:
+def t(key: str, locale: str | None = None, **kwargs: Any) -> str:
     """
     Traduz uma chave do catálogo para o locale ativo (ou o fornecido).
 
@@ -123,21 +123,21 @@ def register_extra_strings(extra: dict[str, dict[str, str]]) -> None:
 # ── Re-exports convenientes ────────────────────────────────────────────────────
 
 __all__ = [
-    "t",
-    "set_session_locale",
-    "get_session_locale",
-    "ask_language_selection",
-    "register_extra_strings",
-    "SUPPORTED_LOCALES",
     "DEFAULT_LOCALE",
-    "normalise_locale",
+    "SUPPORTED_LOCALES",
+    "ask_language_selection",
     "detect_locale_from_text",
+    "get_element_for_sign",
     "get_months",
     "get_months_abbr",
-    "get_zodiac_names",
+    "get_planet_for_sign",
+    "get_session_locale",
     "get_zodiac_alts",
+    "get_zodiac_names",
+    "normalise_locale",
+    "register_extra_strings",
+    "set_session_locale",
     "sign_index_from_day_month",
     "sign_index_from_name",
-    "get_element_for_sign",
-    "get_planet_for_sign",
+    "t",
 ]

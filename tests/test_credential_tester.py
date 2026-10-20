@@ -7,8 +7,6 @@ import os
 import tempfile
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -95,7 +93,8 @@ def test_hash_modes_dict():
 
 
 def test_cli_test_subparser():
-    import subprocess, sys
+    import subprocess
+    import sys
     result = subprocess.run(
         [sys.executable, "wlf.py", "test", "--help"],
         capture_output=True, text=True, timeout=10,

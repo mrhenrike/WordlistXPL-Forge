@@ -12,10 +12,9 @@ from __future__ import annotations
 
 import itertools
 import logging
-import math
 import zlib
+from collections.abc import Generator
 from dataclasses import dataclass, field
-from typing import Generator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -246,8 +245,8 @@ def capswap(word: str) -> Generator[str, None, None]:
 def mask_expand(
     mask: str,
     words: list[str],
-    digits: Optional[list[str]] = None,
-    specials: Optional[list[str]] = None,
+    digits: list[str] | None = None,
+    specials: list[str] | None = None,
     max_output: int = 0,
 ) -> Generator[str, None, None]:
     """Expand a PyMangler-style mask into password candidates.
@@ -350,9 +349,9 @@ class OverseerConfig:
 
 def overseer_expand(
     words: list[str],
-    config: Optional[OverseerConfig] = None,
-    digits: Optional[list[str]] = None,
-    specials: Optional[list[str]] = None,
+    config: OverseerConfig | None = None,
+    digits: list[str] | None = None,
+    specials: list[str] | None = None,
 ) -> Generator[str, None, None]:
     """Expand masks with time-budget control (PyMangler Overseer parity).
 
@@ -395,8 +394,8 @@ def overseer_expand(
 def generate_hashcat_rules(
     masks: list[str],
     words: list[str],
-    digits: Optional[list[str]] = None,
-    specials: Optional[list[str]] = None,
+    digits: list[str] | None = None,
+    specials: list[str] | None = None,
 ) -> list[str]:
     """Generate hashcat-compatible rule strings for mask-based patterns.
 

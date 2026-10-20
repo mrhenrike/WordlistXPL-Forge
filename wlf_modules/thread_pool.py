@@ -18,9 +18,8 @@ from __future__ import annotations
 import logging
 import os
 import threading
-import time
+from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
-from typing import Any, Callable, Generator, Iterable, Optional
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -126,7 +125,7 @@ class SmartPool:
         """
         self._threads  = validate_thread_count(threads, clamp=True, silent=silent_validation)
         self._prefix   = thread_name_prefix
-        self._executor: Optional[ThreadPoolExecutor] = None
+        self._executor: ThreadPoolExecutor | None = None
         self._lock     = threading.Lock()
         self._active   = True
 
@@ -160,7 +159,7 @@ class SmartPool:
         self,
         fn: Callable[..., Any],
         items: Iterable[Any],
-        timeout:  Optional[float] = None,
+        timeout:  float | None = None,
     ) -> Generator[Any, None, None]:
         """
         Map fn over items using the thread pool, yielding results as they complete.
@@ -267,7 +266,7 @@ def parallel_generate(
     items: list[Any],
     threads:      int = DEFAULT_THREADS,
     dedup:        bool = True,
-    progress_cb:  Optional[Callable[[int, int], None]] = None,
+    progress_cb:  Callable[[int, int], None] | None = None,
 ) -> Generator[str, None, None]:
     """
     Run generator_fn(item) in parallel for each item, yielding merged results.

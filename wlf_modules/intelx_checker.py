@@ -22,8 +22,9 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ _MEDIA_TYPES: dict[int, str] = {
 
 # ── API key loader ────────────────────────────────────────────────────────────
 
-def _load_api_key(key_file: Optional[str] = None) -> Optional[str]:
+def _load_api_key(key_file: str | None = None) -> str | None:
     """Load IntelX API key from file.
 
     Searches in order:
@@ -100,10 +101,10 @@ def _api_post(
     endpoint: str,
     data: dict[str, Any],
     api_key: str,
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """POST to IntelX API."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     url = f"{_INTELX_API}{endpoint}"
     payload = json.dumps(data).encode("utf-8")
@@ -133,12 +134,12 @@ def _api_post(
 def _api_get(
     endpoint: str,
     api_key: str,
-    params: Optional[dict[str, str]] = None,
-) -> Optional[dict[str, Any]]:
+    params: dict[str, str] | None = None,
+) -> dict[str, Any] | None:
     """GET from IntelX API."""
-    import urllib.request
     import urllib.error
     import urllib.parse
+    import urllib.request
 
     url = f"{_INTELX_API}{endpoint}"
     if params:
@@ -244,7 +245,7 @@ class IntelXChecker:
 
     def __init__(
         self,
-        api_key_file: Optional[str] = None,
+        api_key_file: str | None = None,
         delay: float = _REQUEST_DELAY,
     ) -> None:
         self._api_key = _load_api_key(api_key_file)
@@ -311,7 +312,7 @@ class IntelXChecker:
 
         self._rate_limit()
         results_resp = _api_get(
-            f"/intelligent/search/result",
+            "/intelligent/search/result",
             self._api_key,
             params={"id": str(search_id), "limit": str(max_results), "offset": "0"},
         )
@@ -347,7 +348,7 @@ class IntelXChecker:
 
 def handle_intelx(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for IntelX search."""
     query = getattr(args, "query", None)
     query_file = getattr(args, "query_file", None)

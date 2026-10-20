@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def _require_torch() -> Any:
 
 
 def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 20) -> Any:
-    torch = _require_torch()
+    _require_torch()
     import torch.nn as nn
 
     class DenoisingNet(nn.Module):  # type: ignore[misc]
@@ -82,7 +83,8 @@ def _cosine_schedule(T: int = 1000) -> Any:
 
 
 def _fallback_generate(max_candidates: int, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
-    import random, string
+    import random
+    import string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
     for _ in range(max_candidates):
@@ -99,7 +101,7 @@ class DiffusionPasswordEngine:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         d_model: int = 256,
         n_layers: int = 4,
         max_len: int = 20,
@@ -117,7 +119,7 @@ class DiffusionPasswordEngine:
         self._model = None
         self._loaded = False
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         path = path or self.model_path
         if not path:
             return False

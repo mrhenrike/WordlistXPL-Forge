@@ -10,8 +10,8 @@ Author: André Henrique (@mrhenrike)
 """
 
 import logging
-from dataclasses import dataclass, field
-from typing import Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +138,7 @@ def _check_ram_gb() -> float:
         return 99.0
 
 
-def get_engine(engine_id: int) -> Optional[EngineSpec]:
+def get_engine(engine_id: int) -> EngineSpec | None:
     """Return an EngineSpec by numeric ID, or None if not found.
 
     Args:
@@ -257,7 +257,7 @@ def resolve_engines(
 
 
 def print_engine_menu(
-    active_ids: Optional[set[int]] = None,
+    active_ids: set[int] | None = None,
     t_func: Callable[[str], str] | None = None,
 ) -> None:
     """Print the numbered engine selection menu to stdout.

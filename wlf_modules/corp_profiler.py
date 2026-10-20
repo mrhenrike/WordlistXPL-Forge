@@ -17,19 +17,17 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 from wlf_modules.profiler import (
-    ACCENT_MAP,
-    COMMON_SUFFIXES,
     WORD_SEPARATORS,
-    LEET_BASIC,
-    _split_words,
-    _word_variants,
-    _date_tokens,
-    _emit_all,
     _ask,
     _ask_multi,
+    _date_tokens,
+    _emit_all,
+    _split_words,
+    _word_variants,
     normalize,
     parse_date_input,
 )
@@ -182,7 +180,7 @@ def interactive_corp_profile() -> dict[str, Any]:
 
 def generate_from_corp_profile(
     profile: dict[str, Any],
-    leet_mode: Optional[str] = None,
+    leet_mode: str | None = None,
     min_len: int = 6,
     max_len: int = 32,
     with_spaces: bool = False,

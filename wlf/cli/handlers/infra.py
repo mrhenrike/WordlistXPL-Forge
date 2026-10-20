@@ -2,19 +2,22 @@
 from __future__ import annotations
 
 import argparse
-
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
+    _GLOBAL_CTX,
+    Fore,
+    Style,
 )
-from typing import Any, Generator
-
 from wlf.cli.utils import (
-    _info, _ok, _warn, _err, _write_output,
-    _effective_len_bounds, _format_bytes, _check_disk_space,
-    _confirm_large, _count_generator_entries,
-    _profile_preview_and_confirm, _resolve_path, _load_profile_file,
+    _err,
+    _info,
+    _ok,
+    _resolve_path,
+    _warn,
+    _write_output,
 )
 
 
@@ -50,8 +53,8 @@ def cmd_strategy(args: argparse.Namespace) -> None:
 
     if getattr(args, "run", False):
         # Execute top engines that we can without heavy deps
-        from wlf_modules.semantic_pcfg import generate_semantic
         from wlf_modules.pattern_engine import expand_variable, render_template
+        from wlf_modules.semantic_pcfg import generate_semantic
 
         for eng in plan.engines[:3]:
             name = eng["strategy"]
@@ -121,11 +124,14 @@ def cmd_bandit(args: argparse.Namespace) -> None:
 
 def cmd_sysinfo(args: argparse.Namespace) -> None:
     """Show hardware profile and compute backend status."""
-    from wlf_modules.hw_profiler import get_hw_profile
     from wlf_modules.compute_backend import auto_select_backend
+    from wlf_modules.hw_profiler import get_hw_profile
     from wlf_modules.thread_pool import (
-        DEFAULT_THREADS, MIN_THREADS, MAX_THREADS,
-        WARN_THRESHOLD, ALERT_THRESHOLD,
+        ALERT_THRESHOLD,
+        DEFAULT_THREADS,
+        MAX_THREADS,
+        MIN_THREADS,
+        WARN_THRESHOLD,
     )
 
     compute_mode = _GLOBAL_CTX.get("compute_mode", "auto")
@@ -162,7 +168,10 @@ def cmd_sysinfo(args: argparse.Namespace) -> None:
 
     stress_n = getattr(args, "crc32_stress", 0) or 0
     if stress_n > 0:
-        from wlf_modules.benchmark_suite import stress_crc32_dedup, format_crc32_stress_report
+        from wlf_modules.benchmark_suite import (
+            format_crc32_stress_report,
+            stress_crc32_dedup,
+        )
         _info(f"Running CRC32 dedup stress test ({stress_n:,} lines)...")
         result = stress_crc32_dedup(stress_n)
         print(format_crc32_stress_report(result))
@@ -176,7 +185,7 @@ def cmd_train(args: argparse.Namespace) -> None:
     Privacy: only structural patterns are extracted - no raw usernames,
     passwords, company names, or personal data are ever stored in the model.
     """
-    from wlf_modules.ml_patterns import PatternModel, DEFAULT_MODEL_FILE
+    from wlf_modules.ml_patterns import DEFAULT_MODEL_FILE, PatternModel
 
     model = PatternModel()
     trained_any = False
@@ -309,8 +318,9 @@ def cmd_pipeline(args: argparse.Namespace) -> None:
 
 def cmd_session(args: argparse.Namespace) -> None:
     """Manage sessions: list / show / resume."""
-    from wlf_modules.session_manager import SessionManager
     import time as _time
+
+    from wlf_modules.session_manager import SessionManager
 
     mgr = SessionManager()
     sub = getattr(args, "session_sub", None) or "list"
@@ -382,7 +392,11 @@ def cmd_serve(args: argparse.Namespace) -> None:
 
 def cmd_plugin(args: argparse.Namespace) -> None:
     """Plugin management: list, run, discover."""
-    from wlf_modules.plugin_manager import auto_discover, describe_all, run_plugin, list_plugins
+    from wlf_modules.plugin_manager import (
+        auto_discover,
+        describe_all,
+        run_plugin,
+    )
     sub = getattr(args, "plugin_sub", None) or "list"
     if sub == "list":
         auto_discover()

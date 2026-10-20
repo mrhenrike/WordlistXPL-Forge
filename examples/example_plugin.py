@@ -7,7 +7,8 @@ To install: copy this file to ~/.wlf/plugins/
 """
 from __future__ import annotations
 
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from wlf_modules.plugin_manager import WLFPlugin, register_plugin
 

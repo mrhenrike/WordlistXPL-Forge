@@ -10,7 +10,7 @@ warnings.warn(
     stacklevel=2,
 )
 
-import wlf_modules as _real  # noqa: E402
+import wlf_modules as _real
 
 sys.modules[__name__] = _real
 

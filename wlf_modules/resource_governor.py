@@ -12,7 +12,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class GovernorState:
 class ResourceGovernor:
     """Stateful soft governor for generation loops."""
 
-    def __init__(self, cfg: Optional[GovernorConfig] = None) -> None:
+    def __init__(self, cfg: GovernorConfig | None = None) -> None:
         self.cfg = cfg or GovernorConfig()
         self.state = GovernorState()
         if self.cfg.enforce_safe_default and not self.cfg.max_candidates:
@@ -91,7 +91,7 @@ class ResourceGovernor:
             pass
         return 8192
 
-    def vram_free_mb(self) -> Optional[int]:
+    def vram_free_mb(self) -> int | None:
         try:
             import subprocess
             out = subprocess.check_output(

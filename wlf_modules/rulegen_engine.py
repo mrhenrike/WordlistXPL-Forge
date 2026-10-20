@@ -25,8 +25,9 @@ from __future__ import annotations
 import logging
 import re
 from collections import Counter
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def _deleet(word: str) -> str:
     return "".join(result)
 
 
-def _find_base_word(password: str, dictionary: set[str]) -> Optional[tuple[str, list[str]]]:
+def _find_base_word(password: str, dictionary: set[str]) -> tuple[str, list[str]] | None:
     """Attempt to find a base word and the rules to derive the password.
 
     Tries progressively more complex transformations:
@@ -147,7 +148,7 @@ def _find_base_word(password: str, dictionary: set[str]) -> Optional[tuple[str, 
 
 def analyze_passwords(
     passwords: list[str],
-    dictionary: Optional[set[str]] = None,
+    dictionary: set[str] | None = None,
     max_rules_per_password: int = 3,
 ) -> tuple[Counter[str], dict[str, list[str]]]:
     """Analyze passwords and extract transformation rules.
@@ -194,7 +195,7 @@ def _build_auto_dictionary(passwords: list[str], min_len: int = 3) -> set[str]:
 
 def generate_rules(
     passwords: list[str],
-    dictionary: Optional[set[str]] = None,
+    dictionary: set[str] | None = None,
     min_frequency: int = 1,
     top_rules: int = 0,
     include_colon: bool = True,
@@ -226,7 +227,7 @@ def generate_rules(
 def generate_rule_file(
     input_file: str,
     output_file: str,
-    dict_file: Optional[str] = None,
+    dict_file: str | None = None,
     max_lines: int = 0,
     top_rules: int = 100,
 ) -> dict[str, Any]:
@@ -288,7 +289,7 @@ def generate_rule_file(
     }
 
 
-def handle_rulegen(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_rulegen(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for hashcat rule generation.
 
     Args:

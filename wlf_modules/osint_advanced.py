@@ -18,7 +18,8 @@ from __future__ import annotations
 import logging
 import os
 import re
-from typing import Generator, Iterable, Optional, Any
+from collections.abc import Generator, Iterable
+from typing import Any
 from urllib.parse import unquote, urlparse
 
 logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ def collect_wayback(domain: str, limit: int = 5000, timeout: float = 20.0) -> se
         resp = requests.get(url, timeout=timeout)
         resp.raise_for_status()
         rows = resp.json()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.error("wayback request failed: %s", exc)
         return set()
     texts: list[str] = []
@@ -133,7 +134,7 @@ def collect_github_org(org: str, max_repos: int = 200,
             )
             resp.raise_for_status()
             repos = resp.json()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.error("github request failed: %s", exc)
             break
         if not repos:
@@ -151,7 +152,7 @@ def collect_github_org(org: str, max_repos: int = 200,
     return extract_entities(texts)
 
 
-def enrich_local(words: set[str], years: Optional[list[int]] = None) -> set[str]:
+def enrich_local(words: set[str], years: list[int] | None = None) -> set[str]:
     """Enrich a word set with common human mutations, without any network call.
 
     Applies capitalization, a few leet substitutions and year suffixes. This is
@@ -237,7 +238,7 @@ def enrich_llm(words: set[str], provider: str, model: str,
         else:
             logger.warning("unknown provider %r; skipping LLM enrichment", provider)
             return out
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.warning("LLM enrichment failed (%s); using base words", exc)
         return out
     for tok in re.split(r"[,\n]", text):
@@ -247,7 +248,7 @@ def enrich_llm(words: set[str], provider: str, model: str,
     return out
 
 
-def handle_osint(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_osint(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for the ``osint`` command.
 
     Args:

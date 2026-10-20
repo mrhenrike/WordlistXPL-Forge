@@ -13,8 +13,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
-
+from typing import Any
 
 STRATEGIES = (
     "rules_mangle",
@@ -109,9 +108,9 @@ def _engine_spec(name: str, weight: float, profile: dict[str, Any]) -> dict[str,
         pets = profile.get("pets") or [{"name": "PetX"}]
         pet = pets[0]["name"] if isinstance(pets[0], dict) else str(pets[0])
         base["templates"] = [
-            f"{{company}}#{{pet}}{{yy}}",
-            f"_{{company}}@{{year}}#{{pet}}",
-            f"#{{company}}@{{tag}}",
+            "{company}#{pet}{yy}",
+            "_{company}@{year}#{pet}",
+            "#{company}@{tag}",
         ]
         base["vars"] = {
             "company": company,
@@ -145,7 +144,7 @@ def bayesian_structure_priors(profile: dict[str, Any]) -> dict[str, float]:
     return {k: v / z for k, v in hyps.items()}
 
 
-def format_plan(plan: StrategyPlan, priors: Optional[dict[str, float]] = None) -> str:
+def format_plan(plan: StrategyPlan, priors: dict[str, float] | None = None) -> str:
     lines = ["=== Generation strategy plan (PBMP-lite) ==="]
     for n, w in plan.top(8):
         lines.append(f"  {n:20s}  p={w:.3f}")

@@ -5,32 +5,109 @@ import logging
 import time
 from collections.abc import Callable
 
+from wlf.cli.config import apply_config_to_ctx, load_config
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, BANNER, logger,
+    _GLOBAL_CTX,
+    BANNER,
 )
-from wlf.cli.utils import _info, _warn
-from wlf.cli.config import load_config, apply_config_to_ctx
-from wlf.cli.parser import build_parser
-from wlf.cli.menu import interactive_menu
 from wlf.cli.handlers import (
-    cmd_charset, cmd_pattern, cmd_profile, cmd_corp, cmd_corp_users,
-    cmd_phone, cmd_scrape, cmd_ocr, cmd_extract, cmd_leet, cmd_leet_perm,
-    cmd_xor, cmd_analyze, cmd_compare, cmd_cluster, cmd_entropy, cmd_hcmon, cmd_hibp, cmd_intelx, cmd_merge, cmd_dns, cmd_pharma, cmd_sanitize,
-    cmd_reverse, cmd_train, cmd_corp_prefixes, cmd_sysinfo, cmd_mangle,
-    cmd_improve, cmd_maya_rank, cmd_default_creds, cmd_isp_keygen,
-    cmd_password_dna, cmd_dna_extract, cmd_cover, cmd_replay, cmd_emit,
-    cmd_maskgen, cmd_strategy, cmd_bandit, cmd_combiner, cmd_pcfg,
-    cmd_markov, cmd_kwalk, cmd_phonetic, cmd_rule_mine, cmd_finetune_data, cmd_nflow, cmd_combo, cmd_corp_conv, cmd_rulegen, cmd_benchmark, cmd_prince,
-    cmd_anomaly_score, cmd_osint_perm, cmd_cupp, cmd_pattern_rank,
-    cmd_scrape_target, cmd_br_names, cmd_iwlgen, cmd_phrase, cmd_mutate,
-    cmd_num2text, cmd_rules, cmd_affix, cmd_dedup, cmd_subtract,
-    cmd_split, cmd_keyspace, cmd_neural, cmd_strength, cmd_hash_id,
-    cmd_hash_gen, cmd_hcmask, cmd_osint, cmd_passphrase, cmd_evaluate,
-    cmd_curate, cmd_pipeline, cmd_session, cmd_score, cmd_explain_cmd,
-    cmd_serve, cmd_br_deep, cmd_locale, cmd_pbmp, cmd_evolve, cmd_graph_expand,
-    cmd_temporal_model, cmd_domain_pcfg, cmd_plugin, cmd_vae_interp,
+    cmd_affix,
+    cmd_analyze,
+    cmd_anomaly_score,
+    cmd_bandit,
+    cmd_benchmark,
+    cmd_br_deep,
+    cmd_br_names,
+    cmd_charset,
+    cmd_cluster,
+    cmd_combiner,
+    cmd_combo,
+    cmd_compare,
+    cmd_corp,
+    cmd_corp_conv,
+    cmd_corp_prefixes,
+    cmd_corp_users,
+    cmd_cover,
+    cmd_cupp,
+    cmd_curate,
+    cmd_dedup,
+    cmd_default_creds,
+    cmd_dna_extract,
+    cmd_dns,
+    cmd_domain_pcfg,
+    cmd_emit,
+    cmd_entropy,
+    cmd_evaluate,
+    cmd_evolve,
+    cmd_explain_cmd,
+    cmd_extract,
+    cmd_finetune_data,
+    cmd_graph_expand,
+    cmd_hash_gen,
+    cmd_hash_id,
+    cmd_hcmask,
+    cmd_hcmon,
+    cmd_hibp,
+    cmd_improve,
+    cmd_intelx,
+    cmd_isp_keygen,
+    cmd_iwlgen,
+    cmd_keyspace,
+    cmd_kwalk,
+    cmd_leet,
+    cmd_leet_perm,
+    cmd_locale,
+    cmd_mangle,
+    cmd_markov,
+    cmd_maskgen,
+    cmd_maya_rank,
+    cmd_merge,
+    cmd_mutate,
+    cmd_neural,
+    cmd_nflow,
+    cmd_num2text,
+    cmd_ocr,
+    cmd_osint,
+    cmd_osint_perm,
+    cmd_passphrase,
+    cmd_password_dna,
+    cmd_pattern,
+    cmd_pattern_rank,
+    cmd_pbmp,
+    cmd_pcfg,
+    cmd_pharma,
+    cmd_phone,
+    cmd_phonetic,
+    cmd_phrase,
+    cmd_pipeline,
+    cmd_plugin,
+    cmd_prince,
+    cmd_profile,
+    cmd_replay,
+    cmd_reverse,
+    cmd_rule_mine,
+    cmd_rulegen,
+    cmd_rules,
+    cmd_sanitize,
+    cmd_score,
+    cmd_scrape,
+    cmd_scrape_target,
+    cmd_serve,
+    cmd_session,
+    cmd_split,
+    cmd_strategy,
+    cmd_strength,
+    cmd_subtract,
+    cmd_sysinfo,
+    cmd_temporal_model,
     cmd_test,
+    cmd_train,
+    cmd_vae_interp,
+    cmd_xor,
 )
+from wlf.cli.menu import interactive_menu
+from wlf.cli.parser import build_parser
+from wlf.cli.utils import _err, _info, _warn
 
 
 def main() -> None:
@@ -57,8 +134,8 @@ def main() -> None:
         _GLOBAL_CTX["locale"] = _cfg.get("locale", "en")
 
     # ── Apply global execution context (CLI overrides config) ─────────────────
-    from wlf_modules.thread_pool import validate_thread_count, DEFAULT_THREADS
     from wlf_modules.compute_backend import set_backend
+    from wlf_modules.thread_pool import DEFAULT_THREADS, validate_thread_count
 
     raw_threads    = getattr(args, "threads", None) or _cfg.get("threads", DEFAULT_THREADS)
     compute_mode   = getattr(args, "compute", "auto") or "auto"

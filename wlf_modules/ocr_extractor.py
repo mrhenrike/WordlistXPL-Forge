@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ except ImportError:
     logger.warning("easyocr não instalado. Instale com: pip install easyocr")
 
 try:
-    from PIL import Image
+    from PIL import Image  # noqa: F401
     _PIL_OK = True
 except ImportError:
     _PIL_OK = False

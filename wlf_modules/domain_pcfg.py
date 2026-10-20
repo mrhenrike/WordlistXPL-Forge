@@ -23,12 +23,11 @@ import json
 import math
 import random
 import re
-from collections import Counter, defaultdict
-from dataclasses import asdict, dataclass, field
+from collections import defaultdict
+from collections.abc import Generator
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Generator, Optional, Any
 from typing import Any
-
 
 # ── Domain vocabulary seeds ───────────────────────────────────────────────────
 
@@ -115,7 +114,7 @@ class DomainPCFGModel:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "DomainPCFGModel":
+    def from_dict(cls, d: dict[str, Any]) -> DomainPCFGModel:
         m = cls(sector=d.get("sector", "generic"), alpha=d.get("alpha", 0.1))
         m.structure_counts = d.get("structure_counts", {})
         m.segment_counts = defaultdict(dict, d.get("segment_counts", {}))
@@ -174,7 +173,7 @@ class DomainPCFG:
             d[value] = d.get(value, 0.0) + weight
         self.model.total_trained += 1
 
-    def _sample_structure(self) -> Optional[str]:
+    def _sample_structure(self) -> str | None:
         d = self.model.structure_counts
         if not d:
             return None
@@ -198,7 +197,7 @@ class DomainPCFG:
             chars = "!@#$%^&*()_+-="
         return "".join(self._rng.choices(chars, k=length))
 
-    def sample(self) -> Optional[str]:
+    def sample(self) -> str | None:
         struct = self._sample_structure()
         if not struct:
             return None
@@ -228,8 +227,8 @@ class DomainPCFG:
 
     def generate(
         self,
-        profile: Optional[dict[str, Any]] = None,
-        corpus: Optional[list[str]] = None,
+        profile: dict[str, Any] | None = None,
+        corpus: list[str] | None = None,
         max_candidates: int = 100_000,
         min_len: int = 4,
         max_len: int = 32,

@@ -26,13 +26,10 @@ Versão: 1.1.0
 from __future__ import annotations
 
 import logging
-import os
-import sys
+from collections.abc import Generator
 from configparser import ConfigParser
-from itertools import combinations, permutations, product
-from math import log10
+from itertools import permutations, product
 from pathlib import Path
-from typing import Generator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +127,7 @@ def load_charset_file(filepath: str, charset_name: str) -> str:
 
 def get_charset(
     charset: str,
-    charset_file: Optional[str] = None,
+    charset_file: str | None = None,
 ) -> str:
     """
     Resolve um charset pelo nome (built-in ou de arquivo externo).
@@ -205,8 +202,8 @@ def generate_by_charset(
 
 def generate_by_pattern(
     pattern: str,
-    charset_file: Optional[str] = None,
-    extra_charset: Optional[str] = None,
+    charset_file: str | None = None,
+    extra_charset: str | None = None,
 ) -> Generator[str, None, None]:
     """
     Gera strings com base em um pattern com placeholders.
@@ -243,7 +240,7 @@ def generate_by_pattern(
 
 def generate_phone_numbers(
     prefix: str = "+55",
-    ddds: Optional[list[str]] = None,
+    ddds: list[str] | None = None,
 ) -> Generator[str, None, None]:
     """
     Gera números de telefone brasileiros com DDDs.
@@ -267,7 +264,7 @@ def generate_phone_numbers(
 
 def generate_by_mask(
     mask: str,
-    custom_charset: Optional[str] = None,
+    custom_charset: str | None = None,
 ) -> Generator[str, None, None]:
     """
     Gera wordlist a partir de uma máscara estilo Hashcat.
@@ -314,7 +311,7 @@ def generate_by_mask(
         yield "".join(combo)
 
 
-def estimate_mask_size(mask: str, custom_charset: Optional[str] = None) -> tuple[int, str]:
+def estimate_mask_size(mask: str, custom_charset: str | None = None) -> tuple[int, str]:
     """
     Estima o número de entradas para uma máscara Hashcat.
 
@@ -448,7 +445,7 @@ def estimate_constrained_size(
     Returns:
         Tupla (total_estimado, tamanho_formatado).
     """
-    from math import factorial, comb
+    from math import factorial
 
     d = len(BUILTIN_CHARSETS["numeric"])
     l_ = len(BUILTIN_CHARSETS["lalpha"])

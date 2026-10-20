@@ -19,8 +19,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Optional
-
 
 # ── Score type registry ────────────────────────────────────────────────────────
 
@@ -35,8 +33,8 @@ SCORE_TYPE_HEURISTIC  = "heuristic"    # 0-1, higher is better
 @dataclass
 class EngineScoreSpec:
     score_type: str = SCORE_TYPE_HEURISTIC
-    min_clip: Optional[float] = None
-    max_clip: Optional[float] = None
+    min_clip: float | None = None
+    max_clip: float | None = None
     cost_scale: float = 100.0          # for COST type: typical max cost
 
 

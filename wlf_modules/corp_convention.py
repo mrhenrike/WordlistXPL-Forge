@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import Any, Generator, Optional
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +155,8 @@ class CorpConventionEngine:
     def __init__(
         self,
         corp_names: list[str],
-        years: Optional[list[str]] = None,
-        patterns: Optional[list[str]] = None,
+        years: list[str] | None = None,
+        patterns: list[str] | None = None,
     ) -> None:
         self.corp_names = corp_names if corp_names else ["Corp"]
         self.years = years if years else list(DEFAULT_YEARS)
@@ -191,7 +192,7 @@ class CorpConventionEngine:
 
 def handle_corp_conv(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for corporate convention generation."""
     corp_names_raw = getattr(args, "corp_names", None)
     years_raw = getattr(args, "years", None)

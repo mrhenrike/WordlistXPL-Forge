@@ -19,8 +19,7 @@ import math
 import re
 import string
 from dataclasses import dataclass, field
-from typing import Optional, Any
-
+from typing import Any
 
 # ── Structure detection ───────────────────────────────────────────────────────
 
@@ -151,7 +150,7 @@ def explain(
     candidate: str,
     engine: str = "unknown",
     raw_score: float = 0.0,
-    normalized_score: Optional[float] = None,
+    normalized_score: float | None = None,
 ) -> CandidateExplanation:
     """Produce a detailed explanation for a generated candidate."""
     from wlf_modules.score_normalizer import normalize as _norm

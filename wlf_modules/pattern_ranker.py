@@ -20,8 +20,7 @@ from __future__ import annotations
 
 import collections
 import re
-from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple, Any
+from typing import Any
 
 __version__ = "1.0.0"
 
@@ -30,7 +29,7 @@ __version__ = "1.0.0"
 # ---------------------------------------------------------------------------
 
 # QWERTY US layout (row-based adjacency)
-_QWERTY_ADJ: Dict[str, str] = {
+_QWERTY_ADJ: dict[str, str] = {
     "q": "wa", "w": "qeas", "e": "wrds", "r": "etdf", "t": "ryfg",
     "y": "tugh", "u": "yihj", "i": "uojk", "o": "ipkl", "p": "ol",
     "a": "qwsz", "s": "wedxza", "d": "erfcxs", "f": "rtgvcd", "g": "tyhbvf",
@@ -42,7 +41,7 @@ _QWERTY_ADJ: Dict[str, str] = {
 }
 
 # ABNT2 Brazilian Portuguese keyboard (additional accented positions)
-_ABNT2_ADJ: Dict[str, str] = dict(_QWERTY_ADJ)
+_ABNT2_ADJ: dict[str, str] = dict(_QWERTY_ADJ)
 _ABNT2_ADJ.update({
     "p": "ol;", ";": "lp/", "~": "`1", "cedilla": "l;",
     "/": ";.", ".": ",/", ",": "m.", "m": "nj,",
@@ -119,7 +118,7 @@ def score_keyboard_walk(
     return 1.0 - walk_ratio  # invert: 0 = all walk, 1 = no walk
 
 
-def detect_ptbr_month(password: str) -> Optional[str]:
+def detect_ptbr_month(password: str) -> str | None:
     """Detect if password contains a PTBR month name.
 
     Returns the detected month name or None.
@@ -135,7 +134,7 @@ def analyze_wordlist(
     wordlist_path: str,
     max_lines: int = 500_000,
     layout: str = "qwerty",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Analyze a wordlist file and produce statistics.
 
     Args:
@@ -146,8 +145,8 @@ def analyze_wordlist(
     Returns:
         Analysis dict with mask_counts, walk_scores, top_masks, ptbr_months.
     """
-    mask_counts: Dict[str, int] = collections.Counter()
-    walk_scores: List[float] = []
+    mask_counts: dict[str, int] = collections.Counter()
+    walk_scores: list[float] = []
     ptbr_count = 0
     total = 0
 
@@ -180,10 +179,10 @@ def analyze_wordlist(
 
 
 def prioritize_by_walk(
-    passwords: List[str],
+    passwords: list[str],
     layout: str = "qwerty",
     threshold: float = 0.3,
-) -> List[Tuple[str, float]]:
+) -> list[tuple[str, float]]:
     """Return passwords sorted by keyboard-walk score (most walk-like first).
 
     Args:

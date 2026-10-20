@@ -25,7 +25,6 @@ import logging
 import os
 import unicodedata
 from pathlib import Path
-from typing import Optional, Any
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -45,10 +44,10 @@ def _resolve_config_path() -> Path:
 
 
 _DEFAULT_CONFIG_PATH = _resolve_config_path()
-_CONFIG_CACHE: Optional[dict[str, Any]] = None
+_CONFIG_CACHE: dict[str, Any] | None = None
 
 
-def load_prefix_config(path: Optional[str] = None) -> dict[str, Any]:
+def load_prefix_config(path: str | None = None) -> dict[str, Any]:
     """
     Load prefix patterns config from JSON file.
 
@@ -108,7 +107,7 @@ def _norm(s: str) -> str:
 
 def get_all_prefixes(
     config: dict[str, Any],
-    categories: Optional[list[str]] = None,
+    categories: list[str] | None = None,
 ) -> list[str]:
     """
     Return all prefix aliases from selected categories.
@@ -210,8 +209,8 @@ def generate_prefixed_usernames(
     ini:        str,
     prefixes:   list[str],
     separators: list[str],
-    config:     Optional[dict[str, Any]] = None,
-    patterns:   Optional[list[str]] = None,
+    config:     dict[str, Any] | None = None,
+    patterns:   list[str] | None = None,
     max_per_prefix: int = 0,
 ) -> list[str]:
     """
@@ -282,12 +281,12 @@ def generate_prefixed_usernames(
 def generate_from_name(
     full_name:  str,
     domain:     str = "",
-    prefixes:   Optional[list[str]] = None,
-    categories: Optional[list[str]] = None,
-    separators: Optional[list[str]] = None,
-    sector:     Optional[str] = None,
+    prefixes:   list[str] | None = None,
+    categories: list[str] | None = None,
+    separators: list[str] | None = None,
+    sector:     str | None = None,
     with_numeric: bool = True,
-    config:     Optional[dict[str, Any]] = None,
+    config:     dict[str, Any] | None = None,
 ) -> list[str]:
     """
     Generate all prefixed username variations for a full name.
@@ -370,7 +369,7 @@ def generate_from_name(
 
 # ── CLI / integration helpers ─────────────────────────────────────────────────
 
-def list_all_prefixes(config: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+def list_all_prefixes(config: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Return all available prefix groups and their aliases for user inspection.
 

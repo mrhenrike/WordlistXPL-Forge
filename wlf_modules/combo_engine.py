@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,7 @@ class ComboEngine:
 
 def handle_combo(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for credential combo generation."""
     userlist = getattr(args, "userlist", None)
     passlist = getattr(args, "passlist", None)

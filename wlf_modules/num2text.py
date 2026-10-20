@@ -27,7 +27,7 @@ Author: André Henrique (@mrhenrike)
 from __future__ import annotations
 
 import unicodedata
-from typing import Generator
+from collections.abc import Generator
 
 MAX_DIGITS = 12
 

@@ -34,14 +34,14 @@ from __future__ import annotations
 
 import math
 import random
-import statistics
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, Any
+from typing import Any
 
 __version__ = "1.0.0"
 
 # QWERTY adjacency map (row/column neighbours only, lowercase)
-_QWERTY_ADJ: Dict[str, str] = {
+_QWERTY_ADJ: dict[str, str] = {
     "q": "wa", "w": "qeas", "e": "wrds", "r": "etdf", "t": "ryfg",
     "y": "tugh", "u": "yihj", "i": "uojk", "o": "ipkl", "p": "ol",
     "a": "qwsz", "s": "wedxza", "d": "erfcxs", "f": "rtgvcd", "g": "tyhbvf",
@@ -51,7 +51,7 @@ _QWERTY_ADJ: Dict[str, str] = {
 }
 
 
-def _extract_features(password: str) -> List[float]:
+def _extract_features(password: str) -> list[float]:
     """Extract numeric feature vector from a password.
 
     Returns:
@@ -68,7 +68,7 @@ def _extract_features(password: str) -> List[float]:
     specials = n - digits - uppers - lowers
 
     # Shannon entropy
-    freq: Dict[str, int] = {}
+    freq: dict[str, int] = {}
     for c in password:
         freq[c] = freq.get(c, 0) + 1
     entropy = -sum((v / n) * math.log2(v / n) for v in freq.values())
@@ -120,19 +120,19 @@ def _extract_features(password: str) -> List[float]:
 class _IsoNode:
     """Node in an isolation tree."""
 
-    __slots__ = ("feature_idx", "split_value", "left", "right", "size")
+    __slots__ = ("feature_idx", "left", "right", "size", "split_value")
 
     def __init__(self) -> None:
         self.feature_idx: int = 0
         self.split_value: float = 0.0
-        self.left: Optional["_IsoNode"] = None
-        self.right: Optional["_IsoNode"] = None
+        self.left: _IsoNode | None = None
+        self.right: _IsoNode | None = None
         self.size: int = 0
 
 
 def _build_iso_tree(
-    data: List[List[float]],
-    indices: List[int],
+    data: list[list[float]],
+    indices: list[int],
     current_depth: int,
     max_depth: int,
     rng: random.Random,
@@ -162,7 +162,7 @@ def _build_iso_tree(
     return node
 
 
-def _path_length(node: _IsoNode, x: List[float], current_depth: int) -> float:
+def _path_length(node: _IsoNode, x: list[float], current_depth: int) -> float:
     """Return path length for sample x in isolation tree."""
     if node.left is None and node.right is None:
         n = node.size
@@ -178,11 +178,11 @@ def _path_length(node: _IsoNode, x: List[float], current_depth: int) -> float:
 
 
 def _iso_forest_scores(
-    features: List[List[float]],
+    features: list[list[float]],
     n_estimators: int = 50,
     max_samples: int = 128,
     seed: int = 42,
-) -> List[float]:
+) -> list[float]:
     """Compute IsolationForest anomaly scores (0=normal, 1=anomaly)."""
     rng = random.Random(seed)
     n = len(features)
@@ -213,7 +213,7 @@ def _iso_forest_scores(
 # HBOS-lite
 # ---------------------------------------------------------------------------
 
-def _hbos_scores(features: List[List[float]], n_bins: int = 10) -> List[float]:
+def _hbos_scores(features: list[list[float]], n_bins: int = 10) -> list[float]:
     """Compute Histogram-Based Outlier Scores (0=normal, higher=anomaly).
 
     Each feature dimension gets an independent histogram. The per-sample
@@ -226,7 +226,7 @@ def _hbos_scores(features: List[List[float]], n_bins: int = 10) -> List[float]:
     n_samples = len(features)
 
     # Build per-feature histograms
-    histograms: List[Tuple[List[float], List[float]]] = []
+    histograms: list[tuple[list[float], list[float]]] = []
     for f_idx in range(n_features):
         col = [features[i][f_idx] for i in range(n_samples)]
         col_min, col_max = min(col), max(col)
@@ -267,7 +267,7 @@ def _hbos_scores(features: List[List[float]], n_bins: int = 10) -> List[float]:
 # Normalisation helper
 # ---------------------------------------------------------------------------
 
-def _normalise(scores: List[float]) -> List[float]:
+def _normalise(scores: list[float]) -> list[float]:
     """Min-max normalise a list of scores to [0, 1]."""
     if not scores:
         return []
@@ -281,7 +281,7 @@ def _normalise(scores: List[float]) -> List[float]:
 # Public API
 # ---------------------------------------------------------------------------
 
-def score_passwords(passwords: Sequence[str]) -> List[Tuple[str, float]]:
+def score_passwords(passwords: Sequence[str]) -> list[tuple[str, float]]:
     """Score a sequence of passwords by anomaly level.
 
     Higher score = more unusual compared to the rest of the input.
@@ -428,14 +428,14 @@ def policy_check(password: str) -> dict[str, Any]:
 
 
 def filter_by_policy(
-    passwords: List[str],
+    passwords: list[str],
     require_windows: bool = False,
     require_owasp_basic: bool = False,
     require_owasp_strong: bool = False,
     min_entropy: float = 0.0,
     exclude_keyboard_walk: bool = False,
     exclude_repeated: bool = False,
-) -> List[str]:
+) -> list[str]:
     """Filter a list of passwords by policy compliance.
 
     Useful for reducing a generated wordlist to only candidates likely to
@@ -453,7 +453,7 @@ def filter_by_policy(
     Returns:
         Filtered list preserving original order.
     """
-    result: List[str] = []
+    result: list[str] = []
     for pw in passwords:
         p = policy_check(pw)
         if require_windows and not p["windows_complexity"]:
@@ -477,7 +477,7 @@ def score_wordlist(
     top_n: int = 0,
     max_lines: int = 100_000,
     encoding: str = "utf-8",
-) -> List[Tuple[str, float]]:
+) -> list[tuple[str, float]]:
     """Load a wordlist file and score each entry by anomaly level.
 
     Args:
@@ -496,7 +496,7 @@ def score_wordlist(
     if not fpath.exists():
         raise FileNotFoundError(f"Wordlist not found: {fpath}")
 
-    passwords: List[str] = []
+    passwords: list[str] = []
     with open(fpath, encoding=encoding, errors="replace") as fh:
         for i, line in enumerate(fh):
             if i >= max_lines:

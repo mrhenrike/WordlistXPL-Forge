@@ -23,7 +23,8 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Generator, Iterable, Optional, Any
+from collections.abc import Generator, Iterable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ _CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z])(?=[A-Z])")
 
 def expand_affixes(
     cores: Iterable[str],
-    specials: Optional[Iterable[str]] = None,
+    specials: Iterable[str] | None = None,
     positions: str = "both",
     include_bare_core: bool = True,
     include_bare_specials: bool = False,
@@ -152,7 +153,7 @@ def case_variants(word: str, include_upper: bool = True) -> list[str]:
 def apply_affix_layer(
     words: Iterable[str],
     cores: Iterable[str],
-    specials: Optional[Iterable[str]] = None,
+    specials: Iterable[str] | None = None,
     positions: str = "both",
     include_base: bool = True,
     titlecase: bool = False,
@@ -186,9 +187,9 @@ def apply_affix_layer(
         include_bare_core=True,
         include_bare_specials=include_bare_specials,
     )
-    seen: Optional[set[str]] = set() if dedupe else None
+    seen: set[str] | None = set() if dedupe else None
 
-    def _emit(s: str) -> Optional[str]:
+    def _emit(s: str) -> str | None:
         if not s:
             return None
         if seen is not None:
@@ -225,7 +226,7 @@ def apply_affix_layer(
 
 def build_ruleset(
     cores: Iterable[str],
-    specials: Optional[Iterable[str]] = None,
+    specials: Iterable[str] | None = None,
     positions: str = "both",
     include_titlecase: bool = False,
     include_case: bool = False,
@@ -267,7 +268,7 @@ def build_ruleset(
     return out
 
 
-def _iter_words(wordlist: Optional[str], keywords: Optional[list[str]]) -> Generator[str, None, None]:
+def _iter_words(wordlist: str | None, keywords: list[str] | None) -> Generator[str, None, None]:
     """Yield base words from a wordlist file, stdin, or inline keywords.
 
     Args:
@@ -296,7 +297,7 @@ def _iter_words(wordlist: Optional[str], keywords: Optional[list[str]]) -> Gener
         yield kw
 
 
-def handle_affix(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_affix(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for the ``affix`` composite-affix mutation layer.
 
     Args:

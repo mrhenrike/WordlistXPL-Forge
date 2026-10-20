@@ -33,8 +33,8 @@ import os
 import sys
 import time
 import uuid
-from typing import Any, AsyncGenerator, Optional
-from typing import Any, Generator
+from collections.abc import AsyncGenerator, Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ def _make_fastapi_app(api_key: str = "") -> Generator[str, None, None]:
     try:
         from fastapi import Depends, FastAPI, Header, HTTPException, Request
         from fastapi.responses import JSONResponse, StreamingResponse
-        from pydantic import BaseModel
+        from pydantic import BaseModel  # noqa: F401
     except ImportError as exc:
         raise RuntimeError(
             "FastAPI not installed. pip install wordlistxpl-forge[api]"
