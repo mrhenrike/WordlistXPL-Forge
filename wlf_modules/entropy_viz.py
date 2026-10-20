@@ -20,8 +20,9 @@ import json
 import logging
 import math
 from collections import Counter
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +239,7 @@ def _load_passwords(path: str, max_load: int = 500_000) -> list[str]:
 
 def handle_entropy(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for entropy visualization."""
     wordlist = getattr(args, "wordlist", None)
     fmt = getattr(args, "format", "text")

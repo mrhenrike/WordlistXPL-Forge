@@ -31,7 +31,7 @@ def test_xor_decrypt_single_byte_key() -> None:
 
 
 def test_xor_encrypt_roundtrip() -> None:
-    from wlf_modules.xor_crypto import xor_encrypt, xor_decrypt
+    from wlf_modules.xor_crypto import xor_decrypt, xor_encrypt
     plaintext = b"secret message"
     key = b"key123"
     ct = xor_encrypt(plaintext, key)
@@ -40,14 +40,14 @@ def test_xor_encrypt_roundtrip() -> None:
 
 
 def test_xor_encrypt_str() -> None:
-    from wlf_modules.xor_crypto import xor_encrypt_str, xor_decrypt
+    from wlf_modules.xor_crypto import xor_decrypt, xor_encrypt_str
     ct = xor_encrypt_str("hello", "k")
     assert isinstance(ct, bytes)
     assert xor_decrypt(ct, b"k") == b"hello"
 
 
 def test_xor_brute_force_single_byte() -> None:
-    from wlf_modules.xor_crypto import xor_encrypt, brute_force_single_byte
+    from wlf_modules.xor_crypto import brute_force_single_byte, xor_encrypt
     plaintext = b"Hello World 123"
     key = b"\x42"
     ct = xor_encrypt(plaintext, key)
@@ -58,14 +58,14 @@ def test_xor_brute_force_single_byte() -> None:
 
 
 def test_xor_decrypt_str() -> None:
-    from wlf_modules.xor_crypto import xor_encrypt_str, xor_decrypt_str
+    from wlf_modules.xor_crypto import xor_decrypt_str, xor_encrypt_str
     ct = xor_encrypt_str("hello world", "k")
     result = xor_decrypt_str(ct, "k")
     assert result == "hello world"
 
 
 def test_xor_brute_force_display(capsys) -> None:
-    from wlf_modules.xor_crypto import xor_encrypt, brute_force_display
+    from wlf_modules.xor_crypto import brute_force_display, xor_encrypt
     ct = xor_encrypt(b"test", b"\x20")
     brute_force_display(ct.hex())
     # Just verify it runs without error; output goes to stdout
@@ -76,7 +76,7 @@ def test_xor_brute_force_display(capsys) -> None:
 # ---------------------------------------------------------------------------
 
 def test_generate_yields_strings() -> None:
-    from wlf_modules.passphrase_gen import generate, _load_words
+    from wlf_modules.passphrase_gen import _load_words, generate
     words = _load_words(None)
     gen = generate(words, count=3, num_words=4, separator="-")
     phrases = list(gen)
@@ -87,7 +87,7 @@ def test_generate_yields_strings() -> None:
 
 
 def test_generate_capitalize() -> None:
-    from wlf_modules.passphrase_gen import generate, _load_words
+    from wlf_modules.passphrase_gen import _load_words, generate
     words = _load_words(None)
     gen = generate(words, count=2, num_words=3, capitalize=True)
     phrases = list(gen)
@@ -97,7 +97,7 @@ def test_generate_capitalize() -> None:
 
 
 def test_generate_add_number() -> None:
-    from wlf_modules.passphrase_gen import generate, _load_words
+    from wlf_modules.passphrase_gen import _load_words, generate
     words = _load_words(None)
     gen = generate(words, count=5, num_words=3, add_number=True)
     found = False

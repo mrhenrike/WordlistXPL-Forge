@@ -17,7 +17,7 @@ import logging
 import re
 import zlib
 from enum import Enum
-from typing import Optional, Union, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -126,11 +126,7 @@ def _split_syllables(word: str) -> list[str]:
             next_next_is_vowel = (
                 len(remaining) > 1 and remaining[1][0] in _VOWELS
             )
-            if next_is_consonant and next_next_is_vowel:
-                syllables.append("".join(current))
-                current = []
-                found_vowel_in_current = False
-            elif not remaining:
+            if (next_is_consonant and next_next_is_vowel) or not remaining:
                 syllables.append("".join(current))
                 current = []
                 found_vowel_in_current = False
@@ -208,7 +204,7 @@ def _crc32(s: str) -> int:
 
 
 def mutate(
-    words: Union[list[str], str],
+    words: list[str] | str,
     modes: list[MutationMode],
     include_original: bool = True,
 ) -> list[str]:
@@ -260,7 +256,7 @@ def mutate(
 def mutate_tokens(
     token_dict: dict[str, Any],
     modes: list[MutationMode],
-    scope_keys: Optional[list[str]] = None,
+    scope_keys: list[str] | None = None,
 ) -> dict[str, Any]:
     """Apply mutations to string/list values in a profile dictionary.
 

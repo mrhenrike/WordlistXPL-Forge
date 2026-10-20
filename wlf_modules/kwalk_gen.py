@@ -14,9 +14,9 @@ Version: 2.0.0
 """
 from __future__ import annotations
 
-import itertools
 import logging
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -149,11 +149,11 @@ def _merge_layouts(*layout_names: str) -> dict[str, dict[str, str]]:
 def generate_walks(
     min_length: int = 4,
     max_length: int = 10,
-    layouts: Optional[list[str]] = None,
-    directions: Optional[list[str]] = None,
+    layouts: list[str] | None = None,
+    directions: list[str] | None = None,
     max_direction_changes: int = 3,
     include_shift: bool = True,
-    start_chars: Optional[str] = None,
+    start_chars: str | None = None,
     max_candidates: int = 0,
 ) -> Generator[str, None, None]:
     """Generate keyboard walk passwords.
@@ -221,9 +221,9 @@ def _parse_route_dirs(route: str) -> list[str]:
 def walk_route(
     start: str,
     route: str,
-    layouts: Optional[list[str]] = None,
+    layouts: list[str] | None = None,
     include_shift: bool = True,
-) -> Optional[str]:
+) -> str | None:
     """Follow an explicit direction route from a starting key."""
     if not start or not route:
         return None
@@ -277,7 +277,7 @@ def load_route_file(filepath: str) -> list[tuple[str, str]]:
 
 def generate_routes(
     routes: list[tuple[str, str]],
-    layouts: Optional[list[str]] = None,
+    layouts: list[str] | None = None,
     include_shift: bool = True,
     min_length: int = 0,
     max_length: int = 64,
@@ -355,7 +355,7 @@ def get_layout_info() -> dict[str, dict[str, Any]]:
     return info
 
 
-def handle_kwalk(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_kwalk(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for keyboard walk generation.
 
     Args:

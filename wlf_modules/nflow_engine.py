@@ -16,7 +16,8 @@ from __future__ import annotations
 import logging
 import math
 import random
-from typing import Any, Generator, Optional
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -288,7 +289,7 @@ class NFlowEngine:
 
 def handle_nflow(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for normalizing flow generation."""
     from pathlib import Path
 

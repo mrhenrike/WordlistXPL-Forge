@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class ComputeBackend(ABC):
         mask: str,
         start: int,
         count: int,
-        custom1: Optional[str] = None,
+        custom1: str | None = None,
     ) -> list[str]:
         """Generate a linear slice of a hashcat-style mask keyspace."""
         from wlf_modules.gpu_expand import generate_mask_chunk as _gen
@@ -125,8 +125,8 @@ class CPUBackend(ComputeBackend):
     @property
     def device_info(self) -> str:
         try:
-            import platform
             import os
+            import platform
             cores = os.cpu_count() or 1
             return f"CPU ({platform.processor() or 'unknown'}, {cores} threads)"
         except Exception:
@@ -362,7 +362,7 @@ def auto_select_backend(compute_mode: str = "auto", hw_profile: Any = None) -> C
 
 # ── Session singleton ─────────────────────────────────────────────────────────
 
-_SESSION_BACKEND: Optional[ComputeBackend] = None
+_SESSION_BACKEND: ComputeBackend | None = None
 
 
 def get_backend(compute_mode: str = "auto") -> ComputeBackend:

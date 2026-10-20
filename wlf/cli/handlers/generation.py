@@ -2,28 +2,36 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Generator
 from pathlib import Path
-
-from typing import Any, Generator, Optional
+from typing import Any
 
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
+    _GLOBAL_CTX,
 )
 from wlf.cli.utils import (
-    _info, _ok, _warn, _err, _write_output,
-    _effective_len_bounds, _format_bytes, _check_disk_space,
-    _confirm_large, _count_generator_entries,
-    _profile_preview_and_confirm, _resolve_path, _load_profile_file,
+    _confirm_large,
+    _err,
+    _info,
+    _load_profile_file,
+    _ok,
+    _warn,
+    _write_output,
 )
 
 
 def cmd_charset(args: argparse.Namespace) -> None:
     """Handler for charset mode."""
     from wlf_modules.charset_gen import (
-        get_charset, generate_by_charset, generate_by_pattern,
-        estimate_size, create_charset_wizard, PLACEHOLDER_MAP,
-        generate_by_mask, estimate_mask_size,
-        generate_constrained, estimate_constrained_size,
+        create_charset_wizard,
+        estimate_constrained_size,
+        estimate_mask_size,
+        estimate_size,
+        generate_by_charset,
+        generate_by_mask,
+        generate_by_pattern,
+        generate_constrained,
+        get_charset,
     )
 
     if args.create_charset:
@@ -97,8 +105,9 @@ def cmd_charset(args: argparse.Namespace) -> None:
 def cmd_pattern(args: argparse.Namespace) -> None:
     """Handler for pattern mode."""
     from wlf_modules.pattern_engine import (
-        render_template, generate_from_template_file, expand_variable,
-        generate_company_patterns,
+        expand_variable,
+        generate_from_template_file,
+        render_template,
     )
 
     variables: dict[str, list[str]] = {}
@@ -129,12 +138,12 @@ def cmd_mutate(args: argparse.Namespace) -> None:
         _err("A password is required.")
         return
 
-    extra_prefixes: Optional[list[str]] = None
+    extra_prefixes: list[str] | None = None
     raw_pfx = getattr(args, "prefixes", None)
     if raw_pfx:
         extra_prefixes = ["" if p == "EMPTY" else p for p in raw_pfx.split(",")]
 
-    extra_suffixes: Optional[list[str]] = None
+    extra_suffixes: list[str] | None = None
     raw_sfx = getattr(args, "suffixes", None)
     if raw_sfx:
         extra_suffixes = ["" if s == "EMPTY" else s for s in raw_sfx.split(",")]
@@ -179,7 +188,7 @@ def cmd_mutate(args: argparse.Namespace) -> None:
 
 def cmd_num2text(args: argparse.Namespace) -> None:
     """Convert digits to text words and generate case/leet/separator variations."""
-    from wlf_modules.num2text import num2text_variants, num2text_range, _normalise_lang
+    from wlf_modules.num2text import _normalise_lang, num2text_range, num2text_variants
 
     lang     = _normalise_lang(getattr(args, "lang", "en") or "en")
     raw_seps = getattr(args, "separators", None)
@@ -230,13 +239,13 @@ def cmd_phrase(args: argparse.Namespace) -> None:
         _err("A phrase is required.")
         return
 
-    extra_prefixes: Optional[list[str]] = None
+    extra_prefixes: list[str] | None = None
     raw_pfx = getattr(args, "prefixes", None)
     if raw_pfx:
         parts = raw_pfx.split(",")
         extra_prefixes = ["" if p == "EMPTY" else p for p in parts]
 
-    extra_suffixes: Optional[list[str]] = None
+    extra_suffixes: list[str] | None = None
     raw_sfx = getattr(args, "suffixes", None)
     if raw_sfx:
         parts = raw_sfx.split(",")
@@ -288,7 +297,11 @@ def cmd_leet(args: argparse.Namespace) -> None:
 
 def cmd_leet_perm(args: argparse.Namespace) -> None:
     """Handler for cartesian leet permutation over a wordlist (elpscrk-style)."""
-    from wlf_modules.leet_permuter import leet_perm_wordlist, parse_custom_mapping, LEET_MEDIUM
+    from wlf_modules.leet_permuter import (
+        LEET_MEDIUM,
+        leet_perm_wordlist,
+        parse_custom_mapping,
+    )
 
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:
@@ -479,10 +492,14 @@ def cmd_br_names(args: argparse.Namespace) -> None:
 
     Generates a username list from BRWordList Brazilian name files.
     """
-    from wlf_modules.brwordlist_loader import BRWordListLoader, generate_usernames_from_br_names
     from pathlib import Path as _Path
 
-    explicit_path: Optional[str] = getattr(args, "brwordlist_path", None)
+    from wlf_modules.brwordlist_loader import (
+        BRWordListLoader,
+        generate_usernames_from_br_names,
+    )
+
+    explicit_path: str | None = getattr(args, "brwordlist_path", None)
     base_path = _Path(explicit_path) if explicit_path else None
 
     category: str = getattr(args, "category", "names") or "names"
@@ -519,7 +536,7 @@ def cmd_iwlgen(args: argparse.Namespace) -> None:
     """
     from wlf_modules.iwlgen import IwlgenEngine
 
-    raw_keywords: Optional[str] = getattr(args, "keywords", None)
+    raw_keywords: str | None = getattr(args, "keywords", None)
     if not raw_keywords:
         _err("Provide at least one keyword with --keywords.")
         return
@@ -539,7 +556,7 @@ def cmd_iwlgen(args: argparse.Namespace) -> None:
     do_abbr: bool = bool(getattr(args, "abbreviation", False))
     do_reverse: bool = bool(getattr(args, "reverse", False))
 
-    raw_num_tails: Optional[str] = getattr(args, "num_tails", None)
+    raw_num_tails: str | None = getattr(args, "num_tails", None)
     num_tails: list[str] = [t.strip() for t in raw_num_tails.split(",") if t.strip()] if raw_num_tails else []
 
     min_len: int = int(getattr(args, "min_length", 4) or 4)
@@ -781,6 +798,4 @@ def cmd_vae_interp(args: argparse.Namespace) -> None:
         _err(f"vae-interp error: {exc}")
 
 
-if __name__ == "__main__":
-    main()  # type: ignore[name-defined]
 

@@ -13,8 +13,9 @@ from __future__ import annotations
 import json
 import logging
 import random
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +222,7 @@ def write_jsonl(
 
 def handle_finetune(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for finetune-data subcommand."""
     wordlist = getattr(args, "wordlist", None)
     output = getattr(args, "output", None)

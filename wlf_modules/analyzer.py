@@ -25,7 +25,6 @@ import logging
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Optional, Any
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -428,7 +427,7 @@ def analyze_char_position_frequency(
     return {pos: dict(cnt.most_common(20)) for pos, cnt in pos_freq.items() if cnt}
 
 
-def export_stats_json(metrics: dict[str, Any], filepath: str, mask_data: Optional[dict[str, Any]] = None) -> str:
+def export_stats_json(metrics: dict[str, Any], filepath: str, mask_data: dict[str, Any] | None = None) -> str:
     """
     Exporta métricas de análise em formato JSON.
 
@@ -475,7 +474,7 @@ def export_stats_json(metrics: dict[str, Any], filepath: str, mask_data: Optiona
     return json.dumps(export, ensure_ascii=False, indent=2)
 
 
-def export_stats_csv(metrics: dict[str, Any], mask_data: Optional[dict[str, Any]] = None) -> str:
+def export_stats_csv(metrics: dict[str, Any], mask_data: dict[str, Any] | None = None) -> str:
     """
     Exporta distribuição de comprimento e top senhas em formato CSV.
 
@@ -524,7 +523,7 @@ def export_stats_csv(metrics: dict[str, Any], mask_data: Optional[dict[str, Any]
 def export_stats_markdown(
     metrics: dict[str, Any],
     filepath: str,
-    mask_data: Optional[dict[str, Any]] = None,
+    mask_data: dict[str, Any] | None = None,
 ) -> str:
     """
     Export analysis metrics as Markdown tables.
@@ -745,7 +744,7 @@ def maskgen_optindex(
 
 def export_masks_csv_pack(
     mask_optindex: list[dict[str, Any]],
-    filepath: Optional[str] = None,
+    filepath: str | None = None,
 ) -> str:
     """Export maskgen_optindex result as PACK-compatible CSV.
 

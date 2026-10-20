@@ -24,10 +24,8 @@ Version: 2.0.0
 from __future__ import annotations
 
 import logging
-import math
-import os
-from pathlib import Path
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -148,13 +146,13 @@ class GANPasswordEngine:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         latent_dim: int = 128,
         hidden_dim: int = 256,
         seq_len: int = 18,
         temperature: float = 1.0,
         vram_budget_mb: int = 4096,
-        device: Optional[str] = None,
+        device: str | None = None,
     ) -> None:
         self.model_path = model_path
         self.latent_dim = latent_dim
@@ -189,7 +187,7 @@ class GANPasswordEngine:
         except RuntimeError:
             return None  # type: ignore[return-value]
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         path = path or self.model_path
         if not path:
             return False
@@ -224,7 +222,7 @@ class GANPasswordEngine:
         max_candidates: int = 10_000,
         min_len: int = 6,
         max_len: int = 20,
-        temperature: Optional[float] = None,
+        temperature: float | None = None,
     ) -> Generator[tuple[str, float], None, None]:
         """Yield (password, score) tuples ordered by discriminator confidence."""
         temp = temperature if temperature is not None else self.temperature

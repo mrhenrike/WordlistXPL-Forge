@@ -16,8 +16,9 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def _pos_char(n: int) -> str:
     return str(n)
 
 
-def _detect_case_rule(base: str, target: str) -> Optional[str]:
+def _detect_case_rule(base: str, target: str) -> str | None:
     """Detect if the transformation is a pure case change."""
     if base.lower() == target.lower() and base != target:
         if target == base.lower():
@@ -59,7 +60,7 @@ def _detect_case_rule(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_append(base: str, target: str) -> Optional[str]:
+def _detect_append(base: str, target: str) -> str | None:
     """Detect append operations (target = base + suffix)."""
     bl = base.lower()
     tl = target.lower()
@@ -76,7 +77,7 @@ def _detect_append(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_prepend(base: str, target: str) -> Optional[str]:
+def _detect_prepend(base: str, target: str) -> str | None:
     """Detect prepend operations (target = prefix + base)."""
     bl = base.lower()
     tl = target.lower()
@@ -89,7 +90,7 @@ def _detect_prepend(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_replace(base: str, target: str) -> Optional[str]:
+def _detect_replace(base: str, target: str) -> str | None:
     """Detect character replacement rules."""
     if len(base) != len(target):
         return None
@@ -105,7 +106,7 @@ def _detect_replace(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_reverse(base: str, target: str) -> Optional[str]:
+def _detect_reverse(base: str, target: str) -> str | None:
     """Detect if target is the reverse of base."""
     if base[::-1] == target:
         return "r"
@@ -115,7 +116,7 @@ def _detect_reverse(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_duplicate(base: str, target: str) -> Optional[str]:
+def _detect_duplicate(base: str, target: str) -> str | None:
     """Detect if target is base doubled."""
     if target == base + base:
         return "d"
@@ -124,7 +125,7 @@ def _detect_duplicate(base: str, target: str) -> Optional[str]:
     return None
 
 
-def _detect_truncate(base: str, target: str) -> Optional[str]:
+def _detect_truncate(base: str, target: str) -> str | None:
     """Detect truncation rules."""
     if base.startswith(target) and len(target) < len(base):
         n_cut = len(base) - len(target)
@@ -216,7 +217,7 @@ def mine_rules_from_pairs(
 
 def mine_from_file(
     plaintext_file: str,
-    dictionary_file: Optional[str] = None,
+    dictionary_file: str | None = None,
     max_rules: int = 200,
     min_confidence: int = 2,
 ) -> list[tuple[str, int]]:
@@ -247,7 +248,7 @@ def mine_from_file(
     pairs: list[tuple[str, str]] = []
 
     if bases:
-        base_set = set(b.lower() for b in bases)
+        set(b.lower() for b in bases)
         for pw in plaintexts:
             pwl = pw.lower()
             for base in bases:
@@ -279,7 +280,7 @@ def write_rules(rules: list[tuple[str, int]], output: str) -> int:
 
 # ── CLI handler ──────────────────────────────────────────────────────────────
 
-def handle_rule_mine(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_rule_mine(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for rule mining."""
     wordlist = getattr(args, "wordlist", None)
     dictionary = getattr(args, "dictionary", None)

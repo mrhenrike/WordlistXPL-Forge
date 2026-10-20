@@ -24,10 +24,9 @@ import math
 import random
 import re
 from collections import Counter, defaultdict
+from collections.abc import Generator
 from dataclasses import dataclass, field
-from typing import Any, Generator, Optional
 from typing import Any
-
 
 # ── Grammar types ─────────────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ class DirichletCounts:
         total = sum(self.counts.values()) + self.alpha * max(len(self.counts), 1)
         return (self.counts.get(item, 0) + self.alpha) / total
 
-    def sample(self, rng: random.Random) -> Optional[str]:
+    def sample(self, rng: random.Random) -> str | None:
         if not self.counts:
             return None
         keys = list(self.counts.keys())
@@ -140,7 +139,7 @@ class BayesianGrammar:
             log_p += math.log(self.segment_priors[key].prob(value) + 1e-30)
         return log_p
 
-    def sample(self, rng: random.Random) -> Optional[str]:
+    def sample(self, rng: random.Random) -> str | None:
         """Sample one password from the posterior grammar."""
         struct = self.structure_prior.sample(rng)
         if not struct:
@@ -205,9 +204,9 @@ class BayesianFullEngine:
 
     def __init__(
         self,
-        profile: Optional[dict[str, Any]] = None,
+        profile: dict[str, Any] | None = None,
         alpha: float = 0.5,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> None:
         self.profile = profile or {}
         self.grammar = BayesianGrammar(alpha=alpha)
@@ -236,7 +235,7 @@ class BayesianFullEngine:
 
     def generate(
         self,
-        seed_corpus: Optional[list[str]] = None,
+        seed_corpus: list[str] | None = None,
         max_candidates: int = 100_000,
         min_len: int = 4,
         max_len: int = 32,

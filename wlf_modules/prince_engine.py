@@ -20,12 +20,12 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-import heapq
 import logging
 from collections import Counter
+from collections.abc import Generator
 from itertools import product
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ def _find_length_combos(
         current.pop()
 
 
-def handle_prince(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_prince(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for PRINCE attack mode.
 
     Args:

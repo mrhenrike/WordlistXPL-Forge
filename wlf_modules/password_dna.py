@@ -18,11 +18,9 @@ Version: 1.0.0
 from __future__ import annotations
 
 import logging
-import re
-import string
 from collections import Counter
+from collections.abc import Generator
 from itertools import product as iterproduct
-from typing import Generator, Optional, Any
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -130,7 +128,7 @@ class PasswordGene:
     def _detect_leet(self) -> bool:
         return any(c in _LEET_REVERSE for c in self.raw)
 
-    def _detect_year(self) -> Optional[str]:
+    def _detect_year(self) -> str | None:
         for seg in self.segments:
             if seg["type"] == "D" and len(seg["value"]) == 4 and seg["value"].startswith("20"):
                 return seg["value"]  # type: ignore[no-any-return]
@@ -245,7 +243,7 @@ def generate_from_dna(
     min_len = dna.length_min
     max_len = dna.length_max
 
-    def emit(s: str) -> Optional[str]:
+    def emit(s: str) -> str | None:
         if s and s not in seen and min_len <= len(s) <= max_len:
             seen.add(s)
             return s

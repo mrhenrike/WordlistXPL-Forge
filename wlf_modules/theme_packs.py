@@ -12,9 +12,7 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-from typing import Optional
-
-__all__ = ["get_theme", "list_themes", "THEMES"]
+__all__ = ["THEMES", "get_theme", "list_themes"]
 
 THEMES: dict[str, dict[str, list[str] | str]] = {
     "starwars": {

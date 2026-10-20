@@ -29,7 +29,7 @@ import random
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -68,15 +68,15 @@ def _read_lines(filepath: str) -> list[str]:
 
 def sanitize(
     filepath: str,
-    output: Optional[str] = None,
+    output: str | None = None,
     no_blank: bool = True,
     no_comments: bool = True,
     dedupe: bool = True,
-    sort_mode: Optional[str] = None,
-    min_len: Optional[int] = None,
-    max_len: Optional[int] = None,
-    filter_pattern: Optional[str] = None,
-    exclude_pattern: Optional[str] = None,
+    sort_mode: str | None = None,
+    min_len: int | None = None,
+    max_len: int | None = None,
+    filter_pattern: str | None = None,
+    exclude_pattern: str | None = None,
     inplace: bool = False,
     strip_control: bool = False,
 ) -> dict[str, Any]:
@@ -207,7 +207,7 @@ def sanitize(
 
 def reverse_file(
     filepath: str,
-    output: Optional[str] = None,
+    output: str | None = None,
     inplace: bool = False,
 ) -> int:
     """

@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -33,7 +31,7 @@ class CrackResult:
     def to_finding(self) -> dict[str, Any]:
         return {
             "schema": "xpl.finding.v1",
-            "id": f"wlf-credtest-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+            "id": f"wlf-credtest-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}",
             "title": f"Credential Testing: {self.cracked}/{self.total_hashes} cracked ({self.success_rate:.1f}%)",
             "severity": _severity_from_rate(self.success_rate),
             "target": "hash-file",
@@ -52,7 +50,7 @@ class CrackResult:
             ),
             "provenance": {
                 "tool": "WordlistXPL-Forge/credential_tester",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             },
         }
 
@@ -246,7 +244,7 @@ def run_test(
     timeout: int = 300,
     max_words: int = 100000,
 ) -> dict[str, Any]:
-    print(f"[*] WordlistXPL Credential Testing Pipeline")
+    print("[*] WordlistXPL Credential Testing Pipeline")
     print(f"    Hash file: {hash_file}")
     print(f"    Model: {model}")
 
@@ -264,16 +262,16 @@ def run_test(
     finding = result.to_finding()
 
     os.makedirs(output_dir, exist_ok=True)
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     out_path = os.path.join(output_dir, f"credtest_{ts}.json")
     with open(out_path, "w") as fh:
         json.dump(finding, fh, indent=2)
 
-    print(f"\n[+] Results:")
+    print("\n[+] Results:")
     print(f"    Cracked: {result.cracked}/{result.total_hashes} ({result.success_rate:.1f}%)")
     print(f"    Duration: {result.duration_seconds}s")
     if result.top_passwords:
-        print(f"    Top passwords:")
+        print("    Top passwords:")
         for entry in result.top_passwords[:10]:
             print(f"      {entry['password']}")
     print(f"[+] Report: {out_path}")

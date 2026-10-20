@@ -27,8 +27,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Generator, Iterable
 from itertools import product as iproduct
-from typing import Generator, Iterable
 
 # ---------------------------------------------------------------------------
 # Defaults

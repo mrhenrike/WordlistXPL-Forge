@@ -16,8 +16,9 @@ from __future__ import annotations
 import hashlib
 import logging
 import math
+from collections.abc import Generator, Iterable
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +256,7 @@ _MASK_CHARSETS = {
 }
 
 
-def mask_keyspace(mask: str, custom: Optional[dict[str, int]] = None) -> int:
+def mask_keyspace(mask: str, custom: dict[str, int] | None = None) -> int:
     """Compute the number of candidates for a hashcat mask.
 
     Args:
@@ -360,7 +361,7 @@ def _count_lines(path: str) -> int:
     return n
 
 
-def handle_dedup(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_dedup(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for the ``dedup`` command."""
     wordlist = getattr(args, "wordlist", None)
     if not wordlist:
@@ -376,7 +377,7 @@ def handle_dedup(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None
     return dedup_stream(words, use_bloom=use_bloom, capacity=capacity)
 
 
-def handle_subtract(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_subtract(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for the ``subtract`` command."""
     wordlist = getattr(args, "wordlist", None)
     remove = getattr(args, "remove", None) or []

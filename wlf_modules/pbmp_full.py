@@ -28,9 +28,7 @@ import time
 from collections import Counter, deque
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
 from typing import Any
-
 
 STRATEGIES = (
     "rules_mangle",
@@ -126,7 +124,7 @@ def _structure_template(pw: str) -> str:
     return "".join(parts)
 
 
-def _extract_context_features(profile: dict[str, Any], sector: Optional[str] = None) -> list[float]:
+def _extract_context_features(profile: dict[str, Any], sector: str | None = None) -> list[float]:
     """Convert profile + sector into a numeric feature vector."""
     has_name      = 1.0 if profile.get("full_name") or profile.get("short_name") else 0.0
     has_pet       = 1.0 if profile.get("pets") else 0.0
@@ -256,9 +254,9 @@ class PBMPFull:
 
     def __init__(
         self,
-        profile: Optional[dict[str, Any]] = None,
-        sector: Optional[str] = None,
-        model_path: Optional[str] = None,
+        profile: dict[str, Any] | None = None,
+        sector: str | None = None,
+        model_path: str | None = None,
         history_window: int = 50,
         lr: float = 0.05,
     ) -> None:

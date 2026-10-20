@@ -18,7 +18,6 @@ import os
 import platform
 import subprocess
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ class HWProfile:
     def gpu_count(self) -> int:
         return len([g for g in self.gpus if g.backend != "cpu"])  # type: ignore[attr-defined]
 
-    def primary_gpu(self) -> Optional[GPUDevice]:
+    def primary_gpu(self) -> GPUDevice | None:
         gpus = [g for g in self.gpus if g.backend != "cpu"]  # type: ignore[attr-defined]
         return gpus[0] if gpus else None  # type: ignore[return-value]
 
@@ -90,7 +89,7 @@ class HWProfiler:
     Singleton-style: use HWProfiler.detect() to get a cached HWProfile.
     """
 
-    _cached: Optional[HWProfile] = None
+    _cached: HWProfile | None = None
 
     @classmethod
     def detect(cls, force: bool = False) -> HWProfile:
@@ -298,7 +297,7 @@ class HWProfiler:
 
 # ── Singleton helper ──────────────────────────────────────────────────────────
 
-_hw_cache: Optional[HWProfile] = None
+_hw_cache: HWProfile | None = None
 
 
 def get_hw_profile(force: bool = False) -> HWProfile:

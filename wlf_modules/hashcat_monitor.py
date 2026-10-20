@@ -15,11 +15,10 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
-import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +220,7 @@ class RestoreInfo:
         }
 
 
-def parse_restore_file(path: str) -> Optional[RestoreInfo]:
+def parse_restore_file(path: str) -> RestoreInfo | None:
     """Parse a Hashcat .restore file (binary header + text args)."""
     p = Path(path)
     if not p.is_file():
@@ -269,15 +268,15 @@ class HashcatMonitor:
 
     def __init__(
         self,
-        session: Optional[str] = None,
-        restore_file: Optional[str] = None,
-        status_file: Optional[str] = None,
+        session: str | None = None,
+        restore_file: str | None = None,
+        status_file: str | None = None,
     ) -> None:
         self.session = session or ""
         self.restore_file = restore_file
         self.status_file = status_file
 
-    def read_status(self) -> Optional[HashcatStatus]:
+    def read_status(self) -> HashcatStatus | None:
         """Read and parse current status."""
         if self.status_file:
             p = Path(self.status_file)
@@ -292,7 +291,7 @@ class HashcatMonitor:
                 return parse_status_text(content)
         return None
 
-    def read_restore(self) -> Optional[RestoreInfo]:
+    def read_restore(self) -> RestoreInfo | None:
         """Read restore file info."""
         if self.restore_file:
             return parse_restore_file(self.restore_file)
@@ -422,7 +421,7 @@ def parse_jtr_pot(potfile: str) -> int:
 
 def handle_hcmon(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for cracker monitoring (Hashcat + JtR)."""
     session = getattr(args, "session", None)
     restore_file = getattr(args, "restore_file", None)

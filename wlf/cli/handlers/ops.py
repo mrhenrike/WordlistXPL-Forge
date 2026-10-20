@@ -2,24 +2,25 @@
 from __future__ import annotations
 
 import argparse
-
 from pathlib import Path
 
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
+    _GLOBAL_CTX,
 )
 from wlf.cli.utils import (
-    _info, _ok, _warn, _err, _write_output,
-    _effective_len_bounds, _format_bytes, _check_disk_space,
-    _confirm_large, _count_generator_entries,
-    _profile_preview_and_confirm, _resolve_path, _load_profile_file,
+    _err,
+    _info,
+    _ok,
+    _write_output,
 )
 
 
 def cmd_xor(args: argparse.Namespace) -> None:
     """Handler for XOR mode."""
     from wlf_modules.xor_crypto import (
-        brute_force_display, xor_encrypt_str, xor_decrypt_str,
+        brute_force_display,
+        xor_decrypt_str,
+        xor_encrypt_str,
     )
 
     if args.brute:
@@ -70,7 +71,7 @@ def cmd_merge(args: argparse.Namespace) -> None:
 
 def cmd_sanitize(args: argparse.Namespace) -> None:
     """Handler for wordlist sanitization."""
-    from wlf_modules.sanitizer import sanitize, format_sanitize_stats
+    from wlf_modules.sanitizer import format_sanitize_stats, sanitize
 
     inplace = getattr(args, "inplace", False)
     output = getattr(args, "output", None)
@@ -209,7 +210,7 @@ def cmd_rulegen(args: argparse.Namespace) -> None:
 
 def cmd_mangle(args: argparse.Namespace) -> None:
     """Handler for hashcat-style mangling rules on wordlists."""
-    from wlf_modules.mangler import apply_rules, BUILTIN_RULES
+    from wlf_modules.mangler import BUILTIN_RULES, apply_rules
 
     list_rules = getattr(args, "list_rules", False)
     if list_rules:
@@ -233,7 +234,7 @@ def cmd_mangle(args: argparse.Namespace) -> None:
         lines = [ln.rstrip("\n\r") for ln in f if ln.strip()]
 
     if getattr(args, "overseer", False):
-        from wlf_modules.mangler import overseer_expand, OverseerConfig
+        from wlf_modules.mangler import OverseerConfig, overseer_expand
         cfg = OverseerConfig(
             pps=int(getattr(args, "pps", 0) or 0),
             target_time_hrs=float(getattr(args, "time_budget", 1.0) or 1.0),
@@ -381,7 +382,10 @@ def cmd_split(args: argparse.Namespace) -> None:
 def cmd_keyspace(args: argparse.Namespace) -> None:
     """Handler for keyspace and time-to-exhaust estimation."""
     from wlf_modules.list_ops import (
-        mask_keyspace, charset_keyspace, keyspace_report, _count_lines,
+        _count_lines,
+        charset_keyspace,
+        keyspace_report,
+        mask_keyspace,
     )
 
     pps = float(getattr(args, "pps", 0) or 1_000_000_000)
@@ -431,7 +435,7 @@ def cmd_curate(args: argparse.Namespace) -> None:
 
 def cmd_test(args: argparse.Namespace) -> None:
     """Credential testing pipeline — generate wordlist + hashcat cracking."""
-    from wlf_modules.credential_tester import run_test, HASH_MODES
+    from wlf_modules.credential_tester import HASH_MODES, run_test
 
     hash_mode = None
     if args.mode:

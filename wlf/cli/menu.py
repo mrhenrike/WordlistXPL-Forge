@@ -3,11 +3,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Any, Optional
+from typing import Any
 
 from wlf.cli.context import Fore, Style
 from wlf.cli.utils import _info, _warn
-
 
 _CATEGORIES: list[dict[str, Any]] = [
     {
@@ -167,7 +166,7 @@ def _print_category_menu(cat: dict[str, Any]) -> None:
     print()
 
 
-def _find_command(name: str) -> Optional[str]:
+def _find_command(name: str) -> str | None:
     """Find a command by name across all categories."""
     name_lower = name.lower().strip()
     for cat in _CATEGORIES:

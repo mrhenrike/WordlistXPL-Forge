@@ -19,15 +19,16 @@ import logging
 import re
 import uuid
 import zlib
-from datetime import datetime, date
-from itertools import permutations as _permutations, product as _product
+from collections.abc import Generator
+from datetime import date, datetime
+from itertools import permutations as _permutations
+from itertools import product as _product
 from pathlib import Path
-from typing import Generator, Optional, Any
 from typing import Any
 
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
-_BEHAVIOR_DB: Optional[dict[str, Any]] = None
+_BEHAVIOR_DB: dict[str, Any] | None = None
 
 
 class _SeenSet:
@@ -170,7 +171,7 @@ def _normalize_date_fields(data: dict[str, Any]) -> dict[str, Any]:
     Também processa ``hire`` para entidades corporativas (mesma lógica).
     """
     try:
-        from wlf_modules.date_profile import date_profile_from_yaml, build_date_tokens
+        from wlf_modules.date_profile import build_date_tokens, date_profile_from_yaml
         from wlf_modules.i18n import get_session_locale
     except ImportError:
         return data
@@ -664,7 +665,7 @@ def normalize_profile_output_path(
     return str(target)
 
 
-def resolve_profile_output(cli_output: Optional[str], profile: dict[str, Any]) -> Optional[str]:
+def resolve_profile_output(cli_output: str | None, profile: dict[str, Any]) -> str | None:
     """CLI -o wins; else interactive output_path; else None (stdout)."""
     fmt = (profile.get("output") or {}).get("format", "lst")
     if cli_output:
@@ -698,7 +699,7 @@ def estimate_birth_year(age: int) -> int:
     return datetime.now().year - age
 
 
-def parse_date_input(raw: str) -> Optional[tuple[int, int, int]]:
+def parse_date_input(raw: str) -> tuple[int, int, int] | None:
     """
     Parse a date from user input in multiple formats.
 
@@ -1236,7 +1237,7 @@ def _emit_phrase_initials_combos(
     profile: dict[str, Any],
     min_len: int,
     max_len: int,
-    seen: "_SeenSet | set[str]",
+    seen: _SeenSet | set[str],
 ) -> Generator[str, None, None]:
     """
     Yield acrostic passwords from personal phrases/jargon in the profile.
@@ -1267,7 +1268,7 @@ def _emit_phrase_full_combos(
     profile: dict[str, Any],
     min_len: int,
     max_len: int,
-    seen: "_SeenSet | set[str]",
+    seen: _SeenSet | set[str],
     *,
     do_leet: bool = False,
     leet_mode: str = "basic",
@@ -1648,7 +1649,7 @@ def _emit_profile_relationship_combos(
     date_tokens: list[str],
     min_len: int,
     max_len: int,
-    seen: "_SeenSet | set[str]",
+    seen: _SeenSet | set[str],
     *,
     include_specials: bool = False,
     with_spaces: bool = False,
@@ -1660,7 +1661,7 @@ def _emit_profile_relationship_combos(
     children↔dates, _NOME@year#Pet, _CORP@year#Dept, _leet@year#SIGLA, etc.
     Respects ``include_specials``, ``with_spaces``, and ``leet_mode``.
     """
-    def _try_emit(s: str) -> Optional[str]:
+    def _try_emit(s: str) -> str | None:
         if s and s not in seen and min_len <= len(s) <= max_len:
             seen.add(s)
             return s
@@ -1695,7 +1696,7 @@ def _emit_profile_relationship_combos(
     nicks = _build_token_pool(profile.get("nicknames", []), leet_mode)
 
     domain = (profile.get("company_domain", "") or "").replace("https://", "").replace("http://", "")
-    domain_prefix = domain.split(".")[0] if domain else ""
+    domain.split(".")[0] if domain else ""
     corps = _build_corp_relationship_pool(profile, leet_mode)
 
     depts = _build_token_pool([profile.get("company_department", "") or ""], leet_mode)
@@ -1876,7 +1877,7 @@ def _emit_all(
     min_len: int,
     max_len: int,
     with_spaces: bool,
-    seen: "_SeenSet | set[str]",
+    seen: _SeenSet | set[str],
     depth: int = 3,
 ) -> Generator[str, None, None]:
     """Yield all combinations of tokens, dates, separators.
@@ -1895,7 +1896,7 @@ def _emit_all(
     if with_spaces and " " not in seps:
         seps.append(" ")
 
-    def _try_emit(s: str) -> Optional[str]:
+    def _try_emit(s: str) -> str | None:
         if s and s not in seen and min_len <= len(s) <= max_len:
             seen.add(s)
             return s
@@ -2129,8 +2130,8 @@ def interactive_profile(
     Returns:
         Dict with all collected profile data.
     """
-    from wlf_modules.i18n import t, ask_language_selection, get_session_locale
     from wlf_modules.date_profile import ask_date_profile, build_date_tokens
+    from wlf_modules.i18n import ask_language_selection, t
 
     # ── Language selection (first screen) ─────────────────────
     locale = ask_language_selection()
@@ -2168,7 +2169,7 @@ def interactive_profile(
     profile["location_country"] = _ask(t("field.country"))
     if profile.get("location_country"):
         try:
-            from wlf_modules.country_tokens import resolve_country, country_display_name
+            from wlf_modules.country_tokens import country_display_name, resolve_country
             _country_key = resolve_country(profile["location_country"])
             if _country_key:
                 profile["location_country_key"] = _country_key
@@ -2387,7 +2388,7 @@ def interactive_profile(
 
 def _generate_from_behavior(
     profile: dict[str, Any],
-    seen: "_SeenSet | set[str]",
+    seen: _SeenSet | set[str],
     min_len: int,
     max_len: int,
 ) -> Generator[str, None, None]:
@@ -2409,7 +2410,7 @@ def _generate_from_behavior(
     if not db:
         return
 
-    def _try(s: str) -> Optional[str]:
+    def _try(s: str) -> str | None:
         s = s.strip()
         if s and s not in seen and min_len <= len(s) <= max_len:
             seen.add(s)
@@ -2596,7 +2597,7 @@ def _generate_from_behavior(
 
 def generate_from_profile(
     profile: dict[str, Any],
-    leet_mode: Optional[str] = None,
+    leet_mode: str | None = None,
     min_len: int = 6,
     max_len: int = 32,
     with_spaces: bool = False,
@@ -2771,8 +2772,8 @@ def generate_from_profile(
     country_raw = (profile.get("location_country", "") or "").strip()
     if country_raw and _eng(24):
         from wlf_modules.country_tokens import (
-            country_word_tokens,
             country_minimal_tokens,
+            country_word_tokens,
             resolve_country,
         )
         ckey = resolve_country(country_raw)
@@ -3024,7 +3025,7 @@ def improve_wordlist(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     written = 0
-    with open(source_path, "r", encoding="utf-8", errors="ignore") as src, \
+    with open(source_path, encoding="utf-8", errors="ignore") as src, \
             open(out_path, "w", encoding="utf-8") as dst:
 
         for raw_line in src:

@@ -17,7 +17,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ _KNOWN_SECLISTS_RELATIVES = [
 ]
 
 
-def find_seclists_root(hint: Optional[str] = None) -> Optional[Path]:
+def find_seclists_root(hint: str | None = None) -> Path | None:
     """Locate SecLists root directory.
 
     Searches the provided hint path first, then known relative locations
@@ -48,7 +48,7 @@ def find_seclists_root(hint: Optional[str] = None) -> Optional[Path]:
     Returns:
         Path to SecLists root or None if not found.
     """
-    candidates: List[Path] = []
+    candidates: list[Path] = []
     if hint:
         candidates.append(Path(hint))
     else:
@@ -79,7 +79,7 @@ def _has_passwords(root: Path) -> bool:
     return any(pwd_dir.iterdir())
 
 
-def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]]:
+def diagnose_corpus(seclists_root: Path | None = None) -> dict[str, list[str]]:
     """Report which corpus files are present and which are missing.
 
     Useful for debugging incomplete SecLists checkouts. Prints a clear
@@ -93,7 +93,7 @@ def diagnose_corpus(seclists_root: Optional[Path] = None) -> Dict[str, List[str]
     """
     root = seclists_root or find_seclists_root()
     corpus = load_corpus_index()
-    result: Dict[str, List[str]] = {"found": [], "missing": [], "seclists_root": str(root) if root else "not found"}  # type: ignore[dict-item]
+    result: dict[str, list[str]] = {"found": [], "missing": [], "seclists_root": str(root) if root else "not found"}  # type: ignore[dict-item]
 
     if not root:
         logger.warning("SecLists not found. %s", _SECLISTS_HINT)
@@ -138,7 +138,7 @@ def load_corpus_index() -> dict[str, Any]:
         return json.load(f)  # type: ignore[no-any-return]
 
 
-def train_from_seclists(model: Any, seclists_root: Path, categories: Optional[List[str]] = None, max_password_sources: int = 0, max_username_sources: int = 0) -> dict[str, Any]:
+def train_from_seclists(model: Any, seclists_root: Path, categories: list[str] | None = None, max_password_sources: int = 0, max_username_sources: int = 0) -> dict[str, Any]:
     """Batch-train a PatternModel from SecLists corpus.
 
     Args:

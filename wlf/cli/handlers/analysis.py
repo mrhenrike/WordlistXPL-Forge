@@ -2,30 +2,32 @@
 from __future__ import annotations
 
 import argparse
-
 from pathlib import Path
+from typing import Any
 
 from wlf.cli.context import (
-    Fore, Style, _GLOBAL_CTX, _TQDM, _tqdm, logger, is_shutdown, VERSION,
+    _GLOBAL_CTX,
 )
-from typing import Optional, Any
-
 from wlf.cli.utils import (
-    _info, _ok, _warn, _err, _write_output,
-    _effective_len_bounds, _format_bytes, _check_disk_space,
-    _confirm_large, _count_generator_entries,
-    _profile_preview_and_confirm, _resolve_path, _load_profile_file,
+    _err,
+    _info,
+    _ok,
+    _warn,
+    _write_output,
 )
 
 
 def cmd_analyze(args: argparse.Namespace) -> None:
     """Handler for wordlist analysis."""
     from wlf_modules.analyzer import (
-        analyze_wordlist, format_report,
-        analyze_masks, format_mask_report,
-        export_stats_json, export_stats_csv,
+        analyze_masks,
+        analyze_wordlist,
+        export_stats_csv,
+        export_stats_json,
         export_stats_markdown,
         extract_base_words,
+        format_mask_report,
+        format_report,
     )
 
     _info(f"Analyzing: {args.wordlist}")
@@ -35,7 +37,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
         _err(str(e))
         return
 
-    mask_data: Optional[dict[str, Any]] = None
+    mask_data: dict[str, Any] | None = None
     do_masks = getattr(args, "masks", False)
     if do_masks:
         _info("Running Hashcat mask analysis...")
@@ -46,9 +48,9 @@ def cmd_analyze(args: argparse.Namespace) -> None:
 
     if getattr(args, "mask_optindex", False):
         from wlf_modules.analyzer import (
-            maskgen_optindex,
-            format_maskgen_report,
             export_masks_csv_pack,
+            format_maskgen_report,
+            maskgen_optindex,
         )
         _info("Running PACK maskgen optindex ranking...")
         try:
@@ -170,8 +172,8 @@ def cmd_password_dna(args: argparse.Namespace) -> None:
 
 def cmd_dna_extract(args: argparse.Namespace) -> None:
     """Extract DNA profile + hashcat masks without full candidate explosion."""
-    from wlf_modules.password_dna import PasswordDNA
     from wlf_modules.coverage_analyzer import hashcat_mask, structure_mask
+    from wlf_modules.password_dna import PasswordDNA
 
     passwords: list[str] = list(getattr(args, "passwords", None) or [])
     if getattr(args, "file", None):
@@ -232,7 +234,7 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
 
 def cmd_maya_rank(args: argparse.Namespace) -> None:
     """Rank a wordlist by MAYA-inspired cracking probability."""
-    from wlf_modules.maya_ranker import rank_wordlist, format_rank_report
+    from wlf_modules.maya_ranker import format_rank_report, rank_wordlist
 
     source = getattr(args, "wordlist", None)
     if not source:
@@ -260,7 +262,9 @@ def cmd_maya_rank(args: argparse.Namespace) -> None:
 
 def cmd_pattern_rank(args: argparse.Namespace) -> None:
     """Analyze wordlist patterns: keyboard walks, Hashcat masks, PTBR months."""
-    from wlf_modules.pattern_ranker import analyze_wordlist, score_keyboard_walk, build_hashcat_mask
+    from wlf_modules.pattern_ranker import (
+        analyze_wordlist,
+    )
 
     path = getattr(args, "wordlist", None)
     if not path:
@@ -311,7 +315,7 @@ def cmd_anomaly_score(args: argparse.Namespace) -> None:
         _warn(str(exc))
         return
 
-    lines_out = [f"{score:.4f}\t{pw}" for pw, score in results]
+    [f"{score:.4f}\t{pw}" for pw, score in results]
 
     if output:
         out_path = Path(output)
@@ -455,7 +459,7 @@ def cmd_compare(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:
@@ -481,7 +485,7 @@ def cmd_hibp(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:
@@ -506,7 +510,7 @@ def cmd_intelx(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:
@@ -526,7 +530,7 @@ def cmd_hcmon(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:
@@ -550,7 +554,7 @@ def cmd_entropy(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:
@@ -574,7 +578,7 @@ def cmd_cluster(args: argparse.Namespace) -> None:
 
     output = getattr(args, "output", None)
     if output:
-        count = _write_output(gen, output)
+        _write_output(gen, output)
         _ok(f"Report saved to {output}")
     else:
         for line in gen:

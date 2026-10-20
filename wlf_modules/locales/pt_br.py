@@ -10,7 +10,7 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-from typing import Generator, Optional, Any
+from collections.abc import Generator
 
 from wlf_modules.locales import BaseLocaleEngine, register_engine
 
@@ -23,7 +23,6 @@ class PTBREngine(BaseLocaleEngine):
 
     def generate(self) -> Generator[tuple[str, float], None, None]:
         from wlf_modules.br_deep_engine import BRDeepEngine
-        profile_str: Optional[str] = None
         if self.profile:
             engine = BRDeepEngine(profile=self.profile, rng_seed=42)
         else:

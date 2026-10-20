@@ -9,15 +9,14 @@ Author: André Henrique (@mrhenrike)
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 import tarfile
 import uuid
 import zipfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any
 
 from wlf_modules.sanitizer import sanitize as _sanitize
 
@@ -27,7 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PROJECT_TMP = PROJECT_ROOT / ".tmp"
 PROJECT_TMP.mkdir(parents=True, exist_ok=True)
 
-_SORT_MAP: dict[str, Optional[str]] = {
+_SORT_MAP: dict[str, str | None] = {
     "none": None,
     "alpha": "alpha",
     "alpha-desc": "alpha-rev",
@@ -66,8 +65,8 @@ class ExportOptions:
     dedupe: bool = True
     strip_control: bool = True
     sort: str = "none"
-    min_len: Optional[int] = None
-    max_len: Optional[int] = None
+    min_len: int | None = None
+    max_len: int | None = None
     member_name: str = "wordlist.lst"
 
 
@@ -133,7 +132,7 @@ def export_wordlist(
     lines_out: int = 0
     removed_dupes: int = 0
 
-    tmp_file: Optional[Path] = None
+    tmp_file: Path | None = None
 
     try:
         if options.sanitize:

@@ -20,10 +20,10 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-import json
 import logging
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def _require_torch() -> Any:
         RuntimeError: If torch is not installed.
     """
     try:
-        import torch  # noqa: F401
+        import torch
         return torch
     except ImportError as exc:
         raise RuntimeError(_INSTALL_HINT) from exc
@@ -142,7 +142,7 @@ class CharVocab:
         return [self.stoi[c] for c in word if c in self.stoi]
 
     @classmethod
-    def from_words(cls, words: list[str], max_vocab: int = 0) -> "CharVocab":
+    def from_words(cls, words: list[str], max_vocab: int = 0) -> CharVocab:
         from collections import Counter
         counter: Counter[str] = Counter[str]()
         for w in words:
@@ -155,7 +155,7 @@ class CharVocab:
         return {"itos": self.itos}
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "CharVocab":
+    def from_dict(cls, d: dict[str, Any]) -> CharVocab:
         obj = cls.__new__(cls)
         obj.itos = d["itos"]
         obj.stoi = {c: i for i, c in enumerate(obj.itos)}
@@ -301,7 +301,7 @@ def _load_model(torch: Any, model_path: str, compute_mode: str, vram_budget_mb: 
     return model, vocab, device, cfg
 
 
-def _mask_allowed_indices(vocab: CharVocab, klass: str) -> Optional[list[int]]:
+def _mask_allowed_indices(vocab: CharVocab, klass: str) -> list[int] | None:
     """Return the vocab indices allowed for a mask class, or None for free."""
     chars = _MASK_CLASSES.get(klass)
     if chars is None:
@@ -379,7 +379,7 @@ def generate(
                 logits, state = model(x, state)
                 logits = logits[0, -1] / max(1e-6, temperature)
 
-                allowed: Optional[list[int]] = None
+                allowed: list[int] | None = None
                 if mask_tokens:
                     if pos >= len(mask_tokens):
                         break
@@ -678,6 +678,6 @@ def handle_neural(args: Any, ctx: dict[str, Any]) -> Any:
     except RuntimeError as exc:
         logger.error(str(exc))
         return None
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.error("neural error: %s", exc)
         return None

@@ -18,11 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Optional
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -50,7 +48,7 @@ class SessionState:
 class SessionManager:
     """Save, load, list and delete generation sessions."""
 
-    def __init__(self, session_dir: Optional[Path] = None) -> None:
+    def __init__(self, session_dir: Path | None = None) -> None:
         self.session_dir = Path(session_dir or _DEFAULT_SESSION_DIR)
         self.session_dir.mkdir(parents=True, exist_ok=True)
 
@@ -59,7 +57,7 @@ class SessionManager:
     @staticmethod
     def new_id(label: str = "") -> str:
         ts_ns = time.time_ns()
-        h = hashlib.sha1(f"{ts_ns}{label}".encode(), usedforsecurity=False).hexdigest()[:6]  # noqa: S324
+        h = hashlib.sha1(f"{ts_ns}{label}".encode(), usedforsecurity=False).hexdigest()[:6]
         ts_sec = ts_ns // 1_000_000_000
         return f"{ts_sec}-{h}"
 
@@ -83,11 +81,11 @@ class SessionManager:
         emitted: int = 0,
         bytes_written: int = 0,
         chunk_index: int = 0,
-        engine_states: Optional[dict[str, Any]] = None,
-        bandit_stats: Optional[dict[str, Any]] = None,
-        pbmp_weights: Optional[dict[str, Any]] = None,
-        pipeline_config: Optional[dict[str, Any]] = None,
-        global_ctx: Optional[dict[str, Any]] = None,
+        engine_states: dict[str, Any] | None = None,
+        bandit_stats: dict[str, Any] | None = None,
+        pbmp_weights: dict[str, Any] | None = None,
+        pipeline_config: dict[str, Any] | None = None,
+        global_ctx: dict[str, Any] | None = None,
     ) -> Path:
         existing = self._try_load(session_id)
         now = time.time()
@@ -123,7 +121,7 @@ class SessionManager:
             data = json.load(fh)
         return SessionState(**data)
 
-    def _try_load(self, session_id: str) -> Optional[SessionState]:
+    def _try_load(self, session_id: str) -> SessionState | None:
         try:
             return self.load(session_id)
         except (FileNotFoundError, TypeError, json.JSONDecodeError):
@@ -180,10 +178,10 @@ class SessionManager:
 
 # ── Module-level singleton ─────────────────────────────────────────────────────
 
-_manager: Optional[SessionManager] = None
+_manager: SessionManager | None = None
 
 
-def get_manager(session_dir: Optional[Path] = None) -> SessionManager:
+def get_manager(session_dir: Path | None = None) -> SessionManager:
     global _manager
     if _manager is None or session_dir is not None:
         _manager = SessionManager(session_dir)

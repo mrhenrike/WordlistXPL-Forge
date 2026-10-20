@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +101,7 @@ def _parse_template(template: str) -> tuple[list[int], list[bool]]:
     return tokens, is_masked
 
 
-def _allowed_for_class(cls: str) -> Optional[set[int]]:
+def _allowed_for_class(cls: str) -> set[int] | None:
     chars = _MASK_CLASS_CHARS.get(cls)
     if chars is None:
         return None
@@ -109,7 +110,8 @@ def _allowed_for_class(cls: str) -> Optional[set[int]]:
 
 def _fallback_fill(template: str, max_candidates: int) -> Generator[tuple[str, float], None, None]:
     """CPU fallback: fill ?-positions randomly."""
-    import random, string
+    import random
+    import string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
     for _ in range(max_candidates):
@@ -122,7 +124,7 @@ class MaskedLMEngine:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         d_model: int = 256,
         n_layers: int = 4,
         max_len: int = 32,
@@ -136,7 +138,7 @@ class MaskedLMEngine:
         self._model = None
         self._loaded = False
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         path = path or self.model_path
         if not path:
             return False
@@ -158,7 +160,7 @@ class MaskedLMEngine:
         template: str,
         max_candidates: int = 10_000,
         temperature: float = 1.0,
-        allowed_classes: Optional[dict[int, str]] = None,
+        allowed_classes: dict[int, str] | None = None,
         batch_size: int = 256,
     ) -> Generator[tuple[str, float], None, None]:
         """Fill ?-masked positions in a template.
@@ -211,7 +213,6 @@ class MaskedLMEngine:
 
                 for b in range(batch_size):
                     chars = []
-                    conf = 0.0
                     for i, tok in enumerate(x[b].tolist()):
                         if tok == _PAD_IDX:
                             break

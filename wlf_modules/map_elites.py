@@ -26,9 +26,8 @@ import math
 import random
 import string
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Any, Callable, Generator, Optional
-
+from collections.abc import Callable, Generator
+from dataclasses import dataclass
 
 # ── Behaviour descriptor ──────────────────────────────────────────────────────
 
@@ -174,8 +173,8 @@ class MAPElites:
 
     def __init__(
         self,
-        fitness_fn: Optional[Callable[[str], float]] = None,
-        seed: Optional[int] = None,
+        fitness_fn: Callable[[str], float] | None = None,
+        seed: int | None = None,
     ) -> None:
         self.fitness_fn = fitness_fn or _default_fitness
         self.rng = random.Random(seed)
@@ -206,12 +205,12 @@ class MAPElites:
                 count += 1
         return count
 
-    def _select_elite(self) -> Optional[str]:
+    def _select_elite(self) -> str | None:
         if not self.grid:
             return None
         return self.rng.choice(list(self.grid.values())).password
 
-    def evolve_step(self) -> Optional[str]:
+    def evolve_step(self) -> str | None:
         """One MAP-Elites step: select → mutate → evaluate → insert."""
         parent = self._select_elite()
         if parent is None:
@@ -229,7 +228,7 @@ class MAPElites:
 
     def generate(
         self,
-        seed_passwords: Optional[list[str]] = None,
+        seed_passwords: list[str] | None = None,
         max_candidates: int = 50_000,
         warmup_steps: int = 5_000,
     ) -> Generator[tuple[str, float], None, None]:

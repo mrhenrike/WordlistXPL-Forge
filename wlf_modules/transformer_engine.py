@@ -22,9 +22,8 @@ Version: 2.0.0
 from __future__ import annotations
 
 import logging
-import math
-from pathlib import Path
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +113,7 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
     return CharGPT()
 
 
-def _parse_mask_pattern(pattern: str) -> list[Optional[set[int]]]:
+def _parse_mask_pattern(pattern: str) -> list[set[int] | None]:
     """Convert hashcat-style mask to per-position allowed index sets. None = any."""
     allowed = []
     i = 0
@@ -131,7 +130,7 @@ def _parse_mask_pattern(pattern: str) -> list[Optional[set[int]]]:
     return allowed  # type: ignore[return-value]
 
 
-def _sample(logits: Any, temperature: float, allowed_indices: Optional[set[int]] = None) -> Any:
+def _sample(logits: Any, temperature: float, allowed_indices: set[int] | None = None) -> Any:
     torch = _require_torch()
     import torch.nn.functional as F
     if allowed_indices:
@@ -146,7 +145,8 @@ def _sample(logits: Any, temperature: float, allowed_indices: Optional[set[int]]
 
 
 def _fallback_generate(max_candidates: int, prefix: str, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
-    import random, string
+    import random
+    import string
     rng = random.Random()
     pool = string.ascii_lowercase + string.digits + "@#!_"
     for _ in range(max_candidates):
@@ -160,7 +160,7 @@ class TransformerPasswordEngine:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         n_layers: int = 4,
         d_model: int = 256,
         n_heads: int = 4,
@@ -189,7 +189,7 @@ class TransformerPasswordEngine:
         except RuntimeError:
             return None  # type: ignore[return-value]
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         path = path or self.model_path
         if self.use_hf:
             return self._load_hf()
@@ -211,7 +211,7 @@ class TransformerPasswordEngine:
 
     def _load_hf(self) -> bool:
         try:
-            from transformers import AutoTokenizer, AutoModelForCausalLM
+            from transformers import AutoModelForCausalLM, AutoTokenizer
             self._hf_tokenizer = AutoTokenizer.from_pretrained(self.hf_model_name)
             self._hf_model = AutoModelForCausalLM.from_pretrained(self.hf_model_name)
             self._loaded = True
@@ -227,12 +227,12 @@ class TransformerPasswordEngine:
         min_len: int = 6,
         max_len: int = 20,
         temperature: float = 1.0,
-        prefix: Optional[str] = None,
-        pattern: Optional[str] = None,
+        prefix: str | None = None,
+        pattern: str | None = None,
         batch_size: int = 256,
     ) -> Generator[tuple[str, float], None, None]:
         try:
-            torch = _require_torch()
+            _require_torch()
         except RuntimeError:
             logger.warning("Transformer engine: torch unavailable, using fallback")
             yield from _fallback_generate(max_candidates, prefix or "", min_len, max_len)
@@ -286,7 +286,6 @@ class TransformerPasswordEngine:
 
                 for seq in seqs:
                     chars = []
-                    log_sum = 0.0
                     for idx in seq:
                         if idx in (_PAD_IDX, _EOS_IDX):
                             break
@@ -305,7 +304,6 @@ class TransformerPasswordEngine:
 
     def _generate_hf(self, max_candidates: Any, min_len: Any, max_len: Any, temperature: Any, prefix: Any) -> Generator[tuple[str, float], None, None]:
         try:
-            import torch
             tok = self._hf_tokenizer
             mod = self._hf_model
             prompt = prefix or ""
