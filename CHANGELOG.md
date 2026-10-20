@@ -5,11 +5,19 @@ All notable changes to WordlistXPL-Forge are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-10-20
+
+### Changed
+- `requires-python` elevated from `>=3.8` to `>=3.12` (align with all XPL-Suite forges)
+- README badge updated to Python >=3.12
+- Added `py.typed` marker (PEP 561) for downstream type checking
+- Replaced em dashes with hyphens in CHANGELOG (style consistency)
+
 ## [2.0.0] - 2026-10-06
 
 ### Added
 
-- **Aurora CLI surface** — wired argparse for `pipeline`, `session`, `score`,
+- **Aurora CLI surface** - wired argparse for `pipeline`, `session`, `score`,
   `explain`, `serve`, `br-deep`, `pbmp`, `evolve`, `graph-expand`,
   `temporal-model`, `domain-pcfg`, `plugin`, `vae-interp`.
 - Multi-engine modules: `async_pipeline`, `pipeline_dsl`, `session_manager`,
