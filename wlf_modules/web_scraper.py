@@ -25,7 +25,8 @@ import logging
 import re
 import time
 from collections import deque
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 logger = logging.getLogger(__name__)
@@ -66,11 +67,11 @@ DEFAULT_STOPWORDS: frozenset[str] = frozenset({
     # PT-BR
     "que", "não", "com", "uma", "para", "por", "como", "mas", "foi", "isso",
     "ele", "ela", "são", "nas", "nos", "seu", "sua", "esse", "essa", "isto",
-    "nós", "eles", "elas", "dos", "das", "num", "uma", "uns", "umas", "mais",
-    "também", "ser", "ter", "tem", "era", "foi", "ser", "está", "este",
-    "esta", "isso", "aqui", "ali", "bem", "sim", "não", "já", "ainda",
+    "nós", "eles", "elas", "dos", "das", "num", "uns", "umas", "mais",
+    "também", "ser", "ter", "tem", "era", "está", "este",
+    "esta", "aqui", "ali", "bem", "sim", "já", "ainda",
     "mesmo", "muito", "pouco", "todo", "toda", "todos", "todas", "outro",
-    "outra", "outros", "outras", "quando", "onde", "porque", "como", "assim",
+    "outra", "outros", "outras", "quando", "onde", "porque", "assim",
     "então", "depois", "antes", "agora", "sempre", "nunca", "até", "sobre",
 })
 
@@ -109,14 +110,14 @@ class WebScraper:
         max_word_len: int = 32,
         extract_emails: bool = False,
         extract_meta: bool = False,
-        user_agent: Optional[str] = None,
+        user_agent: str | None = None,
         delay: float = 0.5,
         timeout: int = 10,
-        auth: Optional[tuple[str, str]] = None,
-        cookies: Optional[dict[str, Any]] = None,
-        proxy: Optional[str] = None,
-        extra_headers: Optional[dict[str, str]] = None,
-        stopwords: Optional[frozenset[str]] = None,
+        auth: tuple[str, str] | None = None,
+        cookies: dict[str, Any] | None = None,
+        proxy: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        stopwords: frozenset[str] | None = None,
         with_numbers: bool = False,
         with_spaces: bool = False,
         capture_paths: bool = False,
@@ -165,7 +166,7 @@ class WebScraper:
         self.urls_visited: list[str] = []
         self.emails_found: set[str] = set()
 
-    def _fetch(self, url: str) -> Optional[tuple[str, str]]:
+    def _fetch(self, url: str) -> tuple[str, str] | None:
         """Fetch a URL and return (content_text, content_type).
 
         For PDFs, extracts text via pypdf. For JS/CSS, returns raw text.

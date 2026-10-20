@@ -19,8 +19,8 @@ import json
 import logging
 import os
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 _MODULE_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _MODULE_DIR.parent
 
-_ISP_PATTERNS: Optional[dict[str, Any]] = None
+_ISP_PATTERNS: dict[str, Any] | None = None
 _WORD_BANKS: dict[int, list[str]] = {}
 
 
@@ -79,7 +79,7 @@ def _load_isp_patterns() -> dict[str, Any]:
         _ISP_PATTERNS = {}
         return _ISP_PATTERNS
 
-    with open(bp_path, "r", encoding="utf-8") as f:
+    with open(bp_path, encoding="utf-8") as f:
         bp = json.load(f)
 
     cpb = bp.get("common_password_behaviors", {})
@@ -102,7 +102,7 @@ def _load_word_bank(length: int) -> list[str]:
         return _WORD_BANKS[length]
 
     words = []
-    with open(fpath, "r", encoding="utf-8") as f:
+    with open(fpath, encoding="utf-8") as f:
         for line in f:
             w = line.strip()
             if w:
@@ -117,7 +117,7 @@ def list_isps() -> list[str]:
     return sorted(_load_isp_patterns().keys())
 
 
-def get_isp_info(isp: str) -> Optional[dict[str, Any]]:
+def get_isp_info(isp: str) -> dict[str, Any] | None:
     """Return pattern info for a specific ISP."""
     patterns = _load_isp_patterns()
     return patterns.get(isp)
@@ -126,8 +126,8 @@ def get_isp_info(isp: str) -> Optional[dict[str, Any]]:
 def estimate_keyspace(
     isp: str,
     direction: str = "forward",
-    word5_file: Optional[str] = None,
-    word6_file: Optional[str] = None,
+    word5_file: str | None = None,
+    word6_file: str | None = None,
 ) -> tuple[int, str]:
     """Estimate total keyspace size and human-readable size string.
 
@@ -165,7 +165,7 @@ def estimate_keyspace(
 def _load_custom_words(filepath: str, expected_len: int) -> list[str]:
     """Load words from a custom file, filtering by expected length."""
     words = []
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         for line in f:
             w = line.strip().lower()
             if w and len(w) == expected_len:
@@ -176,8 +176,8 @@ def _load_custom_words(filepath: str, expected_len: int) -> list[str]:
 def generate_isp_keyspace(
     isp: str,
     direction: str = "forward",
-    word5_file: Optional[str] = None,
-    word6_file: Optional[str] = None,
+    word5_file: str | None = None,
+    word6_file: str | None = None,
     limit: int = 0,
 ) -> Generator[str, None, None]:
     """Generate ISP default WiFi password candidates.
@@ -201,7 +201,7 @@ def generate_isp_keyspace(
     w6 = _load_custom_words(word6_file, 6) if word6_file else _load_word_bank(6)
 
     case = info.get("case", "lowercase")
-    nums = (f"{n:04d}" for n in range(10000))
+    (f"{n:04d}" for n in range(10000))
     num_list = [f"{n:04d}" for n in range(10000)]
 
     count = 0

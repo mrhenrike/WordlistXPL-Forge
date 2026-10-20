@@ -16,13 +16,11 @@ Version: 2.0.0
 """
 from __future__ import annotations
 
-import math
 import random
 import re
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
-from typing import Generator, Optional
-
+from collections.abc import Generator
+from dataclasses import dataclass
 
 # ── Graph data structure ──────────────────────────────────────────────────────
 
@@ -107,9 +105,9 @@ class PasswordGraph:
 
     def random_walk(
         self,
-        start: Optional[str] = None,
+        start: str | None = None,
         length: int = 3,
-        rng: Optional[random.Random] = None,
+        rng: random.Random | None = None,
     ) -> list[str]:
         if rng is None:
             rng = random.Random()
@@ -156,7 +154,7 @@ class PasswordGraphEngine:
         self,
         ngram_sizes: tuple[int, ...] = (2, 3, 4),
         walk_length: int = 4,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> None:
         self.graph = PasswordGraph(ngram_sizes)
         self.walk_length = walk_length
@@ -167,7 +165,7 @@ class PasswordGraphEngine:
         self.graph.train(corpus)
         self._trained = True
 
-    def _walk_to_password(self) -> Optional[str]:
+    def _walk_to_password(self) -> str | None:
         path = self.graph.random_walk(length=self.walk_length, rng=self.rng)
         if not path:
             return None
@@ -190,7 +188,7 @@ class PasswordGraphEngine:
 
     def generate(
         self,
-        seed_corpus: Optional[list[str]] = None,
+        seed_corpus: list[str] | None = None,
         max_candidates: int = 100_000,
         min_len: int = 4,
         max_len: int = 32,

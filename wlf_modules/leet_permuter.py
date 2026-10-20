@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import logging
 import zlib
+from collections.abc import Generator, Iterable
 from itertools import product
-from typing import Generator, Iterable
 
 logger = logging.getLogger(__name__)
 

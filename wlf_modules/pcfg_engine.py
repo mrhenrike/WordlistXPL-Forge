@@ -19,10 +19,10 @@ import json
 import logging
 import math
 import re
-import unicodedata
 from collections import Counter, defaultdict
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -238,10 +238,8 @@ class PCFGGrammar:
         if segment.isdigit():
             return "D", f"D{len(segment)}", segment
         if segment.isalpha():
-            cap = "all_lower"
             for name, check in _CAPITALIZATION_PATTERNS.items():
                 if check(segment):  # type: ignore[no-untyped-call]
-                    cap = name
                     break
             return "L", f"L{len(segment)}", segment.lower()
         return "S", f"S{len(segment)}", segment
@@ -607,7 +605,7 @@ class PCFGGrammar:
         return "\n".join(lines)
 
 
-def handle_pcfg(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_pcfg(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler: train or generate using PCFG grammar.
 
     Args:

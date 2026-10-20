@@ -11,15 +11,16 @@ from __future__ import annotations
 
 import abc
 import logging
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "LOCALE_REGISTRY",
     "BaseLocaleEngine",
     "get_engine",
     "list_locales",
-    "LOCALE_REGISTRY",
 ]
 
 
@@ -31,7 +32,7 @@ class BaseLocaleEngine(abc.ABC):
 
     def __init__(
         self,
-        profile: Optional[dict[str, Any]] = None,
+        profile: dict[str, Any] | None = None,
         max_candidates: int = 0,
     ) -> None:
         self.profile = profile or {}
@@ -95,9 +96,9 @@ def register_engine(cls: type[BaseLocaleEngine]) -> type[BaseLocaleEngine]:
 
 def get_engine(
     locale_code: str,
-    profile: Optional[dict[str, Any]] = None,
+    profile: dict[str, Any] | None = None,
     max_candidates: int = 0,
-) -> Optional[BaseLocaleEngine]:
+) -> BaseLocaleEngine | None:
     """Instantiate a locale engine by code."""
     cls = LOCALE_REGISTRY.get(locale_code.lower().strip())
     if cls is None:

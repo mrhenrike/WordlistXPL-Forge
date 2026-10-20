@@ -18,10 +18,10 @@ Version: 2.0.0
 """
 from __future__ import annotations
 
-import itertools
 import logging
 import random
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -164,13 +164,13 @@ class BRDeepEngine:
 
     def __init__(
         self,
-        profile: Optional[str | dict[str, Any]] = None,
-        sector: Optional[str] = None,
+        profile: str | dict[str, Any] | None = None,
+        sector: str | None = None,
         include_cpf_patterns: bool = True,
         include_cnpj_patterns: bool = True,
         include_cep_patterns: bool = True,
-        cep_prefix: Optional[str] = None,
-        rng_seed: Optional[int] = None,
+        cep_prefix: str | None = None,
+        rng_seed: int | None = None,
     ) -> None:
         self.profile = profile if isinstance(profile, dict) else {}
         if isinstance(profile, str) and profile:

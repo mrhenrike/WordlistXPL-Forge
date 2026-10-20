@@ -19,8 +19,9 @@ from __future__ import annotations
 import json
 import logging
 import random
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +143,7 @@ class CompareResult:
 
         lines = [
             sep,
-            f"  Wordlist Comparison Report",
+            "  Wordlist Comparison Report",
             sep,
             f"  File A: {name_a} ({self.size_a:,} entries)",
             f"  File B: {name_b} ({self.size_b:,} entries)",
@@ -190,9 +191,9 @@ class CompareEngine:
         self.path_b = path_b
         self.case_insensitive = case_insensitive
         self.sample = sample
-        self._set_a: Optional[set[str]] = None
-        self._set_b: Optional[set[str]] = None
-        self._result: Optional[CompareResult] = None
+        self._set_a: set[str] | None = None
+        self._set_b: set[str] | None = None
+        self._result: CompareResult | None = None
 
     def _load(self) -> None:
         """Load both wordlists."""
@@ -243,7 +244,7 @@ class CompareEngine:
 
 def handle_compare(
     args: Any, ctx: dict[str, Any]
-) -> Optional[Generator[str, None, None]]:
+) -> Generator[str, None, None] | None:
     """CLI handler for wordlist comparison."""
     file_a = getattr(args, "file_a", None)
     file_b = getattr(args, "file_b", None)

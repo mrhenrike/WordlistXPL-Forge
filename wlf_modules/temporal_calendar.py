@@ -11,9 +11,7 @@ Version: 2.0.0
 """
 from __future__ import annotations
 
-import itertools
-from typing import Any, Generator, Optional
-
+from collections.abc import Generator
 
 # ── Holidays by locale ───────────────────────────────────────────────────────
 
@@ -154,7 +152,7 @@ def _case_variants(word: str) -> list[str]:
 
 
 def generate_temporal_candidates(
-    locales: Optional[list[str]] = None,
+    locales: list[str] | None = None,
     max_candidates: int = 50_000,
     min_len: int = 4,
     max_len: int = 32,

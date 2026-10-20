@@ -29,13 +29,14 @@ import importlib.util
 import logging
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator, Optional, Type
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _PLUGIN_DIR = Path.home() / ".wlf" / "plugins"
-_REGISTRY: dict[str, "WLFPlugin"] = {}
+_REGISTRY: dict[str, WLFPlugin] = {}
 
 
 # ── Base class ────────────────────────────────────────────────────────────────
@@ -83,7 +84,7 @@ class WLFPlugin(ABC):
 
 # ── Registration ──────────────────────────────────────────────────────────────
 
-def register_plugin(cls: Type[WLFPlugin]) -> Type[WLFPlugin]:
+def register_plugin(cls: type[WLFPlugin]) -> type[WLFPlugin]:
     """Class decorator to register a plugin."""
     inst = cls()
     if not inst.name:
@@ -93,7 +94,7 @@ def register_plugin(cls: Type[WLFPlugin]) -> Type[WLFPlugin]:
     return cls
 
 
-def get_plugin(name: str) -> Optional[WLFPlugin]:
+def get_plugin(name: str) -> WLFPlugin | None:
     return _REGISTRY.get(name)
 
 
@@ -103,7 +104,7 @@ def list_plugins() -> list[WLFPlugin]:
 
 # ── Discovery ─────────────────────────────────────────────────────────────────
 
-def discover(plugin_dir: Optional[Path] = None, validate: bool = True) -> list[str]:
+def discover(plugin_dir: Path | None = None, validate: bool = True) -> list[str]:
     """Scan plugin_dir for .py files and load them.  Returns list of loaded names."""
     d = plugin_dir or _PLUGIN_DIR
     if not d.exists():
@@ -128,7 +129,7 @@ def discover(plugin_dir: Optional[Path] = None, validate: bool = True) -> list[s
     return loaded
 
 
-def discover_packages(plugin_dir: Optional[Path] = None) -> list[str]:
+def discover_packages(plugin_dir: Path | None = None) -> list[str]:
     """Scan for plugin packages (directories with __init__.py)."""
     d = plugin_dir or _PLUGIN_DIR
     if not d.exists():

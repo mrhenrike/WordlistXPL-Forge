@@ -9,9 +9,7 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-from typing import Optional
-
-__all__ = ["get_nouns", "NOUNS_EN", "NOUNS_PT"]
+__all__ = ["NOUNS_EN", "NOUNS_PT", "get_nouns"]
 
 NOUNS_EN: list[str] = [
     # Nature

@@ -10,7 +10,8 @@ from typing import Any
 
 # ── Colorama ─────────────────────────────────────────────────────────────────
 try:
-    from colorama import Fore, Style, init as colorama_init
+    from colorama import Fore, Style
+    from colorama import init as colorama_init
     colorama_init(autoreset=True)
     _COLOR = True
 except ImportError:

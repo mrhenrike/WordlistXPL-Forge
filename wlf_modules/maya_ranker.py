@@ -36,13 +36,13 @@ import re
 import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ── Lazy torch import ─────────────────────────────────────────────────────────
 
-_torch_available: Optional[bool] = None
+_torch_available: bool | None = None
 _torch_mod = None
 _nn_mod = None
 
@@ -228,7 +228,6 @@ _session_model_device = None
 
 def _build_torch_model(input_dim: int = 12, hidden: int = 32) -> object:
     """Build a shallow MLP scorer (12 -> 32 -> 16 -> 1) using torch.nn."""
-    torch = _torch_mod
     nn = _nn_mod
 
     class _MLP(nn.Module):  # type: ignore[misc, name-defined]
@@ -416,7 +415,7 @@ def _get_patterns() -> dict[str, re.Pattern[str]]:
 
 def score_candidates(
     words: list[str],
-    profile_hints: Optional[dict[str, Any]] = None,
+    profile_hints: dict[str, Any] | None = None,
     use_gpu: bool = False,
     backend: str = "auto",
     batch_size: int = 1024,
@@ -519,7 +518,7 @@ def rank_wordlist(
     use_gpu: bool = False,
     top_n: int = 0,
     backend: str = "auto",
-    profile_hints: Optional[dict[str, Any]] = None,
+    profile_hints: dict[str, Any] | None = None,
     chunk_size: int = 10_000,
     min_score: float = 0.0,
 ) -> RankResult:

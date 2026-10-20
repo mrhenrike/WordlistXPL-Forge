@@ -23,7 +23,8 @@ from __future__ import annotations
 import logging
 import random
 import string
-from typing import Generator, Optional, Any
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def _build_tcn(
     kernel_size: int,
     dropout: float,
 ) -> Any:
-    torch = _require_torch()
+    _require_torch()
     import torch.nn as nn
     import torch.nn.functional as F
 
@@ -112,7 +113,7 @@ class TCNPasswordEngine:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         d_model: int = 128,
         n_layers: int = 6,
         kernel_size: int = 3,
@@ -128,7 +129,7 @@ class TCNPasswordEngine:
         self._model = None
         self._loaded = False
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         path = path or self.model_path
         if not path:
             return False

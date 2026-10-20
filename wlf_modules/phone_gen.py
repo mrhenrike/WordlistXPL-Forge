@@ -20,8 +20,9 @@ Version: 1.0.0
 from __future__ import annotations
 
 import logging
+from collections.abc import Generator
 from itertools import product
-from typing import Generator, Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -304,13 +305,13 @@ def estimate_count(pattern: str) -> int:
 
 
 def generate_phones(
-    country: Optional[str] = None,
-    state: Optional[str] = None,
-    ddi: Optional[str] = None,
-    ddd: Optional[str] = None,
+    country: str | None = None,
+    state: str | None = None,
+    ddi: str | None = None,
+    ddd: str | None = None,
     phone_type: str = "both",
-    custom_pattern: Optional[str] = None,
-    output_formats: Optional[list[str]] = None,
+    custom_pattern: str | None = None,
+    output_formats: list[str] | None = None,
 ) -> Generator[str, None, None]:
     """
     Generate phone number wordlist.

@@ -44,8 +44,9 @@ Version: 2.0.0
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Any, Callable, Generator, Optional, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ def register_engine(name: str) -> Callable[[_F], _F]:
     return _dec
 
 
-def _get_factory(name: str, stage: dict[str, Any], global_cfg: dict[str, Any]) -> Optional[Callable[..., Any]]:
+def _get_factory(name: str, stage: dict[str, Any], global_cfg: dict[str, Any]) -> Callable[..., Any] | None:
     fn = _FACTORIES.get(name)
     if fn is None:
         fn = _FACTORIES.get(name.replace("-", "_"))
@@ -132,8 +133,8 @@ def _pcfg_factory(stage: dict[str, Any], _gcfg: dict[str, Any]) -> Any:
 
 @register_engine("semantic")
 def _semantic_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
-    from wlf_modules.semantic_pcfg import generate_semantic
     from wlf_modules.profiler import load_profile_yaml
+    from wlf_modules.semantic_pcfg import generate_semantic
     pf = stage.get("profile")
     if not pf or not Path(pf).exists():
         logger.error("semantic engine requires valid 'profile' path")
@@ -395,7 +396,7 @@ def _finetune_factory(stage: dict[str, Any], gcfg: dict[str, Any]) -> Any:
 class PipelineDSL:
     """Parse and execute a YAML pipeline definition."""
 
-    def __init__(self, pipeline_file: str, global_ctx: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, pipeline_file: str, global_ctx: dict[str, Any] | None = None) -> None:
         self.raw = _load_yaml(pipeline_file)
         self.global_ctx = global_ctx or {}
 
@@ -440,7 +441,7 @@ class PipelineDSL:
             pipeline.bloom = _NullBloom()  # type: ignore[assignment]
         return pipeline.run()
 
-    def output_path(self) -> Optional[str]:
+    def output_path(self) -> str | None:
         return self.raw.get("merge", {}).get("output")  # type: ignore[no-any-return]
 
 
@@ -450,7 +451,7 @@ class _NullBloom:
         return False
 
 
-def execute_pipeline(pipeline_file: str, global_ctx: Optional[dict[str, Any]] = None) -> Generator[str, None, None]:
+def execute_pipeline(pipeline_file: str, global_ctx: dict[str, Any] | None = None) -> Generator[str, None, None]:
     """Parse and run a pipeline YAML file; yields candidate strings."""
     dsl = PipelineDSL(pipeline_file, global_ctx)
     return dsl.build_and_run()

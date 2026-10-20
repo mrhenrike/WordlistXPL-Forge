@@ -13,10 +13,10 @@ from __future__ import annotations
 import hashlib
 import random
 import re
-import zlib
 from collections import Counter
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Iterable, Iterator, Optional, Any
+from typing import Any
 
 _REPO = Path(__file__).resolve().parents[1]
 
@@ -82,7 +82,7 @@ def hashcat_mask(pwd: str) -> str:
 class _Bloom:
     """Tiny bloom for membership tests on sampled corpus (memory-safe)."""
 
-    __slots__ = ("_bits", "_m", "_k")
+    __slots__ = ("_bits", "_k", "_m")
 
     def __init__(self, m_bits: int = 1 << 22, k: int = 4) -> None:
         self._m = m_bits

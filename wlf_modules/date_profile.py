@@ -16,22 +16,22 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass, field
-from datetime import date, datetime
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from typing import Optional, Any
+from typing import Any
 
 from wlf_modules.i18n import (
+    get_element_for_sign,
     get_months,
     get_months_abbr,
-    get_zodiac_names,
-    get_zodiac_alts,
-    get_element_for_sign,
     get_planet_for_sign,
+    get_session_locale,
+    get_zodiac_alts,
+    get_zodiac_names,
     sign_index_from_day_month,
     sign_index_from_name,
     t,
-    get_session_locale,
 )
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,8 @@ class DateProfile:
     day: int = 0
     month: int = 0
     year: int = 0
-    age: Optional[int] = None
-    sign_index: Optional[int] = None  # 0-11, mapeado em i18n/locale.py
+    age: int | None = None
+    sign_index: int | None = None  # 0-11, mapeado em i18n/locale.py
 
     # janela de anos derivada da idade (para modo AGE/AGE_SIGN)
     year_min: int = 0
@@ -130,7 +130,7 @@ class DateProfile:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "DateProfile":
+    def from_dict(cls, d: dict[str, Any]) -> DateProfile:
         """Reconstrói DateProfile a partir de dicionário do perfil."""
         return cls(
             mode=DateMode(d.get("birth_mode", "skip")),
@@ -147,7 +147,7 @@ class DateProfile:
 
 # ── Parsers ────────────────────────────────────────────────────────────────────
 
-def parse_full_date(raw: str) -> Optional[tuple[int, int, int]]:
+def parse_full_date(raw: str) -> tuple[int, int, int] | None:
     """
     Parseia data completa em múltiplos formatos.
 
@@ -172,7 +172,7 @@ def parse_full_date(raw: str) -> Optional[tuple[int, int, int]]:
     return None
 
 
-def parse_month_year(raw: str) -> Optional[tuple[int, int]]:
+def parse_month_year(raw: str) -> tuple[int, int] | None:
     """
     Parseia entrada de mês/ano.
 
@@ -189,7 +189,7 @@ def parse_month_year(raw: str) -> Optional[tuple[int, int]]:
     return None
 
 
-def parse_year_only(raw: str) -> Optional[int]:
+def parse_year_only(raw: str) -> int | None:
     """
     Parseia apenas o ano (4 dígitos).
 
@@ -203,7 +203,7 @@ def parse_year_only(raw: str) -> Optional[int]:
     return None
 
 
-def parse_age(raw: str) -> Optional[int]:
+def parse_age(raw: str) -> int | None:
     """
     Parseia idade aproximada (número inteiro positivo).
 
@@ -219,7 +219,7 @@ def parse_age(raw: str) -> Optional[int]:
 
 # ── Construção de DateProfile a partir de raw input ───────────────────────────
 
-def date_profile_from_full(raw: str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_full(raw: str, locale: str = "en") -> DateProfile | None:
     """Cria DateProfile no modo FULL a partir de string de data."""
     parsed = parse_full_date(raw)
     if not parsed:
@@ -228,7 +228,7 @@ def date_profile_from_full(raw: str, locale: str = "en") -> Optional[DateProfile
     return DateProfile(mode=DateMode.FULL, day=d, month=m, year=y, locale=locale)
 
 
-def date_profile_from_month_year(raw: str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_month_year(raw: str, locale: str = "en") -> DateProfile | None:
     """Cria DateProfile no modo MONTH_YEAR."""
     parsed = parse_month_year(raw)
     if not parsed:
@@ -237,7 +237,7 @@ def date_profile_from_month_year(raw: str, locale: str = "en") -> Optional[DateP
     return DateProfile(mode=DateMode.MONTH_YEAR, month=m, year=y, locale=locale)
 
 
-def date_profile_from_year(raw: str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_year(raw: str, locale: str = "en") -> DateProfile | None:
     """Cria DateProfile no modo YEAR."""
     y = parse_year_only(raw)
     if y is None:
@@ -245,7 +245,7 @@ def date_profile_from_year(raw: str, locale: str = "en") -> Optional[DateProfile
     return DateProfile(mode=DateMode.YEAR, year=y, locale=locale)
 
 
-def date_profile_from_age(raw: str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_age(raw: str, locale: str = "en") -> DateProfile | None:
     """Cria DateProfile no modo AGE."""
     age = parse_age(raw)
     if age is None:
@@ -253,7 +253,7 @@ def date_profile_from_age(raw: str, locale: str = "en") -> Optional[DateProfile]
     return DateProfile(mode=DateMode.AGE, age=age, locale=locale)
 
 
-def date_profile_from_age_sign(age_raw: str, sign_raw: str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_age_sign(age_raw: str, sign_raw: str, locale: str = "en") -> DateProfile | None:
     """
     Cria DateProfile no modo AGE_SIGN a partir de idade e nome do signo.
 
@@ -275,7 +275,7 @@ def date_profile_from_age_sign(age_raw: str, sign_raw: str, locale: str = "en") 
     return DateProfile(mode=DateMode.AGE_SIGN, age=age, sign_index=sign_idx, locale=locale)
 
 
-def date_profile_from_yaml(entry: dict[str, Any] | str, locale: str = "en") -> Optional[DateProfile]:
+def date_profile_from_yaml(entry: dict[str, Any] | str, locale: str = "en") -> DateProfile | None:
     """
     Cria DateProfile a partir de entrada YAML.
 
@@ -340,7 +340,7 @@ def date_profile_from_yaml(entry: dict[str, Any] | str, locale: str = "en") -> O
 
 # ── Geração de tokens a partir de DateProfile ────────────────────────────────
 
-def build_date_tokens(dp: DateProfile, locale: Optional[str] = None) -> list[str]:
+def build_date_tokens(dp: DateProfile, locale: str | None = None) -> list[str]:
     """
     Gera lista de tokens de wordlist a partir de um DateProfile.
 
@@ -427,7 +427,7 @@ def build_date_tokens(dp: DateProfile, locale: Optional[str] = None) -> list[str
 
 # ── Wizard interativo ─────────────────────────────────────────────────────────
 
-def ask_date_profile(label: str, locale: Optional[str] = None) -> DateProfile:
+def ask_date_profile(label: str, locale: str | None = None) -> DateProfile:
     """
     Wizard interativo para coleta de data de uma entidade.
 

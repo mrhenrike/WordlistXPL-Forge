@@ -21,9 +21,9 @@ import math
 import random
 import string
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Callable, Generator, Optional, Any
-
+from collections.abc import Callable, Generator
+from dataclasses import dataclass
+from typing import Any
 
 # ── Fitness helpers ───────────────────────────────────────────────────────────
 
@@ -180,7 +180,7 @@ class Individual:
     password: str
     fitness: float = 0.0
 
-    def __lt__(self, other: "Individual") -> bool:
+    def __lt__(self, other: Individual) -> bool:
         return self.fitness < other.fitness
 
 
@@ -200,12 +200,12 @@ class GeneticPasswordEngine:
 
     def __init__(
         self,
-        fitness_fn: Optional[Callable[[str], float]] = None,
+        fitness_fn: Callable[[str], float] | None = None,
         population_size: int = 500,
         elitism: int = 20,
         mutation_rate: float = 0.85,
         crossover_rate: float = 0.70,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         min_len: int = 6,
         max_len: int = 20,
     ) -> None:
@@ -225,7 +225,7 @@ class GeneticPasswordEngine:
         pw = "".join(self.rng.choices(_ALL_CHARS, k=length))
         return Individual(pw)
 
-    def initialize(self, seed_passwords: Optional[list[str]] = None) -> None:
+    def initialize(self, seed_passwords: list[str] | None = None) -> None:
         self.population = []
         if seed_passwords:
             for pw in seed_passwords[: self.pop_size]:
@@ -278,7 +278,7 @@ class GeneticPasswordEngine:
 
     def generate(
         self,
-        seed_passwords: Optional[list[str]] = None,
+        seed_passwords: list[str] | None = None,
         max_candidates: int = 50_000,
         warmup_generations: int = 20,
     ) -> Generator[tuple[str, float], None, None]:

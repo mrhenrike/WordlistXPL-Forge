@@ -23,9 +23,9 @@ from __future__ import annotations
 import itertools
 import re
 import string
+from collections.abc import Generator, Iterator
 from dataclasses import dataclass, field
-from typing import Generator, Iterator, Optional, Any
-
+from typing import Any
 
 # ── Year / date patterns ──────────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ def _complexity_creep(pw: str) -> list[str]:
     return results
 
 
-def _seasonal_blend(pw: str, year: int, locales: Optional[list[str]] = None) -> list[str]:
+def _seasonal_blend(pw: str, year: int, locales: list[str] | None = None) -> list[str]:
     tokens = list(_SEASONAL_TOKENS.get(year, []))
     if locales:
         from wlf_modules.temporal_calendar import HOLIDAYS, SEASONS
@@ -150,7 +150,7 @@ class TemporalDriftEngine:
         target_year: int = 2026,
         leet_max_level: int = 2,
         include_seasonal: bool = True,
-        locales: Optional[list[str]] = None,
+        locales: list[str] | None = None,
     ) -> None:
         self.cfg = DriftConfig(
             base_year=base_year,
@@ -197,8 +197,8 @@ class TemporalDriftEngine:
 
     def generate(
         self,
-        seed_words: Optional[list[str]] = None,
-        profile: Optional[dict[str, Any]] = None,
+        seed_words: list[str] | None = None,
+        profile: dict[str, Any] | None = None,
         max_candidates: int = 200_000,
     ) -> Generator[tuple[str, float], None, None]:
         """Generate temporally-drifted candidates from seed words."""

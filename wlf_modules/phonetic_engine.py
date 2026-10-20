@@ -17,7 +17,8 @@ from __future__ import annotations
 import itertools
 import logging
 import re
-from typing import Any, Generator, Optional
+from collections.abc import Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -279,8 +280,8 @@ class PhoneticEngine:
 
     def __init__(
         self,
-        seeds: Optional[list[str]] = None,
-        profile: Optional[dict[str, Any]] = None,
+        seeds: list[str] | None = None,
+        profile: dict[str, Any] | None = None,
         max_subs_per_word: int = 30,
     ) -> None:
         self._seeds: list[str] = seeds or []
@@ -359,7 +360,7 @@ def _extract_seeds(profile: dict[str, Any]) -> list[str]:
 
 # ── CLI handler ──────────────────────────────────────────────────────────────
 
-def handle_phonetic(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, None, None]]:
+def handle_phonetic(args: Any, ctx: dict[str, Any]) -> Generator[str, None, None] | None:
     """CLI handler for phonetic password generation."""
     seeds: list[str] = []
 
@@ -374,7 +375,7 @@ def handle_phonetic(args: Any, ctx: dict[str, Any]) -> Optional[Generator[str, N
         seeds.extend(line.strip() for line in text.splitlines() if line.strip())
 
     profile_path = getattr(args, "profile", None)
-    profile: Optional[dict[str, Any]] = None
+    profile: dict[str, Any] | None = None
     if profile_path:
         import json
         from pathlib import Path

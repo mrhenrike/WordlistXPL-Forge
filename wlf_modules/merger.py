@@ -22,8 +22,8 @@ import logging
 import random
 import re
 from collections import Counter
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +46,9 @@ def stream_merged(
     min_len: int = 6,
     max_len: int = 128,
     no_numeric: bool = False,
-    filter_pattern: Optional[str] = None,
+    filter_pattern: str | None = None,
     dedupe: bool = True,
-    sort_mode: Optional[str] = None,
+    sort_mode: str | None = None,
 ) -> Generator[str, None, None]:
     """
     Faz merge de múltiplas wordlists com filtragem e deduplicação.
@@ -112,9 +112,9 @@ def merge_to_file(
     min_len: int = 6,
     max_len: int = 128,
     no_numeric: bool = False,
-    filter_pattern: Optional[str] = None,
+    filter_pattern: str | None = None,
     dedupe: bool = True,
-    sort_mode: Optional[str] = None,
+    sort_mode: str | None = None,
 ) -> int:
     """
     Faz merge de wordlists e salva em arquivo.

@@ -9,7 +9,7 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-from typing import Generator, Optional, Any
+from collections.abc import Generator
 
 from wlf_modules.locales import BaseLocaleEngine, register_engine
 

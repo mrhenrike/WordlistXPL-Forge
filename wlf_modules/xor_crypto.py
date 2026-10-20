@@ -19,7 +19,7 @@ Versão: 1.0.0
 from __future__ import annotations
 
 import logging
-from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

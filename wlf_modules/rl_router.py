@@ -24,12 +24,9 @@ import json
 import math
 import random
 from collections import deque
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from wlf_modules.bandit_router import ArmStats, BanditRouter
-
 
 # ── Feature extraction ────────────────────────────────────────────────────────
 
@@ -111,7 +108,7 @@ class _ActorCriticMLP:
         advantage = reward - value
 
         # actor gradient: -log π(a) * advantage
-        actor_logits = self.actor_head.forward(h)
+        self.actor_head.forward(h)
         actor_grad = [p for p in probs]  # softmax grad trick
         actor_grad[action] -= 1.0
         actor_grad = [g * (-advantage) for g in actor_grad]
@@ -160,8 +157,8 @@ class RLRouter(BanditRouter):
         hidden: int = 64,
         lr: float = 0.01,
         warmup_steps: int = 30,
-        seed: Optional[int] = None,
-        model_path: Optional[str] = None,
+        seed: int | None = None,
+        model_path: str | None = None,
     ) -> None:
         super().__init__(arm_names)  # type: ignore[arg-type]
         n = len(arm_names)
@@ -175,8 +172,8 @@ class RLRouter(BanditRouter):
         self._steps = 0
         self._recent_rewards: deque[float] = deque([0.0] * 5, maxlen=5)
         self._context_feat: list[float] = [0.0] * 8
-        self._last_action: Optional[int] = None
-        self._last_state: Optional[list[float]] = None
+        self._last_action: int | None = None
+        self._last_state: list[float] | None = None
         if model_path and Path(model_path).exists():
             self._model.load(model_path)
 

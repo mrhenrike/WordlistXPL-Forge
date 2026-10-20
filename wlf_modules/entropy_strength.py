@@ -19,7 +19,7 @@ import logging
 import math
 import re
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ def _has_date(pw: str) -> bool:
     return False
 
 
-def estimate(pw: str, extra_dict: Optional[set[str]] = None) -> dict[str, Any]:
+def estimate(pw: str, extra_dict: set[str] | None = None) -> dict[str, Any]:
     """Estimate strength, entropy and crack times for one password.
 
     Args:
@@ -231,7 +231,7 @@ def _fmt_seconds(seconds: float) -> str:
     return "instant"
 
 
-def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
+def hibp_check(pw: str, timeout: float = 8.0) -> int | None:
     """Check a password against Have I Been Pwned using k-anonymity.
 
     Only the first five characters of the SHA-1 hash are sent to the range API,
@@ -258,7 +258,7 @@ def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
             headers={"Add-Padding": "true"},
         )
         resp.raise_for_status()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.warning("HIBP request failed: %s", exc)
         return None
     for line in resp.text.splitlines():
@@ -271,7 +271,7 @@ def hibp_check(pw: str, timeout: float = 8.0) -> Optional[int]:
     return 0
 
 
-def format_report(result: dict[str, Any], hibp: Optional[int] = None) -> list[str]:
+def format_report(result: dict[str, Any], hibp: int | None = None) -> list[str]:
     """Build a detailed text report for a single password estimate."""
     labels = ["very weak", "weak", "fair", "strong", "very strong"]
     lines = [
@@ -301,7 +301,7 @@ def handle_strength(args: Any, ctx: dict[str, Any]) -> Any:
     Returns:
         A tuple (kind, iterable_of_lines) or None on error.
     """
-    extra: Optional[set[str]] = None
+    extra: set[str] | None = None
     dict_file = getattr(args, "dictionary", None)
     if dict_file:
         dp = Path(dict_file)
