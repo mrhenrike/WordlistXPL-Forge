@@ -1,6 +1,6 @@
-# WordlistXPL-Forge — Integration Guide
+# WordlistXPL-Forge  - Integration Guide
 
-> **AUTHORIZED USE ONLY** — Use only on systems you own or have explicit written permission to test.
+> **AUTHORIZED USE ONLY**  - Use only on systems you own or have explicit written permission to test.
 
 WordlistXPL-Forge **generates** wordlists. The tools below **consume** those wordlists to perform actual credential testing. Keep them separate.
 
@@ -8,7 +8,7 @@ WordlistXPL-Forge **generates** wordlists. The tools below **consume** those wor
 
 ## Hashcat
 
-The most powerful offline hash cracker — GPU-accelerated, 400+ hash modes.
+The most powerful offline hash cracker  - GPU-accelerated, 400+ hash modes.
 
 ### Install
 
@@ -187,7 +187,7 @@ ncrack --connection-limit 5 -u admin -P wordlist.txt ssh://192.168.1.10
 
 ## ffuf (web fuzzing)
 
-Extremely fast web fuzzer — directories, parameters, headers, virtual hosts.
+Extremely fast web fuzzer  - directories, parameters, headers, virtual hosts.
 
 ### Install
 

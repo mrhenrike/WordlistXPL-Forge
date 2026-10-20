@@ -3,7 +3,7 @@
 BERT-style bidirectional masked prediction for password generation.
 Predicts masked positions conditioned on all other positions:
 
-    P(x_i | x_{\\i})  — better than left-to-right for policy-constrained generation
+    P(x_i | x_{\\i})   - better than left-to-right for policy-constrained generation
 
 Compatible with PGMaP (2026) checkpoint format.
 

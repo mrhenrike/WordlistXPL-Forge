@@ -1,4 +1,4 @@
-# WordlistXPL-Forge — Architecture
+# WordlistXPL-Forge  - Architecture
 
 > Version 2.0.0
 
@@ -59,7 +59,7 @@ Other tools (Hashcat, JtR, Hydra, Aircrack-ng) consume its output.
 
 1. **CLI** parses args → populates `_GLOBAL_CTX` (threads, limit, timeout, compute_mode, etc.)
 2. **Command handler** (`cmd_*`) creates one or more engine instances
-3. **Engines** yield `str` or `(str, float)` tuples — **never** materialize full lists
+3. **Engines** yield `str` or `(str, float)` tuples  - **never** materialize full lists
 4. **AsyncGeneratorPipeline** merges multiple engines via threaded queues + Bloom dedup
 5. **ResourceGovernor** monitors RAM/VRAM; emits STOP codes if thresholds breached
 6. **`_write_output()`** consumes the generator, applies limit/timeout, writes to file or stdout
@@ -72,7 +72,7 @@ Other tools (Hashcat, JtR, Hydra, Aircrack-ng) consume its output.
 | `resource_governor.py` | Anti-OOM: RAM/VRAM monitoring, chunk rotation |
 | `async_pipeline.py` | Multi-engine parallel merge with Bloom dedup |
 | `score_normalizer.py` | Maps heterogeneous scores → [0,1] |
-| `session_manager.py` | Checkpoint/resume — persists state to `~/.wlf/sessions/` |
+| `session_manager.py` | Checkpoint/resume  - persists state to `~/.wlf/sessions/` |
 | `pipeline_dsl.py` | YAML pipeline executor |
 | `strategy_engine.py` | Bayesian structure priors + strategy plan |
 | `bandit_router.py` | UCB1 multi-armed bandit for engine selection |
@@ -114,7 +114,7 @@ Every engine must:
 | `STOP_SHUTDOWN` | SIGINT/SIGTERM received |
 | `STOP_DISK` | Disk space < 512 MB |
 
-## Neural engines — optional torch pattern
+## Neural engines  - optional torch pattern
 
 ```python
 def _require_torch():
@@ -126,7 +126,7 @@ def _require_torch():
 ```
 
 Every neural engine calls `_require_torch()` at generation time. If unavailable,
-the engine logs a warning and falls back to a CPU heuristic generator — the pipeline
+the engine logs a warning and falls back to a CPU heuristic generator  - the pipeline
 continues without interruption.
 
 ## Session persistence

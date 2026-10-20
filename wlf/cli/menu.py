@@ -1,4 +1,4 @@
-"""Interactive menu for wlf — categorized with submenus."""
+"""Interactive menu for wlf  - categorized with submenus."""
 from __future__ import annotations
 
 import argparse

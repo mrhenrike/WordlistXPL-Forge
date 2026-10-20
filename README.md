@@ -84,7 +84,7 @@ python wlf.py session list
 
 Prefer `pip install wordlistxpl-forge` or run `python wlf.py` from this tree.
 
-Per-command pages: [docs/commands/](docs/commands/) (en-US) and [docs/pt-BR/commands/](docs/pt-BR/commands/).
+Per-command pages: [docs/commands/](docs/commands/) (en-US).
 
 ---
 
@@ -614,4 +614,4 @@ The model stores **only structural patterns**: no PII, passwords, or company nam
 **License:** XSRL-1.0 - Copyright (c) 2024-2026 Andre Henrike de Oliveira / Uniao Geek
 **Created by:** André Henrique ([@mrhenrike](https://github.com/mrhenrike)) | [União Geek](https://uniaogeek.com.br/)
 
-[Leia em Português](README.pt-BR.md) - [Command coverage](docs/commands.md) - [Wiki](../../wiki)
+[Command coverage](docs/commands.md) - [Wiki](../../wiki)

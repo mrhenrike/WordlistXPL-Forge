@@ -1,7 +1,7 @@
 """bayesian_full.py - Full Bayesian password model (TarGuess-style).
 
 Implements a Bayesian approach to password structure inference based on:
-  - TarGuess (Wang et al. 2016) — user demographic-informed guessing
+  - TarGuess (Wang et al. 2016)  - user demographic-informed guessing
   - Adaptive PCFG with Dirichlet priors on structure counts
   - Posterior updating as new corpus evidence arrives
 
@@ -271,7 +271,7 @@ class BayesianFullEngine:
         n_segs = sum(len(d.counts) for d in self.grammar.segment_priors.values())
         top = self.grammar.structure_prior.top_k(5)
         lines = [
-            f"BayesianFullEngine — {n_struct} structures, {n_segs} segment values",
+            f"BayesianFullEngine  - {n_struct} structures, {n_segs} segment values",
             "  Top structures:",
         ]
         for struct, p in top:

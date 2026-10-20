@@ -741,7 +741,7 @@ def cmd_graph_expand(args: argparse.Namespace) -> None:
 
 
 def cmd_temporal_model(args: argparse.Namespace) -> None:
-    """Temporal drift wordlist — evolve seeds across years."""
+    """Temporal drift wordlist  - evolve seeds across years."""
     try:
         from wlf_modules.temporal_drift import TemporalDriftEngine
         seed_file = getattr(args, "seed_file", None)

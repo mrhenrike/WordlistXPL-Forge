@@ -71,4 +71,4 @@ Nested modes (also `--help` exit 0): `pcfg train`, `pcfg generate`, `markov trai
 
 `--limit` is a **global** flag and must appear before the subcommand (`wlf --limit 5 charset 3 3 ab`).
 
-Per-command pages live in `docs/commands/` (en-US) and `docs/pt-BR/commands/`.
+Per-command pages live in `docs/commands/` (en-US).

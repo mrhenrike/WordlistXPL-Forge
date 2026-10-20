@@ -1,4 +1,4 @@
-"""Example WLF plugin — Fibonacci numeric passwords.
+"""Example WLF plugin  - Fibonacci numeric passwords.
 
 Demonstrates the plugin contract: subclass WLFPlugin, decorate with
 @register_plugin, and implement generate().

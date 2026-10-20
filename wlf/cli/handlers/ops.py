@@ -434,7 +434,7 @@ def cmd_curate(args: argparse.Namespace) -> None:
 
 
 def cmd_test(args: argparse.Namespace) -> None:
-    """Credential testing pipeline — generate wordlist + hashcat cracking."""
+    """Credential testing pipeline  - generate wordlist + hashcat cracking."""
     from wlf_modules.credential_tester import HASH_MODES, run_test
 
     hash_mode = None

@@ -13,7 +13,7 @@ Falls back to BanditRouter when torch is unavailable.
 
 Reference:
   Sutton & Barto "Reinforcement Learning: An Introduction" (2020)
-  Mnih et al. "Asynchronous Methods for Deep RL" (2016) — A3C actor-critic
+  Mnih et al. "Asynchronous Methods for Deep RL" (2016)  - A3C actor-critic
 
 Author: André Henrique (@mrhenrike)
 Version: 2.0.0

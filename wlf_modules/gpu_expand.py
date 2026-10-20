@@ -1,7 +1,7 @@
 """gpu_expand.py - Fast mask cartesian + leet expansion (CPU multiprocess / optional torch).
 
 GPU acceleration is best-effort: uses CUDA via torch when available and compute
-mode requests it; otherwise NumPy/multiprocessing. Never blocks forever — callers
+mode requests it; otherwise NumPy/multiprocessing. Never blocks forever  - callers
 should pass ResourceGovernor batch hints.
 
 Author: Andre Henrique (@mrhenrike)
@@ -119,7 +119,7 @@ def expand_leet_batch(
                 device = torch.device("cuda")
                 _ = torch.zeros(1, device=device)  # touch device
         except Exception as exc:
-            logger.debug("leet GPU unavailable (%s) — CPU path", exc)
+            logger.debug("leet GPU unavailable (%s)  - CPU path", exc)
 
     seen: set[str] = set()
     for w in words_list:

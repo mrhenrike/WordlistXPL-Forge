@@ -1,10 +1,8 @@
 # WordlistXPL-Forge wiki
 
-Wordlist generator in the XPL-Forge suite. CLI: `wlf` / `python wlf.py`. Version 1.2.0.
+Wordlist generator in the XPL-Forge suite. CLI: `wlf` / `python wlf.py`. Version 2.0.1.
 
 Author: Andre Henrique (mrhenrike) | Uniao Geek | https://uniaogeek.com.br/
-
-Portugues: [Home.pt-BR](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Home.pt-BR)
 
 ## Disclaimer
 

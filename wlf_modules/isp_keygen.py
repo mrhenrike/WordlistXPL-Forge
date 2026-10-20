@@ -5,7 +5,7 @@ Generates vendor-specific WiFi password wordlists based on known ISP default
 password patterns (e.g., Xfinity/Comcast: word5 + 4digit + word6).
 
 Patterns are loaded from data/behavior_patterns.json (vendor_isp_patterns).
-Word banks are NOT shipped in this repo — pass ``--word5-file`` /
+Word banks are NOT shipped in this repo  - pass ``--word5-file`` /
 ``--word6-file``, set ``WLF_ISP_WORDS_DIR``, or place banks under sibling
 EmbedXPL-Forge ``embedxpl/resources/wordlists/isp/``.
 

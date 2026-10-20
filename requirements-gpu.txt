@@ -2,7 +2,7 @@
 # Install: pip install -r requirements-gpu.txt
 # Or:      pip install wordlistxpl-forge[gpu]
 #
-# Torch wheels are platform-specific — if CUDA is needed, prefer the
+# Torch wheels are platform-specific  - if CUDA is needed, prefer the
 # selector at https://pytorch.org/get-started/locally/ then install
 # transformers. CPU-only torch still enables the neural path.
 

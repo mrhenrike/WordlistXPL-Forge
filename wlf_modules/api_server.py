@@ -39,7 +39,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _DISCLAIMER = (
-    "AUTHORIZED USE ONLY — WordlistXPL-Forge generates wordlists for "
+    "AUTHORIZED USE ONLY  - WordlistXPL-Forge generates wordlists for "
     "authorized security testing. Use only in systems you own or have "
     "written permission to test."
 )
@@ -384,7 +384,7 @@ def run_server(
 ) -> None:
     """Start the WLF API server."""
     logger.info("Starting WordlistXPL-Forge API on %s:%d", host, port)
-    logger.info("AUTHORIZED USE ONLY — %s", _DISCLAIMER)
+    logger.info("AUTHORIZED USE ONLY  - %s", _DISCLAIMER)
 
     try:
         import uvicorn

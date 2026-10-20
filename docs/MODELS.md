@@ -33,10 +33,10 @@ Defaults are **safe** (stream, beam caps, RAM/VRAM governor). Large monoliths ne
 | Bandit router (UCB1) | P3 | `bandit` | Arm pick via proxy reward |
 | PBMP full / lite | P3 | `pbmp`, `strategy` | Weighted engine plan |
 | Genetic / MAP-Elites | P3 | `evolve` | Population search |
-| Graph / temporal / domain PCFG | P3–P4 | `graph-expand`, `temporal-model`, `domain-pcfg` | |
+| Graph / temporal / domain PCFG | P3-P4 | `graph-expand`, `temporal-model`, `domain-pcfg` | |
 | Neural LSTM | P4 | `neural` + `[gpu]` extra | VRAM governor; not default |
-| GAN / VAE / Transformer | P1–P2 modules | `pipeline` stages / `vae-interp` | Optional torch |
-| TUI / PassLLM | open | — | Next cycle / P5 |
+| GAN / VAE / Transformer | P1-P2 modules | `pipeline` stages / `vae-interp` | Optional torch |
+| TUI / PassLLM | open |  - | Next cycle / P5 |
 
 v2 commands require a current checkout: `python wlf.py --help` must list `pipeline`, `br-deep`, `serve`, etc. See [CHANGELOG.md](../CHANGELOG.md) and [CLI-REFERENCE.md](CLI-REFERENCE.md).
 

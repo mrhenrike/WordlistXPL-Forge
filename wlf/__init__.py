@@ -1,4 +1,4 @@
-"""WordlistXPL-Forge — unified wordlist generation."""
+"""WordlistXPL-Forge  - unified wordlist generation."""
 from wlf.cli.context import VERSION
 from wlf.cli.main import main
 

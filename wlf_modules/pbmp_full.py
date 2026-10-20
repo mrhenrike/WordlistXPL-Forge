@@ -5,7 +5,7 @@ Implements the complete PBMP model:
     P(Strategy_{t+1} | History, Context, Behavior, Population)
 
 Where:
-  History    = [(strategy, coverage_delta, entropy_gain), …]  — past generation batches
+  History    = [(strategy, coverage_delta, entropy_gain), …]   - past generation batches
   Context    = profile YAML + policy constraints + sector + vocabulary
   Behavior   = corpus statistics + temporal drift (patterns 2015→2026)
   Population = DNA fingerprint + coverage map + charset distribution
@@ -250,7 +250,7 @@ class PBMPModel:
 
 
 class PBMPFull:
-    """Full PBMP controller — maintains state, selects strategies, learns."""
+    """Full PBMP controller  - maintains state, selects strategies, learns."""
 
     def __init__(
         self,
@@ -328,7 +328,7 @@ class PBMPFull:
 
     def describe(self) -> str:
         _, weights = self.select_strategy()
-        lines = ["=== PBMP Full — strategy distribution ==="]
+        lines = ["=== PBMP Full  - strategy distribution ==="]
         for name, w in sorted(weights.items(), key=lambda x: -x[1])[:8]:
             bar = "█" * int(w * 30)
             lines.append(f"  {name:22s}  {w:.3f}  {bar}")

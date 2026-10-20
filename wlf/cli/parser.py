@@ -608,7 +608,7 @@ def build_parser() -> argparse.ArgumentParser:
                        help="DBSCAN min samples (default: 3)")
     p_cl.add_argument("--seed", type=int, default=42, help="Random seed")
     p_cl.add_argument("--label", action="store_true",
-                       help="Classify only (no clustering) — label each password by type")
+                       help="Classify only (no clustering)  - label each password by type")
     p_cl.add_argument("--format", choices=["text", "json", "csv"],
                        default="text", help="Output format (default: text)")
     p_cl.add_argument("-o", "--output", help="Save report to file")
@@ -2438,7 +2438,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_explain = sub.add_parser(
         "explain",
-        help="Alias for score — explain a candidate",
+        help="Alias for score  - explain a candidate",
         description="Same as 'score'.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

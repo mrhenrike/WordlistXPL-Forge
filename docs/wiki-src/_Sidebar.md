@@ -1,7 +1,6 @@
 ### WordlistXPL-Forge
 
 - [Home](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Home)
-- [Home (pt-BR)](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Home.pt-BR)
 - [Command coverage](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Command-Coverage)
 - [Competitive analysis](https://github.com/mrhenrike/WordlistXPL-Forge/wiki/Competitive-Analysis)
 

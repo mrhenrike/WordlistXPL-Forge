@@ -1,4 +1,4 @@
-"""Credential testing pipeline — generate wordlist + hashcat cracking."""
+"""Credential testing pipeline  - generate wordlist + hashcat cracking."""
 
 from __future__ import annotations
 

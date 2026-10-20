@@ -28,7 +28,7 @@ DEFAULTS: dict[str, Any] = {
 
 _TEMPLATE = """\
 # WordlistXPL-Forge configuration
-# Persistent defaults — CLI flags always override these values.
+# Persistent defaults  - CLI flags always override these values.
 # Location: ~/.wlf/config.yaml  (override with WLF_CONFIG_DIR env var)
 
 # ── Execution ────────────────────────────────────────────────────────────────

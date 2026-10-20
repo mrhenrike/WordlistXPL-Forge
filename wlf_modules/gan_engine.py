@@ -121,7 +121,7 @@ def _logits_to_password(logit_seq: Any, temperature: float = 1.0, max_len: int =
 # ── Fallback: Markov approximation ────────────────────────────────────────────
 
 def _fallback_generate(max_candidates: int, temperature: float, min_len: int, max_len: int) -> Generator[tuple[str, float], None, None]:
-    """CPU fallback when torch unavailable — mimics GAN diversity via random walks."""
+    """CPU fallback when torch unavailable  - mimics GAN diversity via random walks."""
     import random
     import string
     rng = random.Random()

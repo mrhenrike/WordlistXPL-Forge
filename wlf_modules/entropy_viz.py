@@ -5,10 +5,10 @@ calculates statistical summaries, and classifies passwords into
 strength bands based on entropy.
 
 Entropy bands:
-  weak:     0.0 – 2.0 bits
-  low:      2.0 – 3.0 bits
-  medium:   3.0 – 3.5 bits
-  strong:   3.5 – 4.0 bits
+  weak:     0.0 - 2.0 bits
+  low:      2.0 - 3.0 bits
+  medium:   3.0 - 3.5 bits
+  strong:   3.5 - 4.0 bits
   extreme:  4.0+ bits
 
 Author: André Henrique (@mrhenrike)
@@ -179,7 +179,7 @@ class EntropyVizEngine:
             f"  Mean entropy:       {self.stats.mean:.4f} bits",
             f"  Median:             {self.stats.median:.4f} bits",
             f"  Std deviation:      {self.stats.std:.4f}",
-            f"  Range:              {self.stats.min_val:.4f} – {self.stats.max_val:.4f}",
+            f"  Range:              {self.stats.min_val:.4f} - {self.stats.max_val:.4f}",
             f"  P25/P75:            {self.stats.p25:.4f} / {self.stats.p75:.4f}",
             f"  P90/P99:            {self.stats.p90:.4f} / {self.stats.p99:.4f}",
             sep,
@@ -189,7 +189,7 @@ class EntropyVizEngine:
             c = self.stats.band_counts.get(name, 0)
             pct = c / max(self.stats.count, 1) * 100
             hi_str = f"{hi:.1f}" if hi < 100 else "∞"
-            lines.append(f"    {name:10s} [{lo:.1f}–{hi_str}): {c:>8,}  ({pct:5.1f}%)")
+            lines.append(f"    {name:10s} [{lo:.1f}-{hi_str}): {c:>8,}  ({pct:5.1f}%)")
         lines.append(sep)
         lines.append("  Distribution histogram:")
         lines.append("")

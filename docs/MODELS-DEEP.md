@@ -1,6 +1,6 @@
-# WordlistXPL-Forge — Models Deep Dive
+# WordlistXPL-Forge  - Models Deep Dive
 
-> Version 2.0.0 — Technical reference for all generation engines.
+> Version 2.0.0  - Technical reference for all generation engines.
 
 ---
 
@@ -10,12 +10,12 @@
 
 **Algorithm:** Variable-order Markov model trained on character sequences.
 
-- Order 1–6: `P(c_n | c_{n-1}, …, c_{n-k})`
+- Order 1-6: `P(c_n | c_{n-1}, …, c_{n-k})`
 - Positional n-gram tables for suffix boosting
 - Score type: **COST** (lower = more probable)
 - CPU only, no dependencies
 
-**When to use:** Fast baseline generation, 100k–10M candidates/minute.
+**When to use:** Fast baseline generation, 100k-10M candidates/minute.
 
 ```bash
 python wlf.py markov --order 3 --limit 1000000 -o markov3.txt
@@ -113,7 +113,7 @@ python wlf.py neural gan --model-path models/passgan.pt --limit 500000
 
 ### VAE (`vae_engine.py`)
 
-**Algorithm:** Variational Autoencoder — encodes passwords to latent `(μ, σ)`, samples around anchors.
+**Algorithm:** Variational Autoencoder  - encodes passwords to latent `(μ, σ)`, samples around anchors.
 
 - Encode → decode pipeline
 - Interpolation between two passwords in latent space
@@ -180,7 +180,7 @@ python wlf.py neural masked-lm --limit 200000 --iterations 5 -o mlm.txt
 
 ### TCN (`tcn_engine.py`)
 
-**Algorithm:** Temporal Convolutional Network — causal dilated convolutions.
+**Algorithm:** Temporal Convolutional Network  - causal dilated convolutions.
 
 - Receptive field: `(kernel-1) × 2^n_layers` characters
 - Residual connections + dropout
@@ -196,7 +196,7 @@ python wlf.py neural tcn --model-path models/tcn.pt --temperature 0.9
 
 ### Normalizing Flow (`flow_engine.py`)
 
-**Algorithm:** Real-NVP coupling layers — invertible mapping between Gaussian prior and password space.
+**Algorithm:** Real-NVP coupling layers  - invertible mapping between Gaussian prior and password space.
 
 - Exact log-likelihood computation
 - Efficient sampling via inverse pass
@@ -213,8 +213,8 @@ python wlf.py neural flow --limit 100000 -o flow.txt
 ### MAP-Elites (`map_elites.py`)
 
 **Algorithm:** Quality-diversity MAP-Elites over a 3D behaviour space:
-- Dimension 1: password length (6–20)
-- Dimension 2: charset diversity (0–4 classes)
+- Dimension 1: password length (6-20)
+- Dimension 2: charset diversity (0-4 classes)
 - Dimension 3: entropy band (low/medium/high/very_high)
 
 Grid shape: 15 × 5 × 4 = 300 cells. Maintains one elite per cell.
@@ -257,7 +257,7 @@ Specialized for Brazilian targets:
 | Telecoms | vivo, tim, claro, oi |
 | Govt patterns | inss, receita, cpf, cnpj, pix |
 | CEP regions | cep_01 (SP), cep_20 (RJ), cep_40 (BA) |
-| CPF patterns* | structural patterns only — no valid real CPFs |
+| CPF patterns* | structural patterns only  - no valid real CPFs |
 | Special dates | carnaval, copas, datas_nacionais |
 
 > *CPF/CNPJ patterns do NOT generate real valid numbers. They generate structural patterns (###.###.###-##) for testing password policy, not document validation.
@@ -316,7 +316,7 @@ python wlf.py emit --engine bayesian --profile-file alvo.json --limit 200000
 
 ---
 
-## PBMP — Full Controller (`pbmp_full.py`)
+## PBMP  - Full Controller (`pbmp_full.py`)
 
 **P(Strategy_{t+1} | History, Context, Behavior, Population)**
 

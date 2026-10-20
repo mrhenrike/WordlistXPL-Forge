@@ -140,7 +140,7 @@ def cmd_maskgen(args: argparse.Namespace) -> None:
     chunk = gov.gpu_batch_size(int(getattr(args, "chunk", 65536) or 65536))
     limit = int(getattr(args, "limit", 0) or _GLOBAL_CTX.get("limit") or 0)
     if not limit and total > 5_000_000 and not getattr(args, "force", False):
-        _warn("Keyspace >5M — capping at 5M (pass --force or --limit).")
+        _warn("Keyspace >5M  - capping at 5M (pass --force or --limit).")
         limit = 5_000_000
     gen = iter_mask(mask, getattr(args, "custom_charset1", None), chunk, limit)
     count = _write_output(gen, getattr(args, "output", None), stream=True)
@@ -436,7 +436,7 @@ def cmd_score(args: argparse.Namespace) -> None:
 
 
 def cmd_explain_cmd(args: argparse.Namespace) -> None:
-    """Alias for score — explain a password."""
+    """Alias for score  - explain a password."""
     cmd_score(args)
 
 

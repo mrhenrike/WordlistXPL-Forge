@@ -131,7 +131,7 @@ def _cep_tokens(cep_prefix: str) -> list[str]:
 def _cpf_patterns() -> list[str]:
     """Generate common CPF-derived password patterns.
 
-    Does NOT produce real CPF numbers — uses fixed structural patterns
+    Does NOT produce real CPF numbers  - uses fixed structural patterns
     that Brazilians commonly derive passwords from (first N digits, with
     dots/dashes replaced).
     """
@@ -360,7 +360,7 @@ class BRDeepEngine:
             if max_candidates and count >= max_candidates:
                 return
 
-        # Diminutive forms from profile names (high priority — before generic generators)
+        # Diminutive forms from profile names (high priority  - before generic generators)
         for token in profile_tokens:
             lower = token.lower().replace("_", "")
             for suffix_strip, suffix_add in _DIMINUTIVE_RULES:

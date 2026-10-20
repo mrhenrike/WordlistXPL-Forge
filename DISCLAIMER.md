@@ -1,4 +1,4 @@
-# Legal Disclaimer — WordlistXPL-Forge
+# Legal Disclaimer  - WordlistXPL-Forge
 
 **READ BEFORE USE**
 
@@ -30,4 +30,4 @@ Questions about authorized use: **security.research@uniaogeek.com.br**
 
 ---
 
-Copyright © André Henrique / União Geek. Licensed under BSD-3-Clause — see [LICENSE](LICENSE).
+Copyright © André Henrique / União Geek. Licensed under BSD-3-Clause  - see [LICENSE](LICENSE).

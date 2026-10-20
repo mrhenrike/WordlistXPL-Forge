@@ -1,4 +1,4 @@
-"""Command handlers — re-export from category modules."""
+"""Command handlers  - re-export from category modules."""
 from wlf.cli.handlers.analysis import (
     cmd_analyze,
     cmd_anomaly_score,

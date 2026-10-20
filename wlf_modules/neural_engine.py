@@ -98,7 +98,7 @@ def _select_device(torch: Any, compute_mode: str, vram_budget_mb: int = 4096) ->
         floor = 512
         if free is not None and free < floor:
             logger.warning(
-                "VRAM free=%s MiB below floor — neural on CPU (budget=%s)",
+                "VRAM free=%s MiB below floor  - neural on CPU (budget=%s)",
                 free, vram_budget_mb,
             )
             return torch.device("cpu")

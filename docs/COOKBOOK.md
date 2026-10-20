@@ -1,12 +1,12 @@
-# WordlistXPL-Forge — Cookbook
+# WordlistXPL-Forge  - Cookbook
 
-> **AUTHORIZED USE ONLY** — Generate wordlists for systems you own or have written permission to test.
+> **AUTHORIZED USE ONLY**  - Generate wordlists for systems you own or have written permission to test.
 
 Eight production-ready recipes covering the most common generation scenarios, with full terminal output samples.
 
 ---
 
-## Recipe 1 — Quick charset wordlist
+## Recipe 1  - Quick charset wordlist
 
 Generate every 8-character combination from a custom charset.
 
@@ -20,7 +20,7 @@ python wlf.py charset 8 8 "abcdefghijklmnopqrstuvwxyz0123456789" \
 ```
 [*] WordlistXPL-Forge v2.0.0
 [*] Charset: abcdefghijklmnopqrstuvwxyz0123456789 (36 chars)
-[*] Length range: 8–8
+[*] Length range: 8-8
 [*] Limit: 500,000
   Generating ━━━━━━━━━━━━━━━━━━━━ 100% 500,000/500,000 [02:14<00:00, 3,724/s]
 [+] Written: out/charset8.txt  (500,000 lines, 4.0 MB)
@@ -33,7 +33,7 @@ hashcat -a 0 -m 0 hashes.txt out/charset8.txt
 
 ---
 
-## Recipe 2 — Personal profile wordlist (CUPP-style)
+## Recipe 2  - Personal profile wordlist (CUPP-style)
 
 Interactive profiling → tailored wordlist.
 
@@ -66,7 +66,7 @@ hydra -l maria.santos -P maria_santos_wl.txt ssh://192.168.1.10
 
 ---
 
-## Recipe 3 — Neural LSTM generation (CPU)
+## Recipe 3  - Neural LSTM generation (CPU)
 
 Generate ML-assisted wordlist without GPU.
 
@@ -91,9 +91,9 @@ python wlf.py emit --engine neural --compute gpu --limit 1000000 \
 
 ---
 
-## Recipe 4 — Brazilian deep profile
+## Recipe 4  - Brazilian deep profile
 
-Corporate Brazilian target — CPF patterns, nomes, banks, telecom.
+Corporate Brazilian target  - CPF patterns, nomes, banks, telecom.
 
 ```bash
 python wlf.py br-deep --sector corporate \
@@ -134,7 +134,7 @@ aircrack-ng -w out/br_itau.txt -b AA:BB:CC:DD:EE:FF capture.cap
 
 ---
 
-## Recipe 5 — Pipeline DSL (multi-engine)
+## Recipe 5  - Pipeline DSL (multi-engine)
 
 Run several engines in parallel via YAML spec.
 
@@ -178,7 +178,7 @@ python wlf.py pipeline my_pipeline.yaml
 
 ---
 
-## Recipe 6 — Evolutionary generation (MAP-Elites)
+## Recipe 6  - Evolutionary generation (MAP-Elites)
 
 Quality-diversity exploration across length/charset/entropy dimensions.
 
@@ -200,7 +200,7 @@ python wlf.py evolve --mode map-elites \
 
 ---
 
-## Recipe 7 — Temporal drift (year evolution)
+## Recipe 7  - Temporal drift (year evolution)
 
 Evolve seed words across years 2019→2026 with leet escalation.
 
@@ -237,17 +237,17 @@ ffuf -w out/temporal.txt -u https://target.com/FUZZ -mc 200,301
 
 ---
 
-## Recipe 8 — REST API + streaming
+## Recipe 8  - REST API + streaming
 
 Start the API server and stream a wordlist from another tool.
 
 ```bash
-# Terminal 1 — start server
+# Terminal 1  - start server
 WLF_API_KEY=secretkey python wlf.py serve \
   --host 127.0.0.1 \
   --port 8771
 
-# Terminal 2 — stream 50k markov passwords
+# Terminal 2  - stream 50k markov passwords
 curl -s -X POST http://127.0.0.1:8771/v1/generate \
   -H "Content-Type: application/json" \
   -H "X-WLF-Key: secretkey" \

@@ -173,7 +173,7 @@ def replay_hit_rate(
         "hits": hits,
         "hit_rate_pct": round(100.0 * hits / max(total, 1), 4),
         "hit_examples": hit_examples,
-        "note": "Hit rate is vs bloom of a corpus sample — not a 100% guarantee.",
+        "note": "Hit rate is vs bloom of a corpus sample  - not a 100% guarantee.",
     }
 
 

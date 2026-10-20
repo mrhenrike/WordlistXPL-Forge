@@ -76,7 +76,7 @@ class WLFPlugin(ABC):
 
     def describe(self) -> str:
         return (
-            f"{self.name} v{self.version} — {self.description}\n"
+            f"{self.name} v{self.version}  - {self.description}\n"
             f"  Requires: {self.requires_extra or 'none'} | "
             f"VRAM: {self.vram_mb}MB | CPU cores: {self.cpu_cores}"
         )

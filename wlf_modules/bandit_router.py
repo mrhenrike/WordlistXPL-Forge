@@ -74,7 +74,7 @@ def proxy_reward(candidates: list[str], seeds: list[str]) -> float:
     if not candidates:
         return 0.0
     if not seeds:
-        # entropy proxy — prefer moderate length + specials
+        # entropy proxy  - prefer moderate length + specials
         score = 0.0
         for c in candidates[:500]:
             score += min(len(c), 16) / 16.0

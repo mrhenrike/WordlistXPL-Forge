@@ -149,7 +149,7 @@ class ResourceGovernor:
             )
             if avail < floor:
                 logger.warning(
-                    "RAM guard: available=%dMB floor=%dMB — stopping gracefully",
+                    "RAM guard: available=%dMB floor=%dMB  - stopping gracefully",
                     avail,
                     floor,
                 )

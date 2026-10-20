@@ -1,8 +1,8 @@
-# WordlistXPL-Forge — CLI Reference
+# WordlistXPL-Forge  - CLI Reference
 
-> Version 2.0.0 — Complete command reference with parameters and examples.
+> Version 2.0.0  - Complete command reference with parameters and examples.
 
-**AUTHORIZED USE ONLY** — For systems you own or have explicit written permission to test.
+**AUTHORIZED USE ONLY**  - For systems you own or have explicit written permission to test.
 
 ---
 

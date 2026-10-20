@@ -303,7 +303,7 @@ class GeneticPasswordEngine:
 
     def describe(self) -> str:
         if not self.population:
-            return "GeneticPasswordEngine — not initialized"
+            return "GeneticPasswordEngine  - not initialized"
         best = self.population[0]
         avg = sum(i.fitness for i in self.population) / max(len(self.population), 1)
         return (
