@@ -80,9 +80,13 @@ tests/*
 !tests/test_manifest.py
 !tests/test_credential_tester.py
 !tests/conftest.py
+!tests/test_cogpie.py
+!tests/test_cogpie_training.py
 setup_venv.sh
 setup_venv.ps1
 tools/
+!tools/cogpie_corpus_builder.py
+!tools/cogpie_real_benchmark.py
 scripts/
 third_party_manifest.json
 THIRD_PARTY_COMPONENTS.md
