@@ -37,11 +37,13 @@ from typing import Any
 
 from wlf_modules.cogpie.cognitive_transforms import (
     apply_capitalization,
+    apply_credential_mutation,
     apply_leet_partial,
     apply_numeric_suffixes,
     apply_prefix_transforms,
     transform_pair,
     transform_token,
+    transform_triple,
 )
 from wlf_modules.cogpie.markov_pcfg_hybrid import HybridRanker
 from wlf_modules.cogpie.policy_filter import PasswordPolicy, filter_candidates
@@ -148,21 +150,48 @@ class CogPIEEngine:
             for date_t in date_tokens:
                 raw_candidates.update(transform_pair(co_t, date_t))
 
+        suffix_tokens = sorted(
+            banks.get("dates", set()) | banks.get("numbers", set()),
+            key=len,
+        )[:8]
+        for name_t in name_tokens[:10]:
+            for date_t in date_tokens[:6]:
+                for suf in ["!", "1", "123", "@", "#", ""]:
+                    if suf:
+                        raw_candidates.update(
+                            transform_triple(name_t.lower(), date_t, suf)
+                        )
+            for kw_t in kw_tokens[:5]:
+                for num_t in suffix_tokens[:4]:
+                    raw_candidates.update(
+                        transform_triple(name_t.lower(), kw_t.lower(), num_t)
+                    )
+
         for old_pw in banks.get("old_passwords", set()):
-            raw_candidates.add(old_pw)
-            raw_candidates.update(transform_token(old_pw))
+            raw_candidates.update(apply_credential_mutation(old_pw))
 
         self._stats["layer2_candidates"] = len(raw_candidates)
         self._stats["layer2_time"] = time.monotonic() - t1
         logger.info("Layer 2: %d raw candidates", len(raw_candidates))
 
-        # Layer 3: Probabilistic Ranking
+        # Layer 3: Probabilistic Ranking with direct-concat priority band
         t2 = time.monotonic()
-        candidate_list = list(raw_candidates)
-        scored = self.ranker.rank(candidate_list)
+
+        raw_old_pws = list(profile.get("old_passwords", []))
+        priority_candidates = self._build_priority_band(banks, raw_old_pws)
+        priority_set = set(priority_candidates)
+
+        remaining = [c for c in raw_candidates if c not in priority_set]
+        scored_remaining = self.ranker.rank(remaining)
+
+        scored = [(c, 0.0) for c in priority_candidates] + scored_remaining
 
         self._stats["layer3_time"] = time.monotonic() - t2
-        logger.info("Layer 3: ranked %d candidates", len(scored))
+        self._stats["priority_band_size"] = len(priority_candidates)
+        logger.info(
+            "Layer 3: ranked %d candidates (%d priority)",
+            len(scored), len(priority_candidates),
+        )
 
         # Layer 4 + Layer 5: Score and Filter
         t3 = time.monotonic()
@@ -183,6 +212,113 @@ class CogPIEEngine:
         )
 
         return results
+
+    @staticmethod
+    def _build_priority_band(
+        banks: dict[str, set[str]],
+        raw_old_passwords: list[str] | None = None,
+    ) -> list[str]:
+        """Build a priority band of high-probability direct concatenations.
+
+        These are the candidates that CUPP-style tools generate: direct
+        name+date, name+number, keyword+number combinations that match
+        the simplest and most common password patterns.
+        """
+        seen: set[str] = set()
+        priority: list[str] = []
+
+        old_pw_originals: list[str] = []
+        old_pw_mutations: list[str] = []
+
+        raw_set = set(raw_old_passwords or [])
+        for raw_pw in (raw_old_passwords or []):
+            if raw_pw not in seen and len(raw_pw) >= 1:
+                seen.add(raw_pw)
+                old_pw_originals.append(raw_pw)
+
+        for old_pw in sorted(banks.get("old_passwords", set()), key=len):
+            if old_pw not in seen and old_pw not in raw_set and len(old_pw) >= 1:
+                seen.add(old_pw)
+                old_pw_originals.append(old_pw)
+            for mut in apply_credential_mutation(old_pw):
+                if mut not in seen and mut != old_pw and 4 <= len(mut) <= 30:
+                    seen.add(mut)
+                    old_pw_mutations.append(mut)
+
+        core_names: list[str] = []
+        for t in sorted(banks.get("names", set()), key=len):
+            low = t.lower()
+            if 3 <= len(low) <= 15 and low.isalpha() and " " not in low:
+                core_names.append(low)
+        core_names = list(dict.fromkeys(core_names))[:20]
+
+        core_dates: list[str] = []
+        for t in sorted(banks.get("dates", set()), key=len):
+            if t.isdigit() and len(t) <= 8:
+                core_dates.append(t)
+        core_dates = list(dict.fromkeys(core_dates))[:15]
+
+        core_keywords: list[str] = []
+        for t in sorted(banks.get("keywords", set()), key=len):
+            low = t.lower()
+            if 2 <= len(low) <= 12 and low.isalnum():
+                core_keywords.append(low)
+        core_keywords = list(dict.fromkeys(core_keywords))[:10]
+
+        core_pets: list[str] = []
+        for t in sorted(banks.get("pets", set()), key=len):
+            low = t.lower()
+            if 2 <= len(low) <= 10 and low.isalpha():
+                core_pets.append(low)
+        core_pets = list(dict.fromkeys(core_pets))[:5]
+
+        all_words = core_names + core_keywords + core_pets
+        all_nums = core_dates + [str(n) for n in banks.get("numbers", set())]
+
+        suffixes = ["", "!", "1", "123", "12", "@", "#", "!!", "1!"]
+        seps = ["", ".", "_", "-", "@"]
+
+        for word in all_words:
+            for case_fn in [str.lower, str.capitalize, str.upper]:
+                w = case_fn(word)
+                for num in all_nums:
+                    for s in suffixes[:5]:
+                        c = w + num + s
+                        if c not in seen and 4 <= len(c) <= 30:
+                            seen.add(c)
+                            priority.append(c)
+                        c2 = num + w + s
+                        if c2 not in seen and 4 <= len(c2) <= 30:
+                            seen.add(c2)
+                            priority.append(c2)
+                for sep in seps:
+                    for num in all_nums[:8]:
+                        c = w + sep + num
+                        if sep and c not in seen and 4 <= len(c) <= 30:
+                            seen.add(c)
+                            priority.append(c)
+                for s in suffixes:
+                    c = w + s
+                    if c not in seen and 4 <= len(c) <= 30:
+                        seen.add(c)
+                        priority.append(c)
+
+        for w1 in core_names[:8]:
+            for w2 in core_keywords[:5] + core_pets[:3]:
+                for case_fn in [str.lower, str.capitalize]:
+                    a, b = case_fn(w1), case_fn(w2)
+                    for sep in seps[:3]:
+                        for s in suffixes[:4]:
+                            c = a + sep + b + s
+                            if c not in seen and 4 <= len(c) <= 30:
+                                seen.add(c)
+                                priority.append(c)
+                            c2 = b + sep + a + s
+                            if c2 not in seen and 4 <= len(c2) <= 30:
+                                seen.add(c2)
+                                priority.append(c2)
+
+        return old_pw_originals + old_pw_mutations + priority
 
     def generate_stream(
         self,

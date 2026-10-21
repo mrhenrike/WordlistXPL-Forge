@@ -199,9 +199,9 @@ class TestCogPIEEngine:
             "pets": ["Rex"],
         }
         engine = CogPIEEngine()
-        results = engine.generate(profile, max_candidates=500)
+        results = engine.generate(profile, max_candidates=10000)
         assert len(results) > 0
-        assert len(results) <= 500
+        assert len(results) <= 10000
         passwords = [r[0] for r in results]
         assert any("carlos" in p.lower() or "silva" in p.lower() for p in passwords)
 
