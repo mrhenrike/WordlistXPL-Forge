@@ -1,58 +1,70 @@
-# IDE / editor local
-.cursor/
-.claude/
-wiki/
-
-# Large data (corpus, benchmark results)
-corpus/
-benchmark/*
-!benchmark/multi_corpus/
-!benchmark/consolidated_results.json
-
+# === Python bytecode ===
 __pycache__/
 *.pyc
-.log/
-.tmp/
+*.pyo
+*.so
+
+# === Build e distribuicao ===
+dist/
+build/
+*.egg-info/
+*.egg
+sdist/
+
+# === Ambientes virtuais ===
 .venv/
 venv/
 
-# Secrets / keys
-.env
-.env.*
-*.pem
-*.ppk
-*.key
-*.p12
-*.pfx
-*.crt
-id_rsa
-id_rsa.*
-*.credentials
-credentials.json
-secrets.json
-.hibp-key
-.intelx-key
+# === Testes e qualidade (artefatos) ===
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.coveragerc
 
-# Operator-local notes and personal lists
-personal_profile.lst
-target_profile.lst
+# === Linters e type checking ===
+.mypy_cache/
+.ruff_cache/
+
+# === Dev tooling (removido do repo) ===
+tools/
+.githooks/
+scripts/
+setup_venv.sh
+setup_venv.ps1
+setup.py
+setup.cfg
+tox.ini
+update_wordlists.py
+
+# === Docker (removido do repo) ===
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# === Documentos internos ===
 HANDOFF.md
 HANDOFF-AUDIT.md
 docs/competitive-gaps.md
 docs/training/
 docs/wordlist-sources-audit.md
 
-# Local offline tooling (never publish)
-update_wordlists.py
-
-# Offline corpora (local only; public tree keeps generated/.gitkeep)
+# === Large data (corpus, benchmark, models) ===
+corpus/
+benchmark/*
+!benchmark/multi_corpus/
+!benchmark/consolidated_results.json
 generated/**
 !generated/.gitkeep
 *.tmp.lst
-temp/
 .model/
 
-# Relocated / legacy paths — never reintroduce into this repo
+# === Operator-local notes ===
+personal_profile.lst
+target_profile.lst
+
+# === Relocated / legacy paths ===
 fuzzing/
 labs/
 passwords/
@@ -63,67 +75,46 @@ data/default-creds/
 data/waf_bypass_patterns.lst
 data/isp_words_*.txt
 
-# Generic profile/pattern templates only under data/examples/
+# === Generic profile/pattern templates ===
 data/examples/**
 !data/examples/profile-template.yaml
 !data/examples/patterns-complex.txt
 !data/examples/.gitkeep
 
-# Packaging / PyPI / local tooling (not part of the public generator tree)
-dist/
-build/
-*.egg-info/
-*.egg
-pyproject.toml
-setup.py
-setup.cfg
-MANIFEST.in
-tox.ini
-.pypirc
-*.example
-*.sample
-tests/*
-!tests/test_coverage_gate2.py
-!tests/test_manifest.py
-!tests/test_credential_tester.py
-!tests/conftest.py
-!tests/test_cogpie.py
-!tests/test_cogpie_training.py
-setup_venv.sh
-setup_venv.ps1
-tools/*
-!tools/cogpie_corpus_builder.py
-!tools/cogpie_real_benchmark.py
-!tools/cogpie_comparison_benchmark.py
-!tools/cogpie_leak_extractor.py
-!tools/cogpie_scale_benchmark.py
-!tools/cogpie_gpu_benchmark.py
-!tools/cogpie_gpu_comparison.py
-!tools/cogpie_multi_corpus_benchmark.py
-scripts/
-third_party_manifest.json
-THIRD_PARTY_COMPONENTS.md
-.githooks/
+# === Temporarios e logs ===
+.tmp/
+.log/
+*.log
+temp/
 
-# CI/CD and contributor metadata stay local
-.github/dependabot.yml
-.github/CODEOWNERS
-CODEOWNERS
-.github/FUNDING.yml
-FUNDING.yml
-.github/ISSUE_TEMPLATE*
-.github/PULL_REQUEST_TEMPLATE*
-CONTRIBUTING*
-CONTRIBUTORS*
-.travis.yml
-.gitlab-ci.yml
-azure-pipelines.yml
-Jenkinsfile
-.circleci/
-appveyor.yml
-.coverage
+# === IDE e sessoes ===
+.claude/
+.cursor/
+.idea/
+.vscode/
+*.swp
+wiki/
 
-# === Secrets & credentials — NEVER commit ===
+# === Segredos e credenciais ===
+.env
+.env.*
 *.env
+.pypirc
 .netrc
+*.pem
+*.ppk
+*.key
+*.p12
+*.pfx
+*.crt
 *.cer
+id_rsa
+id_rsa.*
+*.credentials
+credentials.json
+secrets.json
+.hibp-key
+.intelx-key
+
+# === OS ===
+.DS_Store
