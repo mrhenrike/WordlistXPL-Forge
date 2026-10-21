@@ -45,6 +45,29 @@ class _MiniMarkov:
         self._alphabet: set[str] = set()
         self._trained = 0
 
+    def __getstate__(self) -> dict:
+        return {
+            "order": self.order,
+            "smoothing": self.smoothing,
+            "ngrams": {k: {ctx: dict(cnt) for ctx, cnt in v.items()} for k, v in self._ngrams.items()},
+            "total_by_pos": {k: dict(v) for k, v in self._total_by_pos.items()},
+            "alphabet": self._alphabet,
+            "trained": self._trained,
+        }
+
+    def __setstate__(self, state: dict) -> None:
+        self.order = state["order"]
+        self.smoothing = state["smoothing"]
+        self._ngrams = defaultdict(lambda: defaultdict(Counter))
+        for k, v in state["ngrams"].items():
+            for ctx, cnt in v.items():
+                self._ngrams[k][ctx] = Counter(cnt)
+        self._total_by_pos = defaultdict(lambda: defaultdict(int))
+        for k, v in state["total_by_pos"].items():
+            self._total_by_pos[k].update(v)
+        self._alphabet = state["alphabet"]
+        self._trained = state["trained"]
+
     def train(self, password: str) -> None:
         pw = password.strip()
         if len(pw) < 2:

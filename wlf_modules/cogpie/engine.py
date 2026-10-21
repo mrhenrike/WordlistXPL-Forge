@@ -27,9 +27,12 @@ Version: 0.1.0
 from __future__ import annotations
 
 import itertools
+import json
 import logging
+import pickle
 import time
 from collections.abc import Generator
+from pathlib import Path
 from typing import Any
 
 from wlf_modules.cogpie.cognitive_transforms import (
@@ -194,6 +197,72 @@ class CogPIEEngine:
         results = self.generate(profile, policy, max_candidates or 500_000)
         for candidate, _ in results:
             yield candidate
+
+    def train_from_corpus(
+        self,
+        corpus_path: str,
+        max_lines: int = 0,
+        progress_every: int = 500_000,
+    ) -> int:
+        """Train from a processed corpus file with progress reporting.
+
+        This is the preferred method for training on large real-world
+        corpora (e.g. processed SecLists output from cogpie_corpus_builder).
+
+        Args:
+            corpus_path: Path to newline-delimited password file.
+            max_lines: Max lines to process (0 = unlimited).
+            progress_every: Log progress every N lines (0 = silent).
+
+        Returns:
+            Number of passwords trained on.
+        """
+        count = 0
+        t0 = time.monotonic()
+        with open(corpus_path, "r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                pw = line.rstrip("\n\r")
+                if pw:
+                    self.ranker.train(pw)
+                    count += 1
+                    if progress_every and count % progress_every == 0:
+                        elapsed = time.monotonic() - t0
+                        rate = count / max(elapsed, 0.001)
+                        logger.info(
+                            "Training: %dk passwords (%.0f pw/s)",
+                            count // 1000, rate,
+                        )
+                    if max_lines and count >= max_lines:
+                        break
+        elapsed = time.monotonic() - t0
+        logger.info(
+            "Training complete: %d passwords in %.1fs (%.0f pw/s)",
+            count, elapsed, count / max(elapsed, 0.001),
+        )
+        return count
+
+    def save_model(self, path: str) -> None:
+        """Serialize the trained model to disk (pickle)."""
+        model_data = {
+            "ranker": self.ranker,
+            "max_pair_depth": self.max_pair_depth,
+            "stats": self._stats,
+        }
+        with open(path, "wb") as f:
+            pickle.dump(model_data, f, protocol=pickle.HIGHEST_PROTOCOL)
+        logger.info("Model saved: %s", path)
+
+    @classmethod
+    def load_model(cls, path: str) -> "CogPIEEngine":
+        """Load a previously saved model."""
+        with open(path, "rb") as f:
+            model_data = pickle.load(f)
+        engine = cls.__new__(cls)
+        engine.ranker = model_data["ranker"]
+        engine.max_pair_depth = model_data.get("max_pair_depth", 2)
+        engine._stats = model_data.get("stats", {})
+        logger.info("Model loaded: %s (%d trained)", path, engine.ranker.trained_count)
+        return engine
 
     @property
     def stats(self) -> dict[str, Any]:
