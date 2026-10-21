@@ -18,10 +18,9 @@ import json
 import logging
 import math
 from collections import Counter
-from collections.abc import Generator, Iterable
-from dataclasses import dataclass, field
+from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,9 @@ wiki/
 
 # Large data (corpus, benchmark results)
 corpus/
-benchmark/
+benchmark/*
+!benchmark/multi_corpus/
+!benchmark/consolidated_results.json
 
 __pycache__/
 *.pyc
@@ -97,6 +99,7 @@ tools/*
 !tools/cogpie_scale_benchmark.py
 !tools/cogpie_gpu_benchmark.py
 !tools/cogpie_gpu_comparison.py
+!tools/cogpie_multi_corpus_benchmark.py
 scripts/
 third_party_manifest.json
 THIRD_PARTY_COMPONENTS.md

@@ -37,7 +37,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 import statistics
 import sys
@@ -222,7 +221,7 @@ class RandomBaseline:
 def load_pairs(filepath: str, max_targets: int = 0, seed: int = 42) -> list[dict]:
     """Load PII:password pairs from JSONL."""
     pairs = []
-    with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(filepath, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             line = line.strip()
             if not line:
@@ -334,7 +333,7 @@ def run_scale_benchmark(
 
     logger.info("Loading training corpus...")
     train_passwords = []
-    with open(train_corpus_path, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(train_corpus_path, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             pw = line.rstrip("\n\r")
             if pw:

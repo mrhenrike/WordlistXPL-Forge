@@ -26,7 +26,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 import sys
 import time
@@ -37,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from wlf_modules.cogpie.engine import CogPIEEngine
 from wlf_modules.cogpie.markov_pcfg_hybrid import HybridRanker
-from wlf_modules.cogpie.pii_correlator import correlate_password, _detect_name, _detect_date
+from wlf_modules.cogpie.pii_correlator import _detect_date, _detect_name, correlate_password
 
 logger = logging.getLogger("cogpie.comparison")
 
@@ -80,7 +79,7 @@ def load_and_split(
 ) -> tuple[list[str], list[str]]:
     """Load corpus and split into train/test (PII-bearing test set)."""
     passwords = []
-    with open(corpus_path, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(corpus_path, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             pw = line.rstrip("\n\r")
             if pw:

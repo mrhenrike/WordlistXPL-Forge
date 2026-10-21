@@ -384,7 +384,7 @@ def correlate_corpus(
             if max_lines and stats.total >= max_lines:
                 break
     elif filepath:
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(filepath, encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 _process(line)
                 if max_lines and stats.total >= max_lines:

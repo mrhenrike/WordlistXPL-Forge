@@ -39,7 +39,7 @@ def is_gpu_available() -> bool:
     return _TORCH_AVAILABLE and torch.cuda.is_available()
 
 
-def get_device() -> "torch.device":
+def get_device() -> torch.device:
     if not _TORCH_AVAILABLE:
         raise RuntimeError("PyTorch not installed")
     if torch.cuda.is_available():
@@ -66,7 +66,7 @@ class GPUMarkov:
         self,
         order: int = 3,
         smoothing: float = 0.01,
-        device: "torch.device | None" = None,
+        device: torch.device | None = None,
     ) -> None:
         self.order = order
         self.smoothing = smoothing
@@ -80,8 +80,8 @@ class GPUMarkov:
             lambda: defaultdict(int)
         )
         self._trained = 0
-        self._gpu_tables: dict[int, "torch.Tensor"] = {}
-        self._gpu_totals: dict[int, "torch.Tensor"] = {}
+        self._gpu_tables: dict[int, torch.Tensor] = {}
+        self._gpu_totals: dict[int, torch.Tensor] = {}
         self._ctx2idx: dict[int, dict[str, int]] = {}
         self._materialized = False
 
@@ -168,7 +168,7 @@ class GPUMarkov:
         self._gpu_tables.clear()
         self._gpu_totals.clear()
         self._ctx2idx.clear()
-        self._ctx_hash_tables: dict[int, tuple["torch.Tensor", "torch.Tensor"]] = {}
+        self._ctx_hash_tables: dict[int, tuple[torch.Tensor, torch.Tensor]] = {}
 
         max_ord = 0
         for ch in self._char2idx:
@@ -283,8 +283,8 @@ class GPUMarkov:
         return encoded, max_len
 
     def _compute_ctx_keys(
-        self, encoded: "torch.Tensor", pos_offset: int
-    ) -> "torch.Tensor":
+        self, encoded: torch.Tensor, pos_offset: int
+    ) -> torch.Tensor:
         """Compute integer context keys for all candidates at a given position."""
         V = self._V
         if self.order == 3:
@@ -302,8 +302,8 @@ class GPUMarkov:
             return key
 
     def _map_ctx_keys_to_indices(
-        self, ctx_keys: "torch.Tensor", pos: int
-    ) -> "torch.Tensor":
+        self, ctx_keys: torch.Tensor, pos: int
+    ) -> torch.Tensor:
         """Map integer context keys to table row indices using GPU hash table."""
         if pos not in self._ctx_hash_tables:
             return torch.full_like(ctx_keys, self._ctx_default_idx)
@@ -326,7 +326,7 @@ class GPUMarkov:
 
         return result
 
-    def score_batch(self, candidates: list[str]) -> "torch.Tensor":
+    def score_batch(self, candidates: list[str]) -> torch.Tensor:
         """Score a batch of candidates on GPU.
 
         Encoding and context-key mapping are vectorized; the per-position loop
@@ -400,7 +400,7 @@ class GPUPCFG:
     Training runs on CPU; batch scoring uses GPU hash-based lookups.
     """
 
-    def __init__(self, device: "torch.device | None" = None) -> None:
+    def __init__(self, device: torch.device | None = None) -> None:
         self.device = device or get_device()
         self._structure_counts: Counter = Counter()
         self._terminal_counts: dict[str, Counter] = defaultdict(Counter)
@@ -463,7 +463,7 @@ class GPUPCFG:
             cache[tag] = (total, vocab)
         return cache
 
-    def score_batch(self, candidates: list[str]) -> "torch.Tensor":
+    def score_batch(self, candidates: list[str]) -> torch.Tensor:
         """Score batch of candidates. Returns tensor of log-probs on GPU."""
         n = len(candidates)
         scores = torch.zeros(n, dtype=torch.float32, device=self.device)
@@ -526,7 +526,7 @@ class GPUHybridRanker:
         alpha: float = 0.4,
         beta: float = 0.2,
         markov_order: int = 3,
-        device: "torch.device | None" = None,
+        device: torch.device | None = None,
     ) -> None:
         self.device = device or get_device()
         self.alpha = alpha
@@ -573,7 +573,7 @@ class GPUHybridRanker:
     ) -> int:
         processed = 0
         t0 = time.monotonic()
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(filepath, encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 pw = line.rstrip("\n\r")
                 if pw:
@@ -599,7 +599,7 @@ class GPUHybridRanker:
         self._markov.materialize_gpu()
         return processed
 
-    def score_batch(self, candidates: list[str]) -> "torch.Tensor":
+    def score_batch(self, candidates: list[str]) -> torch.Tensor:
         """Score all candidates in one GPU pass. Returns tensor of hybrid scores."""
         if not self._markov._materialized:
             self._markov.materialize_gpu()
@@ -665,7 +665,7 @@ class GPUCandidateMatcher:
     lookup, avoiding O(N) Python string comparisons per target.
     """
 
-    def __init__(self, device: "torch.device | None" = None) -> None:
+    def __init__(self, device: torch.device | None = None) -> None:
         self.device = device or get_device()
 
     @staticmethod
@@ -724,7 +724,7 @@ def gpu_benchmark_evaluate(
     gen_fn: Any,
     test_set: list[str],
     budgets: list[int],
-    device: "torch.device | None" = None,
+    device: torch.device | None = None,
     progress_every: int = 100,
 ) -> dict[str, Any]:
     """GPU-accelerated benchmark evaluation for a single algorithm.

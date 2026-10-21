@@ -25,7 +25,6 @@ import re
 import zlib
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass

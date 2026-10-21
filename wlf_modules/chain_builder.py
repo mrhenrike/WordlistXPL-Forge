@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass, field
 from itertools import product
@@ -150,7 +149,7 @@ class Chain:
     stages: list[Stage] = field(default_factory=list)
     description: str = ""
 
-    def add_stage(self, name: str, transforms: list[dict[str, Any]]) -> "Chain":
+    def add_stage(self, name: str, transforms: list[dict[str, Any]]) -> Chain:
         self.stages.append(Stage(name=name, transforms=transforms))
         return self
 

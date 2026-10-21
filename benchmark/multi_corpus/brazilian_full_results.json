@@ -1,0 +1,35 @@
+{
+  "label": "brazilian_full",
+  "preset": "brazilian",
+  "sources": [
+    "wlist_brasil",
+    "melissa_andrade"
+  ],
+  "train_limit": 0,
+  "trained_count": 13104482,
+  "train_time_seconds": 112.59,
+  "test_targets": 2000,
+  "device": "cuda",
+  "results": {
+    "evaluated": 2000,
+    "skipped": 0,
+    "total_hits": 1990,
+    "coverage_pct": 99.5,
+    "mrr": 0.003337,
+    "median_rank": 618,
+    "avg_ms_per_target": 246.14,
+    "total_time_seconds": 492.28,
+    "hit_rates": {
+      "hit@10": 0.25,
+      "hit@100": 2.95,
+      "hit@1000": 66.45,
+      "hit@10000": 99.5
+    },
+    "hits_raw": {
+      "hit@10": 5,
+      "hit@100": 59,
+      "hit@1000": 1329,
+      "hit@10000": 1990
+    }
+  }
+}

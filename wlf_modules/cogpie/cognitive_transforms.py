@@ -24,8 +24,6 @@ Version: 0.1.0
 from __future__ import annotations
 
 from collections.abc import Generator
-from typing import Any
-
 
 _COMMON_SUFFIXES: list[str] = [
     "1", "2", "3", "12", "13", "21", "23", "123", "1234", "12345",

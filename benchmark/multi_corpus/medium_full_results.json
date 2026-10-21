@@ -1,0 +1,38 @@
+{
+  "label": "medium_full",
+  "preset": "medium",
+  "sources": [
+    "rockyou",
+    "wlist_brasil",
+    "melissa_andrade",
+    "pwdb_10m",
+    "openwall"
+  ],
+  "train_limit": 0,
+  "trained_count": 41091472,
+  "train_time_seconds": 346.49,
+  "test_targets": 2000,
+  "device": "cuda",
+  "results": {
+    "evaluated": 2000,
+    "skipped": 0,
+    "total_hits": 1974,
+    "coverage_pct": 98.7,
+    "mrr": 0.029809,
+    "median_rank": 179,
+    "avg_ms_per_target": 293.66,
+    "total_time_seconds": 587.32,
+    "hit_rates": {
+      "hit@10": 3.2,
+      "hit@100": 27.25,
+      "hit@1000": 92.75,
+      "hit@10000": 98.7
+    },
+    "hits_raw": {
+      "hit@10": 64,
+      "hit@100": 545,
+      "hit@1000": 1855,
+      "hit@10000": 1974
+    }
+  }
+}

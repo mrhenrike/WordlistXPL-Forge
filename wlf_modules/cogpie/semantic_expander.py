@@ -21,9 +21,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from collections.abc import Generator
 from typing import Any
-
 
 _ACCENT_MAP: dict[str, str] = {
     "a": "aáàâã", "e": "eéê", "i": "iíî", "o": "oóôõ",
