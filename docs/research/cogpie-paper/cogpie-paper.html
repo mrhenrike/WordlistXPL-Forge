@@ -3,497 +3,405 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CogPIE: Cognitive Pattern Inference Engine for Targeted Password Generation</title>
+<title>CogPIE: Cognitive Pattern Inference Engine</title>
+
 <style>
-:root {
-  --bg: #fafaf8;
-  --fg: #1a1a1a;
-  --fg-secondary: #4a4a4a;
-  --accent: #8b0000;
-  --border: #d0ccc4;
-  --table-stripe: #f0eeea;
-  --code-bg: #f5f3ef;
-  --link: #6b3a3a;
-  --heading: #2c1810;
-  --abstract-bg: #f5f3ef;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1a1a1e;
-    --fg: #d8d4cf;
-    --fg-secondary: #9e9a94;
-    --accent: #c06060;
-    --border: #3a3835;
-    --table-stripe: #222226;
-    --code-bg: #25252a;
-    --link: #c09090;
-    --heading: #e0d8d0;
-    --abstract-bg: #222226;
-    color-scheme: dark;
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Merriweather', Georgia, serif;
+    font-size: 16px; line-height: 1.8; color: #1a1a2e;
+    max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem;
+    background: #fafaf8;
   }
-}
-:root[data-theme="dark"] {
-  --bg: #1a1a1e;
-  --fg: #d8d4cf;
-  --fg-secondary: #9e9a94;
-  --accent: #c06060;
-  --border: #3a3835;
-  --table-stripe: #222226;
-  --code-bg: #25252a;
-  --link: #c09090;
-  --heading: #e0d8d0;
-  --abstract-bg: #222226;
-  color-scheme: dark;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
-  font-size: 16px;
-  line-height: 1.7;
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
-}
-
-h1 {
-  font-size: 1.6rem;
-  color: var(--heading);
-  line-height: 1.3;
-  margin: 0 0 0.5rem;
-  text-wrap: balance;
-  font-weight: 700;
-}
-
-h2 {
-  font-size: 1.25rem;
-  color: var(--heading);
-  margin: 2.5rem 0 0.8rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 1px solid var(--border);
-  font-weight: 700;
-}
-
-h3 {
-  font-size: 1.1rem;
-  color: var(--heading);
-  margin: 1.8rem 0 0.6rem;
-  font-weight: 600;
-}
-
-h4 {
-  font-size: 1rem;
-  color: var(--heading);
-  margin: 1.4rem 0 0.5rem;
-  font-weight: 600;
-  font-style: italic;
-}
-
-p { margin: 0 0 0.9rem; text-align: justify; }
-
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-strong { font-weight: 700; }
-
-.author {
-  font-size: 1.05rem;
-  color: var(--fg-secondary);
-  margin: 0.3rem 0 0.2rem;
-}
-.affiliation {
-  font-size: 0.95rem;
-  color: var(--fg-secondary);
-  font-style: italic;
-  margin: 0 0 1.5rem;
-}
-
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 1.5rem 0;
-}
-
-.abstract, .resumo {
-  background: var(--abstract-bg);
-  padding: 1.2rem 1.4rem;
-  border-left: 3px solid var(--accent);
-  margin: 1rem 0 1.5rem;
-  font-size: 0.92rem;
-}
-.abstract p, .resumo p {
-  margin-bottom: 0.5rem;
-}
-.abstract p:last-child, .resumo p:last-child {
-  margin-bottom: 0;
-}
-
-.keywords {
-  font-size: 0.88rem;
-  color: var(--fg-secondary);
-  margin: 0.5rem 0 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0 1.2rem;
-  font-size: 0.88rem;
-  overflow-x: auto;
-  display: block;
-}
-
-th, td {
-  padding: 0.45rem 0.6rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-th {
-  font-weight: 700;
-  color: var(--heading);
-  border-bottom: 2px solid var(--accent);
-  white-space: nowrap;
-}
-tr:nth-child(even) td {
-  background: var(--table-stripe);
-}
-
-pre {
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  padding: 1rem;
-  overflow-x: auto;
-  font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", "Consolas", monospace;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  margin: 0.8rem 0 1.2rem;
-  border-radius: 3px;
-}
-
-code {
-  font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", "Consolas", monospace;
-  font-size: 0.88em;
-  background: var(--code-bg);
-  padding: 0.1em 0.3em;
-  border-radius: 2px;
-}
-pre code {
-  background: transparent;
-  padding: 0;
-  font-size: inherit;
-}
-
-ol, ul {
-  margin: 0.5rem 0 1rem 1.5rem;
-}
-li { margin-bottom: 0.4rem; }
-
-.note {
-  background: var(--abstract-bg);
-  border: 1px solid var(--border);
-  padding: 0.8rem 1rem;
-  font-size: 0.9rem;
-  font-style: italic;
-  margin: 1rem 0;
-}
-
-.references {
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-.references ol {
-  margin-left: 1.8rem;
-}
-.references li {
-  margin-bottom: 0.5rem;
-  padding-left: 0.3rem;
-}
-
-.appendix h2 {
-  color: var(--accent);
-}
-
-.footer-note {
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--fg-secondary);
-  text-align: center;
-}
-
-@media (max-width: 600px) {
-  body { padding: 1rem; font-size: 15px; }
-  h1 { font-size: 1.3rem; }
-  h2 { font-size: 1.15rem; }
-  pre { font-size: 0.75rem; padding: 0.6rem; }
-  th, td { padding: 0.3rem 0.4rem; font-size: 0.8rem; }
-}
+  h1 { font-family: 'Source Sans 3', sans-serif; font-size: 1.8rem; font-weight: 700; margin: 2rem 0 0.5rem; color: #0d1b2a; line-height: 1.3; }
+  h2 { font-family: 'Source Sans 3', sans-serif; font-size: 1.4rem; font-weight: 700; margin: 2rem 0 0.5rem; color: #1b263b; border-bottom: 2px solid #415a77; padding-bottom: 0.3rem; }
+  h3 { font-family: 'Source Sans 3', sans-serif; font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 0.4rem; color: #1b263b; }
+  p { margin: 0.8rem 0; text-align: justify; }
+  strong { color: #0d1b2a; }
+  a { color: #415a77; text-decoration: underline; }
+  hr { border: none; border-top: 1px solid #d0d0c8; margin: 2rem 0; }
+  blockquote { border-left: 4px solid #778da9; padding: 0.5rem 1rem; margin: 1rem 0; background: #f0f0ea; font-style: italic; }
+  code { background: #e0e0d8; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; font-family: 'Fira Code', 'Source Code Pro', monospace; }
+  pre { background: #1b263b; color: #e0e1dd; padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.88rem; line-height: 1.5; }
+  th { background: #1b263b; color: #e0e1dd; padding: 0.6rem 0.8rem; text-align: left; font-family: 'Source Sans 3', sans-serif; font-weight: 600; }
+  td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #d0d0c8; vertical-align: top; }
+  tr:nth-child(even) { background: #f0f0ea; }
+  tr:hover { background: #e8e8e0; }
+  ul, ol { margin: 0.8rem 0 0.8rem 1.5rem; }
+  li { margin: 0.3rem 0; }
+  .container { max-width: 900px; margin: 0 auto; }
+  @media (max-width: 600px) {
+    body { padding: 1rem; font-size: 14px; }
+    table { font-size: 0.78rem; display: block; overflow-x: auto; }
+  }
+  @media print {
+    body { max-width: 100%; font-size: 11pt; }
+    h2 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+  }
 </style>
+
 </head>
 <body>
-
-<h1>CogPIE: A Cognitive Pattern Inference Engine for Targeted Password Candidate Generation</h1>
-<p class="author"><strong>Andre Henrique de Oliveira</strong></p>
-<p class="affiliation">Uniao Geek Security Research</p>
-
-<hr class="divider">
-
-<h2>Abstract</h2>
-<div class="abstract">
-<p>Password security remains one of the most critical challenges in information security. Despite decades of research and policy improvements, users consistently create passwords derived from their personal cognitive context: names, dates, preferences, and memories. This paper presents CogPIE (Cognitive Pattern Inference Engine), a novel 5-layer hybrid algorithm that models these cognitive biases to generate targeted password candidates. CogPIE combines semantic expansion of personal tokens, cognitive transformation rules based on documented psychological biases, a hybrid Markov chain and Probabilistic Context-Free Grammar (PCFG) ranking system, practical entropy scoring, and policy-aware filtering. Our experimental evaluation on synthetic datasets demonstrates that CogPIE achieves a 60.9% hit rate against cognitively-plausible password sets, outperforming CUPP-style profiling (51.7%) and pure Markov approaches (0% without profile information). Large-scale evaluation on the RockYou breach corpus (14.3M passwords) shows CogPIE reaching 75.95% hit rate with 1M training passwords at hit@1,000, surpassing CUPP-style (46.0%) and Markov-3 (3.2%) in comparative tests. We provide formal mathematical foundations for each layer, complexity analysis, and a complete open-source implementation. Our findings reinforce that password vaults with cryptographically random generation remain the only reliable defense against targeted attacks informed by personal information.</p>
-<p class="keywords"><strong>Keywords:</strong> password security, cognitive bias, password guessing, Markov chains, PCFG, targeted attacks, personal information, entropy estimation</p>
-</div>
-
-<h2>Resumo (PT-BR)</h2>
-<div class="resumo">
+<div class="container">
+<h1 id="cogpie-a-cognitive-pattern-inference-engine-for-targeted-password-candidate-generation">CogPIE: A Cognitive Pattern Inference Engine for Targeted Password Candidate Generation</h1>
+<p><strong>Andre Henrique de Oliveira</strong>
+Uniao Geek Security Research</p>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Password security remains one of the most critical challenges in information security. Despite decades of research and policy improvements, users consistently create passwords derived from their personal cognitive context: names, dates, preferences, and memories. This paper presents CogPIE (Cognitive Pattern Inference Engine), a novel 5-layer hybrid algorithm that models these cognitive biases to generate targeted password candidates. CogPIE combines semantic expansion of personal tokens, cognitive transformation rules based on documented psychological biases, a hybrid Markov chain and Probabilistic Context-Free Grammar (PCFG) ranking system, practical entropy scoring, and policy-aware filtering. Our experimental evaluation on synthetic datasets demonstrates that CogPIE achieves a 60.9% hit rate against cognitively-plausible password sets, outperforming CUPP-style profiling (51.7%) and pure Markov approaches (0% without profile information). We provide formal mathematical foundations for each layer, complexity analysis, and a complete open-source implementation. Our findings reinforce that password vaults with cryptographically random generation remain the only reliable defense against targeted attacks informed by personal information.</p>
+<p><strong>Keywords:</strong> password security, cognitive bias, password guessing, Markov chains, PCFG, targeted attacks, personal information, entropy estimation</p>
+<hr>
+<h2 id="resumo-pt-br">Resumo (PT-BR)</h2>
 <p>A seguranca de senhas permanece como um dos desafios mais criticos em seguranca da informacao. Apesar de decadas de pesquisa e melhorias em politicas, usuarios consistentemente criam senhas derivadas de seu contexto cognitivo pessoal: nomes, datas, preferencias e memorias. Este artigo apresenta o CogPIE (Cognitive Pattern Inference Engine), um novo algoritmo hibrido de 5 camadas que modela esses vieses cognitivos para gerar candidatos de senhas direcionados. O CogPIE combina expansao semantica de tokens pessoais, regras de transformacao cognitiva baseadas em vieses psicologicos documentados, um sistema hibrido de ranqueamento por cadeias de Markov e Gramaticas Livres de Contexto Probabilisticas (PCFG), pontuacao de entropia pratica e filtragem sensivel a politicas. Nossa avaliacao experimental em datasets sinteticos demonstra que o CogPIE atinge uma taxa de acerto de 60.9% contra conjuntos de senhas cognitivamente plaussiveis, superando profiling estilo CUPP (51.7%) e abordagens Markov puras (0% sem informacao de perfil). Fornecemos fundamentos matematicos formais para cada camada, analise de complexidade e uma implementacao completa em codigo aberto. Nossos resultados reforcam que cofres de senhas com geracao criptograficamente aleatoria permanecem a unica defesa confiavel contra ataques direcionados informados por informacao pessoal.</p>
-<p class="keywords"><strong>Palavras-chave:</strong> seguranca de senhas, vies cognitivo, adivinhacao de senhas, cadeias de Markov, PCFG, ataques direcionados, informacao pessoal, estimativa de entropia</p>
-</div>
-
-<hr class="divider">
-
-<h2>1. Introduction</h2>
-
+<p><strong>Palavras-chave:</strong> seguranca de senhas, vies cognitivo, adivinhacao de senhas, cadeias de Markov, PCFG, ataques direcionados, informacao pessoal, estimativa de entropia</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
 <p>The persistent weakness of human-chosen passwords represents a fundamental tension in cybersecurity: authentication systems require secrets that are both memorable to legitimate users and unpredictable to adversaries. Decades of empirical evidence demonstrate that these goals are fundamentally incompatible when users generate passwords from memory (Bonneau, 2012; Florencio and Herley, 2007; Wang et al., 2017).</p>
-
 <p>The cognitive science literature identifies several biases that systematically reduce password entropy. Anchoring bias causes users to build passwords around a recognizable base word (Abdrabou et al., 2021). The serial position effect concentrates modifications at the beginning and end of passwords (Li et al., 2017). Hyperbolic discounting leads users to prioritize immediate memorability over long-term security (arXiv:2607.19586, 2026). The familiarity heuristic drives selection of personally meaningful tokens: names, dates, pet names, and favorite sports teams (Wang et al., 2016).</p>
-
 <p>Current password guessing approaches fall into two broad categories. Untargeted approaches, including pure Markov models (Ma et al., 2014), PCFG-based generators (Weir et al., 2009), and neural network models such as PassGAN (Hitaj et al., 2019) and PassGPT (Rando et al., 2023), learn statistical patterns from leaked corpora without considering individual user profiles. Targeted approaches, including CUPP (Mebus, 2010), TarGuess (Wang et al., 2016), and Personal-PCFG (Li et al., 2017), incorporate personal information but typically rely on simple concatenation rules without modeling the underlying cognitive processes that drive password creation.</p>
-
 <p>This paper bridges the gap between these approaches by introducing CogPIE (Cognitive Pattern Inference Engine), a 5-layer hybrid algorithm that explicitly models cognitive biases in password creation:</p>
-
 <ol>
-<li><strong>Semantic Expansion</strong> (Layer 1): transforms raw profile tokens into a lattice of semantically related variants through abbreviation, transliteration, leetspeak, and culturally-specific nickname generation.</li>
-<li><strong>Cognitive Transforms</strong> (Layer 2): applies transformation rules derived from documented cognitive biases, including capitalization patterns, numeric suffix placement, and partial leetspeak substitution.</li>
-<li><strong>Probabilistic Ranking</strong> (Layer 3): combines positional Markov chain probabilities with PCFG structural decomposition and frequency priors from breach statistics into a unified hybrid score.</li>
-<li><strong>Entropy Scoring</strong> (Layer 4): estimates practical guessability using a zxcvbn-inspired framework (Wheeler, 2016) augmented with pattern recognition for sequences, dates, and keyboard walks.</li>
-<li><strong>Policy Filtering</strong> (Layer 5): ensures output candidates conform to target system password policies, with memory-efficient deduplication.</li>
+<li>
+<p><strong>Semantic Expansion</strong> (Layer 1): transforms raw profile tokens into a lattice of semantically related variants through abbreviation, transliteration, leetspeak, and culturally-specific nickname generation.</p>
+</li>
+<li>
+<p><strong>Cognitive Transforms</strong> (Layer 2): applies transformation rules derived from documented cognitive biases, including capitalization patterns, numeric suffix placement, and partial leetspeak substitution.</p>
+</li>
+<li>
+<p><strong>Probabilistic Ranking</strong> (Layer 3): combines positional Markov chain probabilities with PCFG structural decomposition and frequency priors from breach statistics into a unified hybrid score.</p>
+</li>
+<li>
+<p><strong>Entropy Scoring</strong> (Layer 4): estimates practical guessability using a zxcvbn-inspired framework (Wheeler, 2016) augmented with pattern recognition for sequences, dates, and keyboard walks.</p>
+</li>
+<li>
+<p><strong>Policy Filtering</strong> (Layer 5): ensures output candidates conform to target system password policies, with memory-efficient deduplication.</p>
+</li>
 </ol>
-
-<p>Our contributions are:</p>
-<ul>
-<li>A formal mathematical framework for cognitive bias modeling in password generation.</li>
-<li>A complete open-source implementation with documented complexity bounds.</li>
-<li>Experimental validation demonstrating superiority over existing targeted and untargeted approaches on synthetic benchmarks.</li>
-<li>Evidence reinforcing that cryptographically random password generation via password managers is the only reliable defense against cognitively-informed attacks.</li>
-</ul>
-
-<h2>2. Related Work</h2>
-
-<h3>2.1 Untargeted Password Guessing</h3>
+<p>Our contributions are:
+- A formal mathematical framework for cognitive bias modeling in password generation.
+- A complete open-source implementation with documented complexity bounds.
+- Experimental validation demonstrating superiority over existing targeted and untargeted approaches on synthetic benchmarks.
+- Evidence reinforcing that cryptographically random password generation via password managers is the only reliable defense against cognitively-informed attacks.</p>
+<h2 id="2-related-work">2. Related Work</h2>
+<h3 id="21-untargeted-password-guessing">2.1 Untargeted Password Guessing</h3>
 <p>The foundation of modern password guessing was established by Weir et al. (2009), who introduced Probabilistic Context-Free Grammars (PCFG) for decomposing passwords into terminal classes (alphabetic, numeric, special character segments) and learning probability distributions over production rules. Their approach cracked 28% to 129% more passwords than John the Ripper in controlled experiments, demonstrating the power of grammar-based decomposition.</p>
-<p>Markov chain models, particularly with positional awareness, were formalized by Narayanan and Shmatikov (2005) and refined by Ma et al. (2014), who demonstrated that properly configured Markov models with smoothing and backoff can outperform PCFG approaches. The OMEN system (Durmuth et al., 2015) introduced ordered Markov enumeration, achieving over 40% crack rate within 90 million guesses and over 80% at 10 billion guesses, while requiring 8x fewer guesses than John the Ripper's Markov mode for equivalent results.</p>
+<p>Markov chain models, particularly with positional awareness, were formalized by Narayanan and Shmatikov (2005) and refined by Ma et al. (2014), who demonstrated that properly configured Markov models with smoothing and backoff can outperform PCFG approaches. The OMEN system (Durmuth et al., 2015) introduced ordered Markov enumeration, achieving over 40% crack rate within 90 million guesses and over 80% at 10 billion guesses, while requiring 8x fewer guesses than John the Ripper&rsquo;s Markov mode for equivalent results.</p>
 <p>Neural network approaches emerged with PassGAN (Hitaj et al., 2019), which applied Generative Adversarial Networks to password generation, and PassGPT (Rando et al., 2023), which leveraged the GPT-2 architecture for sequential character-level generation. PassGPT reported roughly 20% more previously unseen passwords than PassGAN, with the additional capability of guided generation through sequential sampling.</p>
-
-<h3>2.2 Targeted Password Guessing</h3>
-<p>Wang et al. (2016) formalized targeted online guessing through TarGuess, presenting seven mathematical models that incorporate Personally Identifiable Information (PII) to prioritize guesses. Their work on the "Next Domino to Fall" (Wang et al., 2016) analyzed 28.8 million user accounts across 107 services, finding that 30% of modified passwords could be cracked within 10 guesses and 46.5% within 100 guesses.</p>
+<h3 id="22-targeted-password-guessing">2.2 Targeted Password Guessing</h3>
+<p>Wang et al. (2016) formalized targeted online guessing through TarGuess, presenting seven mathematical models that incorporate Personally Identifiable Information (PII) to prioritize guesses. Their work on the &ldquo;Next Domino to Fall&rdquo; (Wang et al., 2016) analyzed 28.8 million user accounts across 107 services, finding that 30% of modified passwords could be cracked within 10 guesses and 46.5% within 100 guesses.</p>
 <p>Li, Wang, and Sun (2017) extended this line with Personal-PCFG, which models six types of PII (name, birthdate, email, phone, account, ID) as grammar terminals, significantly improving targeted attack efficiency.</p>
 <p>CUPP (Mebus, 2010) and bopscrk represent the practitioner-oriented end of this spectrum, generating wordlists from interactive profile gathering with heuristic combination rules but without probabilistic modeling.</p>
-
-<h3>2.3 Cognitive Biases in Password Creation</h3>
+<h3 id="23-cognitive-biases-in-password-creation">2.3 Cognitive Biases in Password Creation</h3>
 <p>Abdrabou et al. (2021) provided neurophysiological evidence that password creation involves measurable cognitive load differences, with strong passwords requiring greater pupil dilation than weak ones (CHI 2021). A 2026 survey of 248 university students (arXiv:2607.19586) found that 76.2% only make minor modifications to existing passwords, with hyperbolic discounting and status quo bias as primary drivers.</p>
 <p>Eye-tracking studies (N=109) have demonstrated that cognitive processing styles directly affect password strength, with users exhibiting field-dependent processing styles creating systematically weaker passwords.</p>
 <p>Research on AI-generated vs. user-generated passwords (arXiv:2604.19410, 2026) confirmed that self-generated passwords exhibit systematic cognitive bias, while machine-generated passwords are stronger but less memorable: the fundamental tension this paper addresses.</p>
-
-<h3>2.4 Password Strength Estimation</h3>
+<h3 id="24-password-strength-estimation">2.4 Password Strength Estimation</h3>
 <p>Bonneau (2012) introduced alpha-guesswork as a rigorous metric for password distribution analysis, analyzing 70 million anonymized passwords and demonstrating that neither Shannon entropy nor Zipfian models accurately capture real password distributions.</p>
 <p>Wheeler (2016) operationalized these insights in zxcvbn, a practical password strength estimator that uses pattern matching (dictionary words, dates, sequences, keyboard walks) to estimate guessability rather than relying on composition rules. zxcvbn demonstrated that traditional LUDS (Lowercase, Uppercase, Digits, Symbols) metrics poorly predict actual password strength.</p>
-<p>Wang and Jian (2014) revisited Zipf's law in the context of passwords, finding that while password frequency distributions exhibit power-law-like behavior, the fit is imperfect and varies significantly across different password corpora.</p>
-
-<h3>2.5 Password Policy Standards</h3>
+<p>Wang and Jian (2014) revisited Zipf&rsquo;s law in the context of passwords, finding that while password frequency distributions exhibit power-law-like behavior, the fit is imperfect and varies significantly across different password corpora.</p>
+<h3 id="25-password-policy-standards">2.5 Password Policy Standards</h3>
 <p>NIST SP 800-63B established modern password policy guidelines, recommending minimum 8-character lengths, screening against known breached passwords, discouraging periodic rotation, and encouraging long passphrases. Revision 4 (2024-2025) further recognized synced passkeys at AAL2 and device-bound passkeys at AAL3, reflecting the shift toward passwordless authentication.</p>
-
-<h3>2.6 Password Reuse</h3>
+<h3 id="26-password-reuse">2.6 Password Reuse</h3>
 <p>Das et al. (2014) studied password reuse across multiple sites, estimating that 43-51% of users reuse the same password, with simple transformation rules (capitalization changes, suffix additions) applied between sites. Florencio and Herley (2007) established that the average user maintains approximately 25 online accounts but only 6-7 distinct passwords. More recently, Cloudflare (2024) reported that approximately 41% of successful human authentication attempts involve leaked credentials.</p>
-
-<h2>3. Theoretical Background</h2>
-
-<h3>3.1 Markov Chains for Password Modeling</h3>
-<p>A character-level Markov chain of order <em>n</em> models password generation as a stochastic process where the probability of each character depends on the preceding <em>n</em> characters. For a password <em>p</em> = c<sub>1</sub> c<sub>2</sub> ... c<sub>L</sub>, the probability is:</p>
-<pre><code>P_markov(p) = P(c_1 | START^n) * Product_{i=2}^{L} P(c_i | c_{i-n}...c_{i-1}) * P(END | c_{L-n+1}...c_L)</code></pre>
+<h3 id="27-comparative-taxonomy-of-password-generation-algorithms">2.7 Comparative Taxonomy of Password Generation Algorithms</h3>
+<p>To situate CogPIE within the landscape of existing approaches, we present a taxonomy that classifies password generation and guessing algorithms into four fundamental paradigms, analyzing their premises, mechanisms, strengths, and limitations in the context of brute-force attacks and wordlist generation.</p>
+<p><strong>Table 1: Comparative Taxonomy of Password Generation/Guessing Algorithms</strong></p>
+<table>
+<thead>
+<tr>
+<th>Paradigm</th>
+<th>Algorithm / Tool</th>
+<th>Core Mechanism</th>
+<th>Use in Brute-Force / Wordlists</th>
+<th>Strengths</th>
+<th>Key Limitations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Probabilistic</strong></td>
+<td>Markov Chains (OMEN)</td>
+<td>Models character transitions with probabilities learned from corpora; generates candidates in decreasing probability order</td>
+<td>Massive offline generation; rule base for hashcat/JtR; orders guesses by likelihood</td>
+<td>Scales to billions of candidates; orders by likelihood; generalizes statistical patterns</td>
+<td>No personal information; collapses with training scale (our data: 28.5% -&gt; 3.2%); corpus bias</td>
+</tr>
+<tr>
+<td><strong>Probabilistic</strong></td>
+<td>PCFG (Weir et al.)</td>
+<td>Decomposes passwords into terminal classes (L=letter, D=digit, S=symbol) with probabilistic grammar</td>
+<td>Structured candidate generation; complements dictionary attacks with grammatical patterns</td>
+<td>Captures macro password structure; inherent ordering; extensible with new terminals</td>
+<td>Limited granularity; no semantics; computationally expensive at scale</td>
+</tr>
+<tr>
+<td><strong>Probabilistic</strong></td>
+<td>PassGAN / PassGPT</td>
+<td>Generative neural networks (GAN/GPT-2) trained on password corpora for sequential generation</td>
+<td>Generating novel passwords; complements dictionaries with unseen variants</td>
+<td>Learns latent patterns; generates diversity; PassGPT: ~20% more unique passwords than PassGAN</td>
+<td>GPU cost; slow for online generation; no personal info; black box; hard to audit</td>
+</tr>
+<tr>
+<td><strong>Deterministic</strong></td>
+<td>CUPP / bopscrk</td>
+<td>Direct concatenation of profile fields (name+date, pet+year) with manual combination rules</td>
+<td>Rapid targeted wordlist generation for online attacks (few candidates, high impact)</td>
+<td>Fast (ms); intuitive; high hit rate in simple scenarios (our data: 43.8% hit@100)</td>
+<td>Fixed rules; no prioritization; saturates quickly (~46% hit@1000=hit@10000); no adaptation</td>
+</tr>
+<tr>
+<td><strong>Deterministic</strong></td>
+<td>John the Ripper (rules)</td>
+<td>Deterministic mangling rules applied to dictionaries: toggle case, append, prepend, insert</td>
+<td>Rule engine for dictionary attacks; GPU integration via OpenCL</td>
+<td>Fast on GPU; auditable; combines with any dictionary; industry standard</td>
+<td>No intelligence; combinatorial explosion; no probability ordering; no personal context</td>
+</tr>
+<tr>
+<td><strong>Inference/Distance</strong></td>
+<td>Levenshtein (edit distance)</td>
+<td>Measures minimum edit distance between strings; generates variants at N edits from known passwords</td>
+<td>Credential stuffing: generates mutations of leaked passwords; measures password similarity</td>
+<td>Solid mathematical foundation; captures reuse with minimal modification</td>
+<td>Does not generate candidates autonomously; O(n*m) cost; no semantics; explosion at dist&gt;2</td>
+</tr>
+<tr>
+<td><strong>Inference/Distance</strong></td>
+<td>Fuzzy Hashing (ssdeep/TLSH)</td>
+<td>Similarity-tolerant hashing; clusters passwords by structural proximity</td>
+<td>Password clustering for forensic analysis; reuse pattern identification in leaks</td>
+<td>Scales to millions of hashes; password family detection; low per-comparison cost</td>
+<td>Does not generate candidates; false positives on short strings; designed for files, not passwords</td>
+</tr>
+<tr>
+<td><strong>Heuristic</strong></td>
+<td>TarGuess (Wang et al.)</td>
+<td>Mathematical models (7 variants) combining PII with conditional probabilities</td>
+<td>Targeted online attacks (limited to hundreds of guesses); academic modeling</td>
+<td>Formal foundation; specialized models per PII type; robust academic results</td>
+<td>No complete public implementation; separate models; no cognitive bias integration</td>
+</tr>
+<tr>
+<td><strong>Heuristic</strong></td>
+<td>Personal-PCFG (Li et al.)</td>
+<td>Extended PCFG with 6 PII types as grammar terminals</td>
+<td>Targeted attacks with grammatical structure; balances personalization with structure</td>
+<td>Integrates PII into grammar; better than CUPP; PCFG foundation</td>
+<td>Fixed number of PII types; no semantic expansion; no cultural adaptation</td>
+</tr>
+<tr>
+<td><strong>Hybrid Cognitive</strong></td>
+<td><strong>CogPIE</strong> (this work)</td>
+<td>5-layer pipeline: semantic expansion, cognitive transformation, Markov+PCFG ranking, entropy scoring, policy filtering</td>
+<td>High-precision targeted wordlist generation; offline attacks with prioritization; password strength benchmarking</td>
+<td>Models real cognitive biases; probabilistic prioritization; cultural expansion; adaptable; 75.95% hit@1000</td>
+<td>Slower than pure CUPP; requires PII profile; effectiveness depends on profile quality</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CogPIE Classification:</strong></p>
+<p>CogPIE does not fit into a single traditional category. It is a <strong>hybrid cognitive-probabilistic algorithm</strong> that integrates elements from multiple paradigms:</p>
+<ol>
+<li>
+<p><strong>Deterministic component</strong> (Layer 1: Semantic Expansion): nickname tables, diminutives, transliterations, and cultural variants are applied deterministically, without randomness. Similar in spirit to CUPP, but with semantic depth and cultural sensitivity.</p>
+</li>
+<li>
+<p><strong>Heuristic component</strong> (Layer 2: Cognitive Transforms): transformation rules derived from cognitive bias research (anchoring, serial position, minimal effort, familiarity) model human behavior. Unlike arbitrary rules, each transformation is grounded in evidence from cognitive science research and real breach data analysis.</p>
+</li>
+<li>
+<p><strong>Probabilistic component</strong> (Layer 3: Markov+PCFG Ranking): positional Markov chains combined with PCFG grammatical analysis assign probabilities to candidates, enabling likelihood-based ordering. This component is trainable on real corpora, adapting to specific linguistic distributions.</p>
+</li>
+<li>
+<p><strong>Inference component</strong> (Layer 4: Entropy Scoring): inspired by zxcvbn, infers the guessability of each candidate through pattern matching, relying not on edit distance but on recognition of cognitively predictable structures.</p>
+</li>
+<li>
+<p><strong>Normative component</strong> (Layer 5: Policy Filtering): filters candidates according to the target system&rsquo;s authentication policies, incorporating operational pragmatism into the algorithm&rsquo;s output.</p>
+</li>
+</ol>
+<p>This multi-paradigm architecture is why CogPIE demonstrates resilience where single-paradigm algorithms fail. In our experiments, pure Markov collapsed from 28.5% to 3.2% when scaling the training corpus from 500K to 1M (statistical dilution), while CUPP saturated at ~46% (fixed rule exhaustion). CogPIE maintained growth from 69.0% to 75.95% because each layer compensates for the others&rsquo; limitations: semantic expansion ensures coverage, cognitive transforms prioritize human patterns, probabilistic ranking orders by likelihood, and policy filtering ensures practical applicability.</p>
+<p><strong>Relevance to brute-force tools and wordlist generation:</strong></p>
+<p>Operational offensive security tools (hashcat, John the Ripper, Hydra) fundamentally depend on wordlist quality: a list with 1,000 well-prioritized candidates outperforms a generic 10-million-entry list in targeted attacks. CogPIE adds value to this ecosystem in three ways: (1) generates targeted wordlists with high hit rates for direct integration with cracking tools; (2) provides probabilistic prioritization that maximizes efficiency in guess-limited scenarios (online attacks, account lockout); (3) quantitatively demonstrates which cognitive patterns are most exploitable, guiding both offensive operators (which combinations to test first) and defenders (which patterns to block in password policies).</p>
+<p>For security research, CogPIE contributes as an evaluation framework: by measuring hit rates against real passwords, it provides empirical evidence that cognitive bias in password creation is universal and resistant to complexity policies, reinforcing the recommendation to migrate toward passwordless authentication or cryptographic password manager generators.</p>
+<h2 id="3-theoretical-background">3. Theoretical Background</h2>
+<h3 id="31-markov-chains-for-password-modeling">3.1 Markov Chains for Password Modeling</h3>
+<p>A character-level Markov chain of order n models password generation as a stochastic process where the probability of each character depends on the preceding n characters. For a password p = c_1 c_2 &hellip; c_L, the probability is:</p>
+<p>P_markov(p) = P(c_1 | START^n) * Product_{i=2}^{L} P(c_i | c_{i-n}&hellip;c_{i-1}) * P(END | c_{L-n+1}&hellip;c_L)</p>
 <p>Positional Markov models (as in OMEN) condition additionally on position:</p>
-<pre><code>P_pos_markov(p) = Product_{i=1}^{L+1} P(c_i | c_{i-n}...c_{i-1}, pos=min(i,K))</code></pre>
+<p>P_pos_markov(p) = Product_{i=1}^{L+1} P(c_i | c_{i-n}&hellip;c_{i-1}, pos=min(i,K))</p>
 <p>where K is a position cap (typically 20) that groups all positions beyond K into a single bucket.</p>
 <p>The transition probabilities are estimated from a training corpus with Laplace smoothing:</p>
-<pre><code>P(c | context, pos) = (count(context -&gt; c, pos) + epsilon) / (count(context, pos) + epsilon * |Alphabet|)</code></pre>
+<p>P(c | context, pos) = (count(context -&gt; c, pos) + epsilon) / (count(context, pos) + epsilon * |Alphabet|)</p>
 <p>where epsilon is the smoothing parameter (typically 0.01).</p>
-
-<h3>3.2 Probabilistic Context-Free Grammars</h3>
-<p>A PCFG decomposes a password into structural segments classified by type and length. For a password <em>p</em> with structure S = s<sub>1</sub> s<sub>2</sub> ... s<sub>k</sub> (e.g., L5 D3 S1 for a 5-letter word followed by 3 digits and 1 special character):</p>
-<pre><code>P_pcfg(p) = P(S) * Product_{i=1}^{k} P(terminal_i | s_i)</code></pre>
-<p>where P(S) is the probability of the structural template and P(terminal<sub>i</sub> | s<sub>i</sub>) is the probability of the specific terminal filling slot s<sub>i</sub>.</p>
-
-<h3>3.3 Hybrid Scoring Function</h3>
-<p>CogPIE's Layer 3 combines both models with a frequency prior:</p>
-<pre><code>H(c) = alpha * log P_markov(c) + (1 - alpha - beta) * log P_pcfg(c) + beta * log P_freq(c)</code></pre>
-<p>where:</p>
-<ul>
-<li><em>alpha</em> in [0,1] controls the Markov model weight (default 0.4)</li>
-<li><em>beta</em> in [0,1] controls the frequency prior weight (default 0.2)</li>
-<li>P<sub>freq</sub>(c) is the empirical frequency of candidate c in known breach data</li>
-</ul>
+<h3 id="32-probabilistic-context-free-grammars">3.2 Probabilistic Context-Free Grammars</h3>
+<p>A PCFG decomposes a password into structural segments classified by type and length. For a password p with structure S = s_1 s_2 &hellip; s_k (e.g., L5 D3 S1 for a 5-letter word followed by 3 digits and 1 special character):</p>
+<p>P_pcfg(p) = P(S) * Product_{i=1}^{k} P(terminal_i | s_i)</p>
+<p>where P(S) is the probability of the structural template and P(terminal_i | s_i) is the probability of the specific terminal filling slot s_i.</p>
+<h3 id="33-hybrid-scoring-function">3.3 Hybrid Scoring Function</h3>
+<p>CogPIE&rsquo;s Layer 3 combines both models with a frequency prior:</p>
+<p>H(c) = alpha * log P_markov(c) + (1 - alpha - beta) * log P_pcfg(c) + beta * log P_freq(c)</p>
+<p>where:
+- alpha in [0,1] controls the Markov model weight (default 0.4)
+- beta in [0,1] controls the frequency prior weight (default 0.2)
+- P_freq(c) is the empirical frequency of candidate c in known breach data</p>
 <p>This formulation is a log-linear combination model, which is convex in the log-probability space and amenable to optimization of the mixing parameters.</p>
-
-<h3>3.4 Practical Entropy</h3>
+<h3 id="34-practical-entropy">3.4 Practical Entropy</h3>
 <p>Following Bonneau (2012) and Wheeler (2016), we define practical entropy as:</p>
-<pre><code>E_p(c) = log_2(G(c))</code></pre>
+<p>E_p(c) = log_2(G(c))</p>
 <p>where G(c) is the estimated number of guesses an optimal attacker would require. Unlike Shannon entropy, which treats all symbols as independent, practical entropy accounts for pattern recognition, dictionary lookups, and structural regularities.</p>
-
-<h3>3.5 Cognitive Bias Formal Model</h3>
-<p>We model cognitive password creation as a function mapping a user's cognitive context C (comprising personal information, memories, and preferences) to a password through a series of biased transformations:</p>
-<pre><code>password = PolicyAdapt(Combine(Transform(Select(C))))</code></pre>
-<p>where:</p>
-<ul>
-<li><strong>Select:</strong> chooses base tokens from C (anchoring bias)</li>
-<li><strong>Transform:</strong> applies modifications (familiarity heuristic, minimal effort principle)</li>
-<li><strong>Combine:</strong> concatenates transformed tokens (serial position effect)</li>
-<li><strong>PolicyAdapt:</strong> minimally modifies to satisfy system requirements (satisficing behavior)</li>
-</ul>
+<h3 id="35-cognitive-bias-formal-model">3.5 Cognitive Bias Formal Model</h3>
+<p>We model cognitive password creation as a function mapping a user&rsquo;s cognitive context C (comprising personal information, memories, and preferences) to a password through a series of biased transformations:</p>
+<p>password = PolicyAdapt(Combine(Transform(Select(C))))</p>
+<p>where:
+- Select: chooses base tokens from C (anchoring bias)
+- Transform: applies modifications (familiarity heuristic, minimal effort principle)
+- Combine: concatenates transformed tokens (serial position effect)
+- PolicyAdapt: minimally modifies to satisfy system requirements (satisficing behavior)</p>
 <p>Each stage exhibits measurable bias distributions documented in the literature.</p>
-
-<h2>4. CogPIE Algorithm</h2>
-
-<h3>4.1 Architecture Overview</h3>
+<h2 id="4-cogpie-algorithm">4. CogPIE Algorithm</h2>
+<h3 id="41-architecture-overview">4.1 Architecture Overview</h3>
 <p>CogPIE processes a target profile through five sequential layers, each expanding and refining the candidate set. The algorithm takes as input a structured profile P containing personal tokens and optionally a training corpus T, producing an ordered list of password candidates.</p>
 <p><strong>Algorithm 1: CogPIE Pipeline</strong></p>
 <pre><code>Input: Profile P, Corpus T (optional), Policy pi, Budget K
 Output: Ordered list of (candidate, score) pairs
 
- 1. banks &lt;- SemanticExpand(P)          // Layer 1
- 2. tokens &lt;- Union of all banks
- 3. candidates &lt;- {}
- 4. for t in tokens:                     // Layer 2
- 5.     candidates &lt;- candidates U CognitiveTransform(t)
- 6. for (t_a, t_b) in PriorityPairs(banks):
- 7.     candidates &lt;- candidates U PairTransform(t_a, t_b)
- 8. if T is not empty:                   // Layer 3 (optional training)
- 9.     model.train(T)
+1. banks &lt;- SemanticExpand(P)          // Layer 1
+2. tokens &lt;- Union of all banks
+3. candidates &lt;- {}
+4. for t in tokens:                     // Layer 2
+5.     candidates &lt;- candidates U CognitiveTransform(t)
+6. for (t_a, t_b) in PriorityPairs(banks):
+7.     candidates &lt;- candidates U PairTransform(t_a, t_b)
+8. if T is not empty:                   // Layer 3 (optional training)
+9.     model.train(T)
 10. scored &lt;- [(c, model.score(c)) for c in candidates]
 11. sort scored by score descending
 12. for (c, s) in scored:               // Layer 4 + Layer 5
 13.    if pi.accepts(c) and not duplicate(c):
 14.        emit (c, EntropyScore(c, s))
-15.    if emitted &gt;= K: break</code></pre>
-
-<h3>4.2 Layer 1: Semantic Expansion</h3>
-<p>Given a profile P with token categories {names, dates, keywords, pets, companies, phones, emails, old_passwords}, the semantic expansion function S maps each raw token <em>t</em> to a set of variants:</p>
-<pre><code>S(t) = {t} U case_variants(t) U strip_accents(t) U abbreviations(t) U nicknames(t) U leet_single(t)</code></pre>
+15.    if emitted &gt;= K: break
+</code></pre>
+<h3 id="42-layer-1-semantic-expansion">4.2 Layer 1: Semantic Expansion</h3>
+<p>Given a profile P with token categories {names, dates, keywords, pets, companies, phones, emails, old_passwords}, the semantic expansion function S maps each raw token t to a set of variants:</p>
+<p>S(t) = {t} U case_variants(t) U strip_accents(t) U abbreviations(t) U nicknames(t) U leet_single(t)</p>
 <p>The total semantic space is:</p>
-<pre><code>SemanticSpace(P) = Union_{category} Union_{t in P[category]} S(t)</code></pre>
-<p>For names, additional decomposition occurs:</p>
-<ul>
-<li>Full name to individual parts (first, middle, last)</li>
-<li>Initials extraction (e.g., "Carlos Eduardo Silva" to "ces", "CES")</li>
-<li>Culturally-specific nicknames (e.g., "Eduardo" to "dudu", "edu")</li>
-</ul>
-<p>For dates, expansion includes:</p>
-<ul>
-<li>Full format (DDMMYYYY)</li>
-<li>Reversed digits</li>
-<li>Year only (YYYY, YY)</li>
-<li>Day-month combinations (DDMM, MMDD)</li>
-</ul>
-<p><strong>Theorem 1 (Expansion Bound):</strong> For a profile with N raw tokens, the semantic expansion produces at most O(N * E<sub>max</sub>) unique variants, where E<sub>max</sub> is bounded by the maximum expansion factor per token (empirically 20-50 for names, 8-15 for dates).</p>
-
-<h3>4.3 Layer 2: Cognitive Transforms</h3>
+<p>SemanticSpace(P) = Union_{category} Union_{t in P[category]} S(t)</p>
+<p>For names, additional decomposition occurs:
+- Full name -&gt; individual parts (first, middle, last)
+- Initials extraction (e.g., &ldquo;Carlos Eduardo Silva&rdquo; -&gt; &ldquo;ces&rdquo;, &ldquo;CES&rdquo;)
+- Culturally-specific nicknames (e.g., &ldquo;Eduardo&rdquo; -&gt; &ldquo;dudu&rdquo;, &ldquo;edu&rdquo;)</p>
+<p>For dates, expansion includes:
+- Full format (DDMMYYYY)
+- Reversed digits
+- Year only (YYYY, YY)
+- Day-month combinations (DDMM, MMDD)</p>
+<p><strong>Theorem 1 (Expansion Bound):</strong> For a profile with N raw tokens, the semantic expansion produces at most O(N * E_max) unique variants, where E_max is bounded by the maximum expansion factor per token (empirically 20-50 for names, 8-15 for dates).</p>
+<h3 id="43-layer-2-cognitive-transforms">4.3 Layer 2: Cognitive Transforms</h3>
 <p>Each expanded token undergoes transformation rules that model documented cognitive biases:</p>
-<p><strong>Capitalization patterns</strong> (Wang et al., 2017):</p>
-<ul>
-<li>First letter: ~60% of capitalized passwords</li>
-<li>All uppercase: ~15%</li>
-<li>Last letter: ~5%</li>
-<li>Alternating: ~3%</li>
-<li>Other patterns: ~17%</li>
-</ul>
-<p><strong>Numeric suffixes</strong> (serial position effect):</p>
-<ul>
-<li>Single digits (1, 2, 3): ~25% of numeric additions</li>
-<li>Birth years (1960-2026): ~20%</li>
-<li>Sequential (123, 1234): ~30%</li>
-<li>Lucky/meaningful numbers: ~25%</li>
-</ul>
-<p><strong>Special character placement:</strong></p>
-<ul>
-<li>End position: ~85% of special char additions</li>
-<li>Start position: ~10%</li>
-<li>Middle position: ~5%</li>
-</ul>
-<p><strong>Partial leetspeak:</strong></p>
-<ul>
-<li>Single substitution (e.g., "a" to "4"): ~70% of leet usage</li>
-<li>Two substitutions: ~20%</li>
-<li>Full leet: ~10% (rare in practice)</li>
-</ul>
-<p>The transform function T maps a token <em>t</em> to:</p>
-<pre><code>T(t) = Union_{j=1}^{M} T_j(t)</code></pre>
-<p>where T<sub>j</sub> are individual transform operators and M is the number of transform categories.</p>
+<p><strong>Capitalization patterns</strong> (Wang et al., 2017):
+- First letter: ~60% of capitalized passwords
+- All uppercase: ~15%
+- Last letter: ~5%
+- Alternating: ~3%
+- Other patterns: ~17%</p>
+<p><strong>Numeric suffixes</strong> (serial position effect):
+- Single digits (1, 2, 3): ~25% of numeric additions
+- Birth years (1960-2026): ~20%
+- Sequential (123, 1234): ~30%
+- Lucky/meaningful numbers: ~25%</p>
+<p><strong>Special character placement:</strong>
+- End position: ~85% of special char additions
+- Start position: ~10%
+- Middle position: ~5%</p>
+<p><strong>Partial leetspeak:</strong>
+- Single substitution (e.g., &ldquo;a&rdquo; -&gt; &ldquo;4&rdquo;): ~70% of leet usage
+- Two substitutions: ~20%
+- Full leet: ~10% (rare in practice)</p>
+<p>The transform function T maps a token t to:</p>
+<p>T(t) = Union_{j=1}^{M} T_j(t)</p>
+<p>where T_j are individual transform operators and M is the number of transform categories.</p>
 <p><strong>Pair transforms</strong> combine two tokens with separators and suffixes:</p>
-<pre><code>PairTransform(a, b) = {f(a) + sep + g(b) + suffix : f in CaseVariants, g in CaseVariants, sep in Separators, suffix in Suffixes}</code></pre>
-
-<h3>4.4 Layer 3: Probabilistic Ranking</h3>
+<p>PairTransform(a, b) = {f(a) + sep + g(b) + suffix : f in CaseVariants, g in CaseVariants, sep in Separators, suffix in Suffixes}</p>
+<h3 id="44-layer-3-probabilistic-ranking">4.4 Layer 3: Probabilistic Ranking</h3>
 <p>The hybrid ranker assigns each candidate a unified score using the log-linear combination defined in Section 3.3. When no training corpus is available, the ranker uses uniform priors, reducing to a structural complexity estimate.</p>
 <p>Training from a corpus updates both the Markov transition tables and the PCFG grammar simultaneously:</p>
 <pre><code>for password in corpus:
     markov.train(password)    // Update positional n-gram counts
     pcfg.train(password)      // Update structure and terminal counts
-    freq[password.lower()] += 1  // Update frequency table</code></pre>
+    freq[password.lower()] += 1  // Update frequency table
+</code></pre>
 <p><strong>Theorem 2 (Ranking Convergence):</strong> As the training corpus size |T| approaches infinity, the hybrid score H(c) converges to the true log-probability of c under the mixture model, assuming the true password distribution lies within the model family. The convergence rate is O(1/sqrt(|T|)) for the Markov component and O(1/|T|) for the PCFG component.</p>
-<p><em>Proof sketch:</em> The Markov component's convergence follows from the consistency of maximum likelihood estimation for finite-state models with Laplace smoothing (Katz, 1987). The PCFG component converges faster due to the finite grammar structure. The frequency prior converges at the parametric rate. The log-linear combination preserves convergence of the components.</p>
-
-<h3>4.5 Layer 4: Entropy Scoring</h3>
+<p><em>Proof sketch:</em> The Markov component&rsquo;s convergence follows from the consistency of maximum likelihood estimation for finite-state models with Laplace smoothing (Katz, 1987). The PCFG component converges faster due to the finite grammar structure. The frequency prior converges at the parametric rate. The log-linear combination preserves convergence of the components.</p>
+<h3 id="45-layer-4-entropy-scoring">4.5 Layer 4: Entropy Scoring</h3>
 <p>Practical entropy estimation combines multiple heuristic detectors:</p>
 <pre><code>G(c) = base_guesses(c) * pattern_factor(c) * hybrid_factor(c) * repeat_factor(c)
-E_p(c) = log2(G(c))</code></pre>
-<p>where:</p>
-<ul>
-<li>base_guesses(c) = charset^length when c is not in a known dictionary, or rank when it is</li>
-<li>pattern_factor penalizes sequences (x0.01), dates (x0.1), and keyboard walks</li>
-<li>hybrid_factor adjusts based on the Layer 3 score (x0.01 for high probability to x0.5 for low)</li>
-<li>repeat_factor penalizes character repetition</li>
-</ul>
+E_p(c) = log2(G(c))
+</code></pre>
+<p>where:
+- base_guesses(c) = charset^length when c is not in a known dictionary, or rank when it is
+- pattern_factor penalizes sequences (x0.01), dates (x0.1), and keyboard walks
+- hybrid_factor adjusts based on the Layer 3 score (x0.01 for high probability to x0.5 for low)
+- repeat_factor penalizes character repetition</p>
 <p>The score mapping follows zxcvbn convention:</p>
 <table>
-<thead><tr><th>Score</th><th>Entropy Bits</th><th>Attack Resistance</th></tr></thead>
+<thead>
+<tr>
+<th>Score</th>
+<th>Entropy Bits</th>
+<th>Attack Resistance</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>0</td><td>&lt; 10</td><td>&lt; 10<sup>3</sup> guesses</td></tr>
-<tr><td>1</td><td>10-19</td><td>&lt; 10<sup>6</sup> guesses</td></tr>
-<tr><td>2</td><td>20-26</td><td>&lt; 10<sup>8</sup> guesses</td></tr>
-<tr><td>3</td><td>27-33</td><td>&lt; 10<sup>10</sup> guesses</td></tr>
-<tr><td>4</td><td>&ge; 34</td><td>&ge; 10<sup>10</sup> guesses</td></tr>
+<tr>
+<td>0</td>
+<td>&lt; 10</td>
+<td>&lt; 10^3 guesses</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10-19</td>
+<td>&lt; 10^6 guesses</td>
+</tr>
+<tr>
+<td>2</td>
+<td>20-26</td>
+<td>&lt; 10^8 guesses</td>
+</tr>
+<tr>
+<td>3</td>
+<td>27-33</td>
+<td>&lt; 10^10 guesses</td>
+</tr>
+<tr>
+<td>4</td>
+<td>&gt;= 34</td>
+<td>&gt;= 10^10 guesses</td>
+</tr>
 </tbody>
 </table>
-
-<h3>4.6 Layer 5: Policy Filtering</h3>
+<h3 id="46-layer-5-policy-filtering">4.6 Layer 5: Policy Filtering</h3>
 <p>The policy filter applies target system constraints as a pure predicate function:</p>
-<pre><code>accepts(c, pi) = (min_len &lt;= |c| &lt;= max_len) AND char_class_requirements(c, pi) AND (c not in blacklist)</code></pre>
+<p>accepts(c, pi) = (min_len &lt;= |c| &lt;= max_len) AND char_class_requirements(c, pi) AND (c not in blacklist)</p>
 <p>Deduplication uses CRC32 hashing for memory efficiency, trading a negligible false positive rate (approximately 1 in 4.3 billion) for 10x memory reduction compared to storing full strings.</p>
-
-<h3>4.7 Complexity Analysis</h3>
-<p><strong>Time complexity:</strong></p>
-<ul>
-<li>Layer 1: O(N * E<sub>max</sub>) where N = profile tokens, E<sub>max</sub> = max expansion factor</li>
-<li>Layer 2: O(N * E<sub>max</sub> * T<sub>max</sub> + P<sup>2</sup> * S * V<sup>2</sup>) where T<sub>max</sub> = transforms per token, P = priority pairs, S = separators, V = case variants</li>
-<li>Layer 3: O(C * (n + G)) where C = total candidates, n = Markov order, G = grammar depth</li>
-<li>Layer 4: O(C) linear scan</li>
-<li>Layer 5: O(C) with CRC32 dedup</li>
-</ul>
+<h3 id="47-complexity-analysis">4.7 Complexity Analysis</h3>
+<p><strong>Time complexity:</strong>
+- Layer 1: O(N * E_max) where N = profile tokens, E_max = max expansion factor
+- Layer 2: O(N * E_max * T_max + P^2 * S * V^2) where T_max = transforms per token, P = priority pairs, S = separators, V = case variants
+- Layer 3: O(C * (n + G)) where C = total candidates, n = Markov order, G = grammar depth
+- Layer 4: O(C) linear scan
+- Layer 5: O(C) with CRC32 dedup</p>
 <p><strong>Total: O(C * log C)</strong> dominated by the sorting step in Layer 3.</p>
 <p><strong>Space complexity:</strong> O(C + |T| * n * |Alphabet|) where |T| is training corpus size.</p>
-<p>For typical parameters (N=50 tokens, E<sub>max</sub>=30, T<sub>max</sub>=200, P=150 pairs):</p>
-<ul>
-<li>Expected candidate set: 100,000-200,000 candidates</li>
-<li>Memory usage: 50-100 MB for candidate storage, 10-50 MB for trained models</li>
-<li>Execution time: 1-3 seconds on modern hardware</li>
-</ul>
-
-<h2>5. Implementation</h2>
-
-<h3>5.1 System Architecture</h3>
+<p>For typical parameters (N=50 tokens, E_max=30, T_max=200, P=150 pairs):
+- Expected candidate set: 100,000-200,000 candidates
+- Memory usage: 50-100 MB for candidate storage, 10-50 MB for trained models
+- Execution time: 1-3 seconds on modern hardware</p>
+<h2 id="5-implementation">5. Implementation</h2>
+<h3 id="51-system-architecture">5.1 System Architecture</h3>
 <p>CogPIE is implemented as a Python module within the WordlistXPL-Forge framework, part of the XPL-Suite security toolkit. The implementation consists of six source files totaling approximately 800 lines of Python:</p>
 <ul>
 <li><code>semantic_expander.py</code>: Layer 1 semantic expansion with cultural nickname databases</li>
@@ -503,287 +411,1210 @@ E_p(c) = log2(G(c))</code></pre>
 <li><code>policy_filter.py</code>: Layer 5 policy-aware filtering</li>
 <li><code>engine.py</code>: Pipeline orchestrator integrating all layers</li>
 </ul>
-
-<h3>5.2 Profile Format</h3>
+<h3 id="52-profile-format">5.2 Profile Format</h3>
 <p>Target profiles are specified as JSON documents:</p>
-<pre><code>{
-    "names": ["Carlos Eduardo Silva"],
-    "dates": ["15/03/1990", "1990"],
-    "keywords": ["flamengo", "futebol"],
-    "pets": ["Rex", "Mel"],
-    "companies": ["Empresa ABC"],
-    "phones": ["11987654321"],
-    "emails": ["carlos.silva@email.com"],
-    "old_passwords": ["Carlos90!"],
-    "numbers": ["13", "7"]
-}</code></pre>
-
-<h3>5.3 Integration with Existing Tools</h3>
-<p>CogPIE integrates with the WordlistXPL-Forge ecosystem, which already provides:</p>
-<ul>
-<li>A positional Markov engine (OMEN-style, <code>markov_engine.py</code>)</li>
-<li>A PCFG generator (<code>pcfg_engine.py</code>)</li>
-<li>A CUPP-style profiler (<code>cupp_engine.py</code>, <code>profiler.py</code>)</li>
-<li>Leetspeak permutation (<code>leet_permuter.py</code>)</li>
-<li>Entropy/strength estimation (<code>entropy_strength.py</code>)</li>
-<li>Semantic PCFG helpers (<code>semantic_pcfg.py</code>)</li>
-</ul>
+<pre><code class="language-json">{
+    &quot;names&quot;: [&quot;Carlos Eduardo Silva&quot;],
+    &quot;dates&quot;: [&quot;15/03/1990&quot;, &quot;1990&quot;],
+    &quot;keywords&quot;: [&quot;flamengo&quot;, &quot;futebol&quot;],
+    &quot;pets&quot;: [&quot;Rex&quot;, &quot;Mel&quot;],
+    &quot;companies&quot;: [&quot;Empresa ABC&quot;],
+    &quot;phones&quot;: [&quot;11987654321&quot;],
+    &quot;emails&quot;: [&quot;carlos.silva@email.com&quot;],
+    &quot;old_passwords&quot;: [&quot;Carlos90!&quot;],
+    &quot;numbers&quot;: [&quot;13&quot;, &quot;7&quot;]
+}
+</code></pre>
+<h3 id="53-integration-with-existing-tools">5.3 Integration with Existing Tools</h3>
+<p>CogPIE integrates with the WordlistXPL-Forge ecosystem, which already provides:
+- A positional Markov engine (OMEN-style, <code>markov_engine.py</code>)
+- A PCFG generator (<code>pcfg_engine.py</code>)
+- A CUPP-style profiler (<code>cupp_engine.py</code>, <code>profiler.py</code>)
+- Leetspeak permutation (<code>leet_permuter.py</code>)
+- Entropy/strength estimation (<code>entropy_strength.py</code>)
+- Semantic PCFG helpers (<code>semantic_pcfg.py</code>)</p>
 <p>CogPIE leverages these existing capabilities while providing a unified cognitive bias framework that these individual tools lack.</p>
-
-<h2>6. Experimental Evaluation</h2>
-
-<h3>6.1 Methodology</h3>
-<p>We evaluate CogPIE using synthetic datasets generated from five target profiles with known cognitive patterns. Each profile contains names, dates, keywords, pets, companies, phone numbers, emails, and previously known passwords. For each profile, we generate a set of "ground truth" passwords that follow documented cognitive creation patterns.</p>
-<div class="note"><strong>Important ethical note:</strong> All experiments use exclusively synthetic data. No real breach data, credentials, or personal information from actual individuals was used at any stage.</div>
-<p>We compare three approaches:</p>
-<ol>
-<li><strong>CogPIE:</strong> Full 5-layer pipeline (no training corpus, testing pure profile-based generation)</li>
-<li><strong>CUPP baseline:</strong> Simple concatenation of profile tokens with basic transforms (names + dates + keywords, case variants, basic separators)</li>
-<li><strong>Markov baseline:</strong> Common password dictionary without profile information (simulating an untargeted attack)</li>
-</ol>
-
-<h3>6.2 Results</h3>
+<h2 id="6-experimental-evaluation">6. Experimental Evaluation</h2>
+<h3 id="61-methodology">6.1 Methodology</h3>
+<p>We evaluate CogPIE using synthetic datasets generated from five target profiles with known cognitive patterns. Each profile contains names, dates, keywords, pets, companies, phone numbers, emails, and previously known passwords. For each profile, we generate a set of &ldquo;ground truth&rdquo; passwords that follow documented cognitive creation patterns.</p>
+<p><strong>Important ethical note:</strong> All experiments use exclusively synthetic data. No real breach data, credentials, or personal information from actual individuals was used at any stage.</p>
+<p>We compare three approaches:
+1. <strong>CogPIE</strong>: Full 5-layer pipeline (no training corpus, testing pure profile-based generation)
+2. <strong>CUPP baseline</strong>: Simple concatenation of profile tokens with basic transforms (names + dates + keywords, case variants, basic separators)
+3. <strong>Markov baseline</strong>: Common password dictionary without profile information (simulating an untargeted attack)</p>
+<h3 id="62-results">6.2 Results</h3>
 <table>
-<thead><tr><th>Profile</th><th>Real PWs</th><th>CogPIE Hits</th><th>CogPIE Rate</th><th>CUPP Hits</th><th>CUPP Rate</th><th>Markov Hits</th><th>Markov Rate</th></tr></thead>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Real PWs</th>
+<th>CogPIE Hits</th>
+<th>CogPIE Rate</th>
+<th>CUPP Hits</th>
+<th>CUPP Rate</th>
+<th>Markov Hits</th>
+<th>Markov Rate</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>Carlos Eduardo Silva</td><td>19</td><td>12</td><td>63.2%</td><td>9</td><td>47.4%</td><td>0</td><td>0.0%</td></tr>
-<tr><td>Maria Fernanda Costa</td><td>17</td><td>11</td><td>64.7%</td><td>9</td><td>52.9%</td><td>0</td><td>0.0%</td></tr>
-<tr><td>Joao Pedro Almeida</td><td>17</td><td>10</td><td>58.8%</td><td>9</td><td>52.9%</td><td>0</td><td>0.0%</td></tr>
-<tr><td>Ana Beatriz Santos</td><td>17</td><td>9</td><td>52.9%</td><td>9</td><td>52.9%</td><td>0</td><td>0.0%</td></tr>
-<tr><td>Roberto Nascimento</td><td>17</td><td>11</td><td>64.7%</td><td>9</td><td>52.9%</td><td>0</td><td>0.0%</td></tr>
-<tr><td><strong>Overall</strong></td><td><strong>87</strong></td><td><strong>53</strong></td><td><strong>60.9%</strong></td><td><strong>45</strong></td><td><strong>51.7%</strong></td><td><strong>0</strong></td><td><strong>0.0%</strong></td></tr>
+<tr>
+<td>Carlos Eduardo Silva</td>
+<td>19</td>
+<td>12</td>
+<td>63.2%</td>
+<td>9</td>
+<td>47.4%</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td>Maria Fernanda Costa</td>
+<td>17</td>
+<td>11</td>
+<td>64.7%</td>
+<td>9</td>
+<td>52.9%</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td>Joao Pedro Almeida</td>
+<td>17</td>
+<td>10</td>
+<td>58.8%</td>
+<td>9</td>
+<td>52.9%</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td>Ana Beatriz Santos</td>
+<td>17</td>
+<td>9</td>
+<td>52.9%</td>
+<td>9</td>
+<td>52.9%</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td>Roberto Nascimento</td>
+<td>17</td>
+<td>11</td>
+<td>64.7%</td>
+<td>9</td>
+<td>52.9%</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td><strong>87</strong></td>
+<td><strong>53</strong></td>
+<td><strong>60.9%</strong></td>
+<td><strong>45</strong></td>
+<td><strong>51.7%</strong></td>
+<td><strong>0</strong></td>
+<td><strong>0.0%</strong></td>
+</tr>
 </tbody>
 </table>
-
-<h3>6.3 Analysis</h3>
-<p><strong>CogPIE vs. CUPP:</strong> CogPIE achieves a 17.8% relative improvement over CUPP (60.9% vs. 51.7%). The advantage comes primarily from: deeper semantic expansion (nicknames, abbreviations, accent stripping), more comprehensive pair combinations with case variant coverage, old password mutation (appending characters, symbol substitution), and leet substitution variants that simple CUPP rules miss.</p>
+<h3 id="63-analysis">6.3 Analysis</h3>
+<p><strong>CogPIE vs. CUPP:</strong> CogPIE achieves a 17.8% relative improvement over CUPP (60.9% vs. 51.7%). The advantage comes primarily from:
+- Deeper semantic expansion (nicknames, abbreviations, accent stripping)
+- More comprehensive pair combinations with case variant coverage
+- Old password mutation (appending characters, symbol substitution)
+- Leet substitution variants that simple CUPP rules miss</p>
 <p><strong>CogPIE vs. Markov:</strong> The pure Markov baseline achieves 0% hit rate because it lacks any profile information. This confirms that untargeted statistical approaches are fundamentally inadequate against targeted attacks when the attacker possesses personal information about the target.</p>
-<p><strong>Candidate efficiency:</strong> CogPIE generates approximately 110,000-130,000 candidates per profile, compared to CUPP's 100-130. While CogPIE has a lower candidate-to-hit ratio (approximately 1:10,000 vs. CUPP's 1:14), it discovers passwords that CUPP cannot generate at all: leet variants, complex pair combinations with multiple case patterns, and old password mutations.</p>
+<p><strong>Candidate efficiency:</strong> CogPIE generates approximately 110,000-130,000 candidates per profile, compared to CUPP&rsquo;s 100-130. While CogPIE has a lower candidate-to-hit ratio (approximately 1:10,000 vs. CUPP&rsquo;s 1:14), it discovers passwords that CUPP cannot generate at all: leet variants, complex pair combinations with multiple case patterns, and old password mutations.</p>
 <p><strong>Execution performance:</strong> CogPIE completes the full pipeline in 1.0-1.3 seconds per profile on commodity hardware, making it practical for real-time use in authorized penetration testing scenarios.</p>
-
-<h3>6.4 Real-World Evaluation on Breach Data</h3>
+<h3 id="64-real-world-evaluation-on-breach-data">6.4 Real-World Evaluation on Breach Data</h3>
 <p>To validate CogPIE beyond synthetic scenarios, we conducted large-scale evaluation using the RockYou breach corpus (14.3 million passwords). PII profiles were automatically extracted from passwords exhibiting name or date patterns using the <code>pii_correlator</code> module, which detects embedded names (via a multilingual name database) and date/year patterns.</p>
-
-<h4>6.4.1 Standalone CogPIE Performance</h4>
+<h4 id="641-standalone-cogpie-performance">6.4.1 Standalone CogPIE Performance</h4>
 <p>Training on 479,854 passwords (random split from a 500,000 sample), with 500 PII-bearing test targets:</p>
 <table>
-<thead><tr><th>Budget</th><th>Hits</th><th>Hit Rate</th><th>Practical Scenario</th></tr></thead>
+<thead>
+<tr>
+<th>Budget</th>
+<th>Hits</th>
+<th>Hit Rate</th>
+<th>Practical Scenario</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>10</td><td>4</td><td>0.80%</td><td>Online with rate limiting</td></tr>
-<tr><td>100</td><td>40</td><td>8.00%</td><td>Online with throttling</td></tr>
-<tr><td>1,000</td><td>342</td><td>68.40%</td><td>Fast offline attacks</td></tr>
-<tr><td>10,000</td><td>349</td><td>69.80%</td><td>Moderate offline attacks</td></tr>
-<tr><td>100,000</td><td>349</td><td>69.80%</td><td>Extensive offline attacks</td></tr>
+<tr>
+<td>10</td>
+<td>4</td>
+<td>0.80%</td>
+<td>Online with rate limiting</td>
+</tr>
+<tr>
+<td>100</td>
+<td>40</td>
+<td>8.00%</td>
+<td>Online with throttling</td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>342</td>
+<td>68.40%</td>
+<td>Fast offline attacks</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>349</td>
+<td>69.80%</td>
+<td>Moderate offline attacks</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>349</td>
+<td>69.80%</td>
+<td>Extensive offline attacks</td>
+</tr>
 </tbody>
 </table>
 <p>The saturation at ~70% from budget 1,000 indicates that CogPIE concentrates its best candidates in the first 1,000 positions. The remaining ~30% likely represent passwords not derivable from the available PII (truly random passwords, vault-generated passwords, or passwords based on context not captured by the profile).</p>
-
-<h4>6.4.2 Comparative Analysis Against Baselines</h4>
+<h4 id="642-comparative-analysis-against-baselines">6.4.2 Comparative Analysis Against Baselines</h4>
 <p>Six algorithms were evaluated on 200 PII-bearing targets from the same 500,000-password corpus:</p>
 <table>
-<thead><tr><th>Algorithm</th><th>hit@10</th><th>hit@100</th><th>hit@1,000</th><th>hit@10,000</th><th>ms/target</th></tr></thead>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>hit@10</th>
+<th>hit@100</th>
+<th>hit@1,000</th>
+<th>hit@10,000</th>
+<th>ms/target</th>
+</tr>
+</thead>
 <tbody>
-<tr><td><strong>CogPIE</strong></td><td>1.00%</td><td>5.00%</td><td><strong>67.50%</strong></td><td><strong>69.00%</strong></td><td>241.3</td></tr>
-<tr><td>CUPP-style</td><td><strong>7.50%</strong></td><td><strong>42.00%</strong></td><td>43.50%</td><td>43.50%</td><td>0.01</td></tr>
-<tr><td>Markov-3</td><td>2.50%</td><td>9.50%</td><td>28.50%</td><td>28.50%</td><td>991.3</td></tr>
-<tr><td>Frequency</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.03</td></tr>
-<tr><td>Levenshtein</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>315.5</td></tr>
-<tr><td>Random</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>1.2</td></tr>
+<tr>
+<td><strong>CogPIE</strong></td>
+<td>1.00%</td>
+<td>5.00%</td>
+<td><strong>67.50%</strong></td>
+<td><strong>69.00%</strong></td>
+<td>241.3</td>
+</tr>
+<tr>
+<td>CUPP-style</td>
+<td><strong>7.50%</strong></td>
+<td><strong>42.00%</strong></td>
+<td>43.50%</td>
+<td>43.50%</td>
+<td>0.01</td>
+</tr>
+<tr>
+<td>Markov-3</td>
+<td>2.50%</td>
+<td>9.50%</td>
+<td>28.50%</td>
+<td>28.50%</td>
+<td>991.3</td>
+</tr>
+<tr>
+<td>Frequency</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.03</td>
+</tr>
+<tr>
+<td>Levenshtein</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>315.5</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>1.2</td>
+</tr>
 </tbody>
 </table>
 <p>Three patterns emerge:</p>
 <ol>
-<li><strong>CogPIE dominance at moderate-to-high budgets:</strong> From hit@1,000 onward, CogPIE achieves 67.50%, surpassing CUPP-style (43.50%) by a 55% relative margin. The hybrid probabilistic ranking (Markov + PCFG + frequency) orders candidates significantly more efficiently than heuristic concatenation.</li>
-<li><strong>CUPP advantage at low budgets:</strong> CUPP-style leads at hit@10 (7.50% vs. 1.00%) and hit@100 (42.00% vs. 5.00%) because its direct concatenations (name+year, name+123) match the simplest and most common patterns exactly. However, CUPP saturates at 43.50% with no additional gains beyond 1,000 candidates.</li>
-<li><strong>Non-profile baselines collapse:</strong> Frequency, Levenshtein, and Random achieve 0% hit rate on PII-bearing targets, confirming that personal information is a necessary condition for targeted password guessing. Markov-3 with profile seeding reaches 28.50%, showing that statistical models alone are insufficient without a cognitive transformation framework.</li>
+<li>
+<p><strong>CogPIE dominance at moderate-to-high budgets:</strong> From hit@1,000 onward, CogPIE achieves 67.50%, surpassing CUPP-style (43.50%) by a 55% relative margin. The hybrid probabilistic ranking (Markov + PCFG + frequency) orders candidates significantly more efficiently than heuristic concatenation.</p>
+</li>
+<li>
+<p><strong>CUPP advantage at low budgets:</strong> CUPP-style leads at hit@10 (7.50% vs. 1.00%) and hit@100 (42.00% vs. 5.00%) because its direct concatenations (name+year, name+123) match the simplest and most common patterns exactly. However, CUPP saturates at 43.50% with no additional gains beyond 1,000 candidates.</p>
+</li>
+<li>
+<p><strong>Non-profile baselines collapse:</strong> Frequency, Levenshtein, and Random achieve 0% hit rate on PII-bearing targets, confirming that personal information is a necessary condition for targeted password guessing. Markov-3 with profile seeding reaches 28.50%, showing that statistical models alone are insufficient without a cognitive transformation framework.</p>
+</li>
 </ol>
-
-<h4>6.4.3 Standalone Performance at Scale (1M Train)</h4>
+<h4 id="643-standalone-performance-at-scale-1m-train">6.4.3 Standalone Performance at Scale (1M Train)</h4>
 <p>Using 1,000,000 training passwords from the full RockYou corpus with 2,000 PII-bearing test targets (4x the 500K experiment):</p>
 <table>
-<thead><tr><th>Budget</th><th>Hits</th><th>Hit Rate</th><th>Practical Scenario</th></tr></thead>
+<thead>
+<tr>
+<th>Budget</th>
+<th>Hits</th>
+<th>Hit Rate</th>
+<th>Practical Scenario</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>10</td><td>481</td><td><strong>24.05%</strong></td><td>Online with rate limiting</td></tr>
-<tr><td>100</td><td>1,186</td><td><strong>59.30%</strong></td><td>Online with throttling</td></tr>
-<tr><td>1,000</td><td>1,519</td><td><strong>75.95%</strong></td><td>Fast offline attacks</td></tr>
-<tr><td>10,000</td><td>1,519</td><td>75.95%</td><td>Moderate offline attacks</td></tr>
-<tr><td>100,000</td><td>1,519</td><td>75.95%</td><td>Extensive offline attacks</td></tr>
+<tr>
+<td>10</td>
+<td>481</td>
+<td><strong>24.05%</strong></td>
+<td>Online with rate limiting</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1,186</td>
+<td><strong>59.30%</strong></td>
+<td>Online with throttling</td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>1,519</td>
+<td><strong>75.95%</strong></td>
+<td>Fast offline attacks</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>1,519</td>
+<td>75.95%</td>
+<td>Moderate offline attacks</td>
+</tr>
+<tr>
+<td>100,000</td>
+<td>1,519</td>
+<td>75.95%</td>
+<td>Extensive offline attacks</td>
+</tr>
 </tbody>
 </table>
 <p>Key observations: (1) Hit rate improves from 69.8% (500K train) to 75.95% (1M train), a 9% absolute gain from richer n-gram statistics. (2) MRR of 0.137 with median rank 35 indicates the correct password appears in the top 35 candidates for most targets. (3) At hit@10, the 24.05% rate (vs 0.80% at 500K) reflects substantially better candidate ranking from the larger training set. (4) Saturation persists at hit@1,000, with no gains beyond that budget.</p>
-
-<h4>6.4.4 Scale Effect: Full Corpus Comparative Analysis</h4>
+<h4 id="644-scale-effect-full-corpus-comparative-analysis">6.4.4 Scale Effect: Full Corpus Comparative Analysis</h4>
 <p>To assess scale sensitivity, we repeated the comparison using 1,000,000 training passwords from the full RockYou corpus (14.3M) with 500 PII-bearing test targets:</p>
 <table>
-<thead><tr><th>Algorithm</th><th>hit@10</th><th>hit@100</th><th>hit@1,000</th><th>hit@10,000</th><th>ms/target</th></tr></thead>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>hit@10</th>
+<th>hit@100</th>
+<th>hit@1,000</th>
+<th>hit@10,000</th>
+<th>ms/target</th>
+</tr>
+</thead>
 <tbody>
-<tr><td><strong>CogPIE</strong></td><td>0.00%</td><td>1.40%</td><td><strong>28.80%</strong></td><td><strong>48.00%</strong></td><td>637.4</td></tr>
-<tr><td>CUPP-style</td><td><strong>6.20%</strong></td><td><strong>43.80%</strong></td><td>46.00%</td><td>46.00%</td><td>0.01</td></tr>
-<tr><td>Markov-3</td><td>0.20%</td><td>1.80%</td><td>2.60%</td><td>3.20%</td><td>856.9</td></tr>
-<tr><td>Frequency</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.08</td></tr>
-<tr><td>Levenshtein</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>182.1</td></tr>
-<tr><td>Random</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>0.00%</td><td>1.36</td></tr>
+<tr>
+<td><strong>CogPIE</strong></td>
+<td>0.00%</td>
+<td>1.40%</td>
+<td><strong>28.80%</strong></td>
+<td><strong>48.00%</strong></td>
+<td>637.4</td>
+</tr>
+<tr>
+<td>CUPP-style</td>
+<td><strong>6.20%</strong></td>
+<td><strong>43.80%</strong></td>
+<td>46.00%</td>
+<td>46.00%</td>
+<td>0.01</td>
+</tr>
+<tr>
+<td>Markov-3</td>
+<td>0.20%</td>
+<td>1.80%</td>
+<td>2.60%</td>
+<td>3.20%</td>
+<td>856.9</td>
+</tr>
+<tr>
+<td>Frequency</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.08</td>
+</tr>
+<tr>
+<td>Levenshtein</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>182.1</td>
+</tr>
+<tr>
+<td>Random</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>0.00%</td>
+<td>1.36</td>
+</tr>
 </tbody>
 </table>
 <p>Three scale-dependent effects are observable:</p>
 <ol>
-<li><strong>PII dilution at scale:</strong> CogPIE drops from 69.0% (500K) to 48.0% (1M) at hit@10,000. The proportion of PII-derived passwords in the test set decreases as the corpus grows, because the full corpus includes more non-PII passwords (random strings, vault-generated, slang). CogPIE still surpasses CUPP (48.0% vs. 46.0%) at the highest budget.</li>
-<li><strong>CUPP resilience:</strong> CUPP-style performance is scale-invariant (43.5% at 500K vs. 46.0% at 1M), because its direct concatenation strategy does not depend on corpus statistics. The slight improvement at 1M reflects sampling variance with more test targets (500 vs. 200).</li>
-<li><strong>Markov catastrophic dilution:</strong> Markov-3 collapses from 28.5% (500K) to 3.2% (1M), a 9x reduction. Larger training corpora introduce more n-gram transitions, diluting profile-specific patterns. This demonstrates that purely statistical approaches are fundamentally unsuited for targeted password guessing at scale.</li>
+<li>
+<p><strong>PII dilution at scale:</strong> CogPIE drops from 69.0% (500K) to 48.0% (1M) at hit@10,000. The proportion of PII-derived passwords in the test set decreases as the corpus grows, because the full corpus includes more non-PII passwords (random strings, vault-generated, slang). CogPIE still surpasses CUPP (48.0% vs. 46.0%) at the highest budget.</p>
+</li>
+<li>
+<p><strong>CUPP resilience:</strong> CUPP-style performance is scale-invariant (43.5% at 500K vs. 46.0% at 1M), because its direct concatenation strategy does not depend on corpus statistics. The slight improvement at 1M reflects sampling variance with more test targets (500 vs. 200).</p>
+</li>
+<li>
+<p><strong>Markov catastrophic dilution:</strong> Markov-3 collapses from 28.5% (500K) to 3.2% (1M), a 9x reduction. Larger training corpora introduce more n-gram transitions, diluting profile-specific patterns. This demonstrates that purely statistical approaches are fundamentally unsuited for targeted password guessing at scale.</p>
+</li>
 </ol>
-
-<h3>6.5 Limitations</h3>
+<h3 id="65-limitations">6.5 Limitations</h3>
 <ol>
-<li><strong>Single breach corpus:</strong> All real-world evaluations use the RockYou corpus. While it contains 14.3M real passwords, it represents a 2009-era demographic. Validation on more recent, diverse breach corpora (with explicit authorization) would strengthen generalizability claims.</li>
-<li><strong>Cultural specificity:</strong> The current nickname database and accent handling are focused on Brazilian Portuguese names. Extending to other cultures would require additional linguistic resources.</li>
-<li><strong>PII extraction accuracy:</strong> The automatic PII correlator infers profiles from password patterns (embedded names, dates). False positives in profile extraction could inflate or deflate hit rates. Manual verification of a subset suggests ~85% extraction accuracy.</li>
-<li><strong>Candidate set size:</strong> Without budget constraints, CogPIE generates 100,000+ candidates. In online attack scenarios with rate limiting, the ranking quality becomes critical for selecting the most promising candidates within a small guess budget.</li>
+<li>
+<p><strong>Single breach corpus:</strong> All real-world evaluations use the RockYou corpus. While it contains 14.3M real passwords, it represents a 2009-era demographic. Validation on more recent, diverse breach corpora (with explicit authorization) would strengthen generalizability claims.</p>
+</li>
+<li>
+<p><strong>Cultural specificity:</strong> The current nickname database and accent handling are focused on Brazilian Portuguese names. Extending to other cultures would require additional linguistic resources.</p>
+</li>
+<li>
+<p><strong>PII extraction accuracy:</strong> The automatic PII correlator infers profiles from password patterns (embedded names, dates). False positives in profile extraction could inflate or deflate hit rates. Manual verification of a subset suggests ~85% extraction accuracy.</p>
+</li>
+<li>
+<p><strong>Candidate set size:</strong> Without budget constraints, CogPIE generates 100,000+ candidates. In online attack scenarios with rate limiting, the ranking quality becomes critical for selecting the most promising candidates within a small guess budget.</p>
+</li>
 </ol>
-
-<h2>7. Discussion</h2>
-
-<h3>7.1 Implications for Password Security</h3>
+<h2 id="7-discussion">7. Discussion</h2>
+<h3 id="71-implications-for-password-security">7.1 Implications for Password Security</h3>
 <p>Our results provide quantitative evidence for a well-known but often underappreciated conclusion: human-generated passwords are fundamentally insecure against targeted attacks. When an attacker possesses even basic personal information about a target (names, dates, interests), a systematic cognitive bias model can correctly predict 48-76% of PII-derived passwords, depending on corpus scale and budget. At the standalone level with 1M training passwords, CogPIE achieves 75.95% hit rate within just 1,000 guesses, with a median rank of 35.</p>
-<p>This finding aligns with the broader literature:</p>
-<ul>
-<li>Wang et al. (2016) found 30% of modified passwords crackable within 10 guesses</li>
-<li>Cloudflare (2024) reported 41% of successful authentications involving leaked credentials</li>
-<li>Das et al. (2014) estimated 43-51% password reuse across sites</li>
-<li>A 2026 survey found 76.2% of users only make small modifications to existing passwords</li>
-</ul>
-
-<h3>7.2 Defense Recommendations</h3>
+<p>This finding aligns with the broader literature:
+- Wang et al. (2016) found 30% of modified passwords crackable within 10 guesses
+- Cloudflare (2024) reported 41% of successful authentications involving leaked credentials
+- Das et al. (2014) estimated 43-51% password reuse across sites
+- A 2026 survey found 76.2% of users only make small modifications to existing passwords</p>
+<h3 id="72-defense-recommendations">7.2 Defense Recommendations</h3>
 <p>Based on our analysis, we recommend:</p>
 <ol>
-<li><strong>Password managers with random generation:</strong> The only reliable defense against CogPIE-class attacks. Cryptographically random passwords have no cognitive patterns to exploit.</li>
-<li><strong>Multi-factor authentication:</strong> Renders password guessing insufficient for account compromise, regardless of password strength.</li>
-<li><strong>FIDO2/WebAuthn passkeys:</strong> Eliminates passwords entirely, removing the cognitive vulnerability from the authentication chain.</li>
-<li><strong>Breach credential screening:</strong> As recommended by NIST SP 800-63B, checking new passwords against known leaked databases prevents the reuse of compromised credentials.</li>
-<li><strong>Password policy modernization:</strong> Moving from composition rules (which CogPIE easily satisfies) to minimum length requirements and breach checking (which address the actual vulnerability).</li>
+<li>
+<p><strong>Password managers with random generation:</strong> The only reliable defense against CogPIE-class attacks. Cryptographically random passwords have no cognitive patterns to exploit.</p>
+</li>
+<li>
+<p><strong>Multi-factor authentication:</strong> Renders password guessing insufficient for account compromise, regardless of password strength.</p>
+</li>
+<li>
+<p><strong>FIDO2/WebAuthn passkeys:</strong> Eliminates passwords entirely, removing the cognitive vulnerability from the authentication chain.</p>
+</li>
+<li>
+<p><strong>Breach credential screening:</strong> As recommended by NIST SP 800-63B, checking new passwords against known leaked databases prevents the reuse of compromised credentials.</p>
+</li>
+<li>
+<p><strong>Password policy modernization:</strong> Moving from composition rules (which CogPIE easily satisfies) to minimum length requirements and breach checking (which address the actual vulnerability).</p>
+</li>
 </ol>
-
-<h3>7.3 Ethical Considerations</h3>
-<p>CogPIE is designed for authorized security testing, specifically for penetration testers evaluating the strength of user-chosen passwords within the scope of authorized engagements. The algorithm's existence does not create new attack capabilities; rather, it systematizes techniques already known to sophisticated attackers and makes them available for defensive assessment.</p>
-<p>We emphasize:</p>
-<ul>
-<li>All testing must be performed with explicit authorization</li>
-<li>Personal information used in profiles must be obtained through legitimate means within the engagement scope</li>
-<li>Results should be used to improve organizational password policies, not to compromise individual accounts</li>
-<li>The strongest defense remains eliminating human-chosen passwords entirely</li>
-</ul>
-
-<h3>7.4 Future Work</h3>
+<h3 id="73-ethical-considerations">7.3 Ethical Considerations</h3>
+<p>CogPIE is designed for authorized security testing, specifically for penetration testers evaluating the strength of user-chosen passwords within the scope of authorized engagements. The algorithm&rsquo;s existence does not create new attack capabilities; rather, it systematizes techniques already known to sophisticated attackers and makes them available for defensive assessment.</p>
+<p>We emphasize:
+- All testing must be performed with explicit authorization
+- Personal information used in profiles must be obtained through legitimate means within the engagement scope
+- Results should be used to improve organizational password policies, not to compromise individual accounts
+- The strongest defense remains eliminating human-chosen passwords entirely</p>
+<h3 id="74-future-work">7.4 Future Work</h3>
 <p>Several directions for future research emerge:</p>
 <ol>
-<li><strong>Cross-cultural expansion:</strong> Extending the semantic expansion layer to support additional languages, name conventions, and cultural password patterns.</li>
-<li><strong>Temporal modeling:</strong> Incorporating password evolution patterns (how users modify passwords over time) as documented by Wang et al. (2016).</li>
-<li><strong>Active learning:</strong> Using feedback from successful and unsuccessful guesses to dynamically adjust the model weights during an assessment.</li>
-<li><strong>Neural network integration:</strong> Replacing or augmenting the Markov/PCFG hybrid with transformer-based models fine-tuned on profile-specific patterns.</li>
-<li><strong>Passphrase analysis:</strong> Extending cognitive bias modeling to multi-word passphrases, which exhibit different but equally exploitable patterns.</li>
+<li>
+<p><strong>Cross-cultural expansion:</strong> Extending the semantic expansion layer to support additional languages, name conventions, and cultural password patterns.</p>
+</li>
+<li>
+<p><strong>Temporal modeling:</strong> Incorporating password evolution patterns (how users modify passwords over time) as documented by Wang et al. (2016).</p>
+</li>
+<li>
+<p><strong>Active learning:</strong> Using feedback from successful and unsuccessful guesses to dynamically adjust the model weights during an assessment.</p>
+</li>
+<li>
+<p><strong>Neural network integration:</strong> Replacing or augmenting the Markov/PCFG hybrid with transformer-based models fine-tuned on profile-specific patterns.</p>
+</li>
+<li>
+<p><strong>Passphrase analysis:</strong> Extending cognitive bias modeling to multi-word passphrases, which exhibit different but equally exploitable patterns.</p>
+</li>
 </ol>
-
-<h2>8. Conclusion</h2>
-<p>We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8% and demonstrating the fundamental inadequacy of pure statistical approaches in targeted scenarios.</p>
+<h2 id="8-conclusion">8. Conclusion</h2>
+<p>We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8%. On real breach data (RockYou), CogPIE reaches 75.95% at budget 1,000 with 1M training corpus and 2,000 PII-bearing targets, with a median rank of 35 (MRR 0.137). In comparative evaluation, CogPIE surpasses CUPP-style (46.0%) and Markov-3 (3.2%) at scale, while non-profile approaches score 0%.</p>
 <p>Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system, while the practical implementation runs in under 2 seconds per profile on commodity hardware. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.</p>
-<p>The central thesis of this work, that passwords generated "from the head" always resort to patterns derived from cognitive context, is supported by both our experimental results and the extensive body of prior literature. The measurable cognitive bias in password creation is not a failure of user education or policy design; it is a fundamental property of human cognition. Password managers with cryptographically random generation represent the only provably secure defense against this class of vulnerability.</p>
-
-<h2 class="references">References</h2>
-<div class="references">
+<p>The central thesis of this work, that passwords generated &ldquo;from the head&rdquo; always resort to patterns derived from cognitive context, is supported by both our experimental results and the extensive body of prior literature. The measurable cognitive bias in password creation is not a failure of user education or policy design; it is a fundamental property of human cognition. Password managers with cryptographically random generation represent the only provably secure defense against this class of vulnerability.</p>
+<h2 id="references">References</h2>
 <ol>
-<li>Abdrabou, Y., Riber, M., Steinert, A., et al. (2021). "Cognitive Load and Password Strength: A Pupillometry Study." In Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems.</li>
-<li>Bonneau, J. (2012). "The Science of Guessing: Analyzing an Anonymized Corpus of 70 Million Passwords." In IEEE Symposium on Security and Privacy, pp. 538-552. DOI: 10.1109/SP.2012.49.</li>
-<li>Bonneau, J. (2012). "Statistical Metrics for Individual Password Strength." In Security Protocols Workshop.</li>
-<li>Cloudflare (2024). "Leaked Credentials in Authentication Traffic." Cloudflare Radar Report.</li>
-<li>Das, A., Bonneau, J., Caesar, M., Borisov, N., and Wang, X. (2014). "The Tangled Web of Password Reuse." In Network and Distributed System Security Symposium (NDSS).</li>
-<li>Durmuth, M., Angelstorf, F., Castelluccia, C., Perito, D., and Chaabane, A. (2015). "OMEN: Faster Password Guessing Using an Ordered Markov Enumerator." In Engineering Secure Software and Systems (ESSoS), LNCS 8978, pp. 119-132.</li>
-<li>Florencio, D. and Herley, C. (2007). "A Large-Scale Study of Web Password Habits." In Proceedings of the 16th International Conference on World Wide Web (WWW '07).</li>
-<li>Hitaj, B., Gasti, P., Ateniese, G., and Perez-Cruz, F. (2019). "PassGAN: A Deep Learning Approach for Password Guessing." In Applied Cryptography and Network Security (ACNS). arXiv:1709.00440.</li>
-<li>Imperva (2010). "Consumer Password Worst Practices." Imperva Application Defense Center Report.</li>
-<li>Katz, S. M. (1987). "Estimation of Probabilities from Sparse Data for the Language Model Component of a Speech Recognizer." IEEE Transactions on Acoustics, Speech, and Signal Processing, 35(3), pp. 400-401.</li>
-<li>Li, Y., Wang, H., and Sun, K. (2017). "Personal Information in Passwords and Its Security Implications." IEEE Transactions on Information Forensics and Security, 12(10). DOI: 10.1109/TIFS.2017.2705627.</li>
-<li>Ma, J., Yang, W., Luo, M., and Li, N. (2014). "A Study of Probabilistic Password Models." In IEEE Symposium on Security and Privacy, pp. 689-704.</li>
-<li>Mebus, M. (2010). "CUPP: Common User Passwords Profiler." GitHub Repository.</li>
-<li>Narayanan, A. and Shmatikov, V. (2005). "Fast Dictionary Attacks on Passwords Using Time-Space Tradeoff." In ACM Conference on Computer and Communications Security (CCS).</li>
-<li>NIST (2017, revised 2024). "Digital Identity Guidelines: Authentication and Lifecycle Management." NIST Special Publication 800-63B.</li>
-<li>Rando, J., Perez-Cruz, F., and Hitaj, B. (2023). "PassGPT: Password Modeling and (Guided) Generation with Large Language Models." In European Symposium on Research in Computer Security (ESORICS). arXiv:2306.01545.</li>
-<li>Veras, R., Collins, C., and Thorpe, J. (2014). "On Semantic Patterns of Passwords and their Security Impact." In Network and Distributed System Security Symposium (NDSS).</li>
-<li>Wang, D. and Jian, G. (2014). "Zipf's Law in Passwords." IACR ePrint Archive, 2014/631. Later published in IEEE TIFS, 2017.</li>
-<li>Wang, D., Zhang, Z., Wang, P., Yan, J., and Huang, X. (2016). "Targeted Online Password Guessing: An Underestimated Threat." In ACM Conference on Computer and Communications Security (CCS).</li>
-<li>Wang, D., Cheng, H., Wang, P., Huang, X., and Jian, G. (2016). "The Next Domino to Fall: Empirical Analysis of User Passwords across Online Services." In ACM Conference on Computer and Communications Security (CCS).</li>
-<li>Weir, M., Aggarwal, S., de Medeiros, B., and Glodek, B. (2009). "Password Cracking Using Probabilistic Context-Free Grammars." In IEEE Symposium on Security and Privacy, pp. 391-405. DOI: 10.1109/SP.2009.8.</li>
-<li>Wheeler, D. L. (2016). "zxcvbn: Low-Budget Password Strength Estimation." In USENIX Security Symposium.</li>
-<li>Xie, X. (2020). "Modified TarGuess-I: Keyboard Patterns and Popular Passwords as Password Guessing Threats." Master's Thesis.</li>
-<li>Survey Authors (2026). "Examining User Behavior and Cognitive Biases in Personal Password Security." arXiv:2607.19586.</li>
-<li>AI Password Study Authors (2026). "AI vs. User-Generated Passwords: Strength, Memorability, and Cognitive Bias." arXiv:2604.19410.</li>
-<li>MDPI Entropy Review (2023). "A Systematic Review of Password Guessing Methods." MDPI Entropy.</li>
-<li>Castelluccia, C. and Durmuth, M. (2012). "Adaptive Password-Strength Meters from Markov Models." In Network and Distributed System Security Symposium (NDSS).</li>
-<li>Dell'Amico, M. and Filippone, M. (2015). "Monte Carlo Strength Evaluation: Fast and Reliable Password Checking." In ACM Conference on Computer and Communications Security (CCS).</li>
-<li>Ur, B., Segreti, S. M., Bauer, L., et al. (2015). "Measuring Real-World Accuracies and Biases in Modeling Password Guessability." In USENIX Security Symposium.</li>
-<li>Kelley, P. G., Komanduri, S., Mazurek, M. L., et al. (2012). "Guess Again (and Again and Again): Measuring Password Strength by Simulating Password-Cracking Algorithms." In IEEE Symposium on Security and Privacy.</li>
-<li>Melicher, W., Ur, B., Segreti, S. M., et al. (2016). "Fast, Lean, and Accurate: Modeling Password Guessability Using Neural Networks." In USENIX Security Symposium.</li>
-<li>Golla, M. and Durmuth, M. (2018). "On the Accuracy of Password Strength Meters." In ACM Conference on Computer and Communications Security (CCS).</li>
-<li>Pal, B. and Chua, T. (2019). "A Comparison of Approaches to Large-Scale Data Analysis." In Pacific-Asia Conference on Knowledge Discovery and Data Mining.</li>
-<li>Adams, A. and Sasse, M. A. (1999). "Users Are Not the Enemy." Communications of the ACM, 42(12), pp. 40-46.</li>
-<li>Yan, J., Blackwell, A., Anderson, R., and Grant, A. (2004). "Password Memorability and Security: Empirical Results." IEEE Security &amp; Privacy, 2(5), pp. 25-31.</li>
-<li>Forget, A., Chiasson, S., van Oorschot, P. C., and Biddle, R. (2008). "Improving Text Passwords Through Persuasion." In Symposium on Usable Privacy and Security (SOUPS).</li>
-<li>Shay, R., Komanduri, S., Kelley, P. G., et al. (2010). "Encountering Stronger Password Requirements: User Attitudes and Behaviors." In Symposium on Usable Privacy and Security (SOUPS).</li>
-<li>Ur, B., Noma, F., Bees, J., et al. (2015). "'I Added '!' at the End to Make It Secure': Observing Password Creation in the Lab." In Symposium on Usable Privacy and Security (SOUPS).</li>
-<li>Wash, R., Rader, E., Berman, R., and Wellmer, Z. (2016). "Understanding Password Choices: How Frequently Entered Passwords Are Re-used Across Websites." In Symposium on Usable Privacy and Security (SOUPS).</li>
-<li>Oesch, S. and Ruoti, S. (2020). "That Was Then, This Is Now: A Security Evaluation of Password Generation, Storage, and Autofill in Browser-Based Password Managers." In USENIX Security Symposium.</li>
-<li>Pasquini, D., Gangwal, A., Ateniese, G., Bernaschi, M., and Conti, M. (2021). "Improving Password Guessing via Representation Learning." In IEEE Symposium on Security and Privacy.</li>
-<li>Pal, B., Daniel, T., Chatterjee, R., and Ristenpart, T. (2019). "Beyond Credential Stuffing: Password Similarity Models Using Neural Networks." In IEEE Symposium on Security and Privacy.</li>
+<li>
+<p>Abdrabou, Y., Riber, M., Steinert, A., et al. (2021). &ldquo;Cognitive Load and Password Strength: A Pupillometry Study.&rdquo; In Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems.</p>
+</li>
+<li>
+<p>Bonneau, J. (2012). &ldquo;The Science of Guessing: Analyzing an Anonymized Corpus of 70 Million Passwords.&rdquo; In IEEE Symposium on Security and Privacy, pp. 538-552. DOI: 10.1109/SP.2012.49.</p>
+</li>
+<li>
+<p>Bonneau, J. (2012). &ldquo;Statistical Metrics for Individual Password Strength.&rdquo; In Security Protocols Workshop.</p>
+</li>
+<li>
+<p>Cloudflare (2024). &ldquo;Leaked Credentials in Authentication Traffic.&rdquo; Cloudflare Radar Report.</p>
+</li>
+<li>
+<p>Das, A., Bonneau, J., Caesar, M., Borisov, N., and Wang, X. (2014). &ldquo;The Tangled Web of Password Reuse.&rdquo; In Network and Distributed System Security Symposium (NDSS).</p>
+</li>
+<li>
+<p>Durmuth, M., Angelstorf, F., Castelluccia, C., Perito, D., and Chaabane, A. (2015). &ldquo;OMEN: Faster Password Guessing Using an Ordered Markov Enumerator.&rdquo; In Engineering Secure Software and Systems (ESSoS), LNCS 8978, pp. 119-132.</p>
+</li>
+<li>
+<p>Florencio, D. and Herley, C. (2007). &ldquo;A Large-Scale Study of Web Password Habits.&rdquo; In Proceedings of the 16th International Conference on World Wide Web (WWW &lsquo;07).</p>
+</li>
+<li>
+<p>Hitaj, B., Gasti, P., Ateniese, G., and Perez-Cruz, F. (2019). &ldquo;PassGAN: A Deep Learning Approach for Password Guessing.&rdquo; In Applied Cryptography and Network Security (ACNS). arXiv:1709.00440.</p>
+</li>
+<li>
+<p>Imperva (2010). &ldquo;Consumer Password Worst Practices.&rdquo; Imperva Application Defense Center Report.</p>
+</li>
+<li>
+<p>Katz, S. M. (1987). &ldquo;Estimation of Probabilities from Sparse Data for the Language Model Component of a Speech Recognizer.&rdquo; IEEE Transactions on Acoustics, Speech, and Signal Processing, 35(3), pp. 400-401.</p>
+</li>
+<li>
+<p>Li, Y., Wang, H., and Sun, K. (2017). &ldquo;Personal Information in Passwords and Its Security Implications.&rdquo; IEEE Transactions on Information Forensics and Security, 12(10). DOI: 10.1109/TIFS.2017.2705627.</p>
+</li>
+<li>
+<p>Ma, J., Yang, W., Luo, M., and Li, N. (2014). &ldquo;A Study of Probabilistic Password Models.&rdquo; In IEEE Symposium on Security and Privacy, pp. 689-704.</p>
+</li>
+<li>
+<p>Mebus, M. (2010). &ldquo;CUPP: Common User Passwords Profiler.&rdquo; GitHub Repository.</p>
+</li>
+<li>
+<p>Narayanan, A. and Shmatikov, V. (2005). &ldquo;Fast Dictionary Attacks on Passwords Using Time-Space Tradeoff.&rdquo; In ACM Conference on Computer and Communications Security (CCS).</p>
+</li>
+<li>
+<p>NIST (2017, revised 2024). &ldquo;Digital Identity Guidelines: Authentication and Lifecycle Management.&rdquo; NIST Special Publication 800-63B.</p>
+</li>
+<li>
+<p>Rando, J., Perez-Cruz, F., and Hitaj, B. (2023). &ldquo;PassGPT: Password Modeling and (Guided) Generation with Large Language Models.&rdquo; In European Symposium on Research in Computer Security (ESORICS). arXiv:2306.01545.</p>
+</li>
+<li>
+<p>Veras, R., Collins, C., and Thorpe, J. (2014). &ldquo;On Semantic Patterns of Passwords and their Security Impact.&rdquo; In Network and Distributed System Security Symposium (NDSS).</p>
+</li>
+<li>
+<p>Wang, D. and Jian, G. (2014). &ldquo;Zipf&rsquo;s Law in Passwords.&rdquo; IACR ePrint Archive, 2014/631. Later published in IEEE TIFS, 2017.</p>
+</li>
+<li>
+<p>Wang, D., Zhang, Z., Wang, P., Yan, J., and Huang, X. (2016). &ldquo;Targeted Online Password Guessing: An Underestimated Threat.&rdquo; In ACM Conference on Computer and Communications Security (CCS).</p>
+</li>
+<li>
+<p>Wang, D., Cheng, H., Wang, P., Huang, X., and Jian, G. (2016). &ldquo;The Next Domino to Fall: Empirical Analysis of User Passwords across Online Services.&rdquo; In ACM Conference on Computer and Communications Security (CCS).</p>
+</li>
+<li>
+<p>Weir, M., Aggarwal, S., de Medeiros, B., and Glodek, B. (2009). &ldquo;Password Cracking Using Probabilistic Context-Free Grammars.&rdquo; In IEEE Symposium on Security and Privacy, pp. 391-405. DOI: 10.1109/SP.2009.8.</p>
+</li>
+<li>
+<p>Wheeler, D. L. (2016). &ldquo;zxcvbn: Low-Budget Password Strength Estimation.&rdquo; In USENIX Security Symposium.</p>
+</li>
+<li>
+<p>Xie, X. (2020). &ldquo;Modified TarGuess-I: Keyboard Patterns and Popular Passwords as Password Guessing Threats.&rdquo; Master&rsquo;s Thesis.</p>
+</li>
+<li>
+<p>Survey Authors (2026). &ldquo;Examining User Behavior and Cognitive Biases in Personal Password Security.&rdquo; arXiv:2607.19586.</p>
+</li>
+<li>
+<p>AI Password Study Authors (2026). &ldquo;AI vs. User-Generated Passwords: Strength, Memorability, and Cognitive Bias.&rdquo; arXiv:2604.19410.</p>
+</li>
+<li>
+<p>MDPI Entropy Review (2023). &ldquo;A Systematic Review of Password Guessing Methods.&rdquo; MDPI Entropy.</p>
+</li>
+<li>
+<p>Castelluccia, C. and Durmuth, M. (2012). &ldquo;Adaptive Password-Strength Meters from Markov Models.&rdquo; In Network and Distributed System Security Symposium (NDSS).</p>
+</li>
+<li>
+<p>Dell&rsquo;Amico, M. and Filippone, M. (2015). &ldquo;Monte Carlo Strength Evaluation: Fast and Reliable Password Checking.&rdquo; In ACM Conference on Computer and Communications Security (CCS).</p>
+</li>
+<li>
+<p>Ur, B., Segreti, S. M., Bauer, L., et al. (2015). &ldquo;Measuring Real-World Accuracies and Biases in Modeling Password Guessability.&rdquo; In USENIX Security Symposium.</p>
+</li>
+<li>
+<p>Kelley, P. G., Komanduri, S., Mazurek, M. L., et al. (2012). &ldquo;Guess Again (and Again and Again): Measuring Password Strength by Simulating Password-Cracking Algorithms.&rdquo; In IEEE Symposium on Security and Privacy.</p>
+</li>
+<li>
+<p>Melicher, W., Ur, B., Segreti, S. M., et al. (2016). &ldquo;Fast, Lean, and Accurate: Modeling Password Guessability Using Neural Networks.&rdquo; In USENIX Security Symposium.</p>
+</li>
+<li>
+<p>Golla, M. and Durmuth, M. (2018). &ldquo;On the Accuracy of Password Strength Meters.&rdquo; In ACM Conference on Computer and Communications Security (CCS).</p>
+</li>
+<li>
+<p>Pal, B. and Chua, T. (2019). &ldquo;A Comparison of Approaches to Large-Scale Data Analysis.&rdquo; In Pacific-Asia Conference on Knowledge Discovery and Data Mining.</p>
+</li>
+<li>
+<p>Adams, A. and Sasse, M. A. (1999). &ldquo;Users Are Not the Enemy.&rdquo; Communications of the ACM, 42(12), pp. 40-46.</p>
+</li>
+<li>
+<p>Yan, J., Blackwell, A., Anderson, R., and Grant, A. (2004). &ldquo;Password Memorability and Security: Empirical Results.&rdquo; IEEE Security &amp; Privacy, 2(5), pp. 25-31.</p>
+</li>
+<li>
+<p>Forget, A., Chiasson, S., van Oorschot, P. C., and Biddle, R. (2008). &ldquo;Improving Text Passwords Through Persuasion.&rdquo; In Symposium on Usable Privacy and Security (SOUPS).</p>
+</li>
+<li>
+<p>Shay, R., Komanduri, S., Kelley, P. G., et al. (2010). &ldquo;Encountering Stronger Password Requirements: User Attitudes and Behaviors.&rdquo; In Symposium on Usable Privacy and Security (SOUPS).</p>
+</li>
+<li>
+<p>Ur, B., Noma, F., Bees, J., et al. (2015). &ldquo;&lsquo;I Added &lsquo;!&rsquo; at the End to Make It Secure&rsquo;: Observing Password Creation in the Lab.&rdquo; In Symposium on Usable Privacy and Security (SOUPS).</p>
+</li>
+<li>
+<p>Wash, R., Rader, E., Berman, R., and Wellmer, Z. (2016). &ldquo;Understanding Password Choices: How Frequently Entered Passwords Are Re-used Across Websites.&rdquo; In Symposium on Usable Privacy and Security (SOUPS).</p>
+</li>
+<li>
+<p>Oesch, S. and Ruoti, S. (2020). &ldquo;That Was Then, This Is Now: A Security Evaluation of Password Generation, Storage, and Autofill in Browser-Based Password Managers.&rdquo; In USENIX Security Symposium.</p>
+</li>
+<li>
+<p>Pasquini, D., Gangwal, A., Ateniese, G., Bernaschi, M., and Conti, M. (2021). &ldquo;Improving Password Guessing via Representation Learning.&rdquo; In IEEE Symposium on Security and Privacy.</p>
+</li>
+<li>
+<p>Pal, B., Daniel, T., Chatterjee, R., and Ristenpart, T. (2019). &ldquo;Beyond Credential Stuffing: Password Similarity Models Using Neural Networks.&rdquo; In IEEE Symposium on Security and Privacy.</p>
+</li>
 </ol>
-</div>
-
-<hr class="divider">
-
-<div class="appendix">
-
-<h2>Appendix A: Profile Schema</h2>
+<hr>
+<h2 id="appendix-a-profile-schema">Appendix A: Profile Schema</h2>
 <p>Complete JSON schema for CogPIE target profiles:</p>
-<pre><code>{
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "names": {"type": "array", "items": {"type": "string"}},
-        "dates": {"type": "array", "items": {"type": "string"}},
-        "keywords": {"type": "array", "items": {"type": "string"}},
-        "pets": {"type": "array", "items": {"type": "string"}},
-        "companies": {"type": "array", "items": {"type": "string"}},
-        "phones": {"type": "array", "items": {"type": "string"}},
-        "emails": {"type": "array", "items": {"type": "string"}},
-        "old_passwords": {"type": "array", "items": {"type": "string"}},
-        "numbers": {"type": "array", "items": {"type": "string"}}
+<pre><code class="language-json">{
+    &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;,
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+        &quot;names&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;dates&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;keywords&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;pets&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;companies&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;phones&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;emails&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;old_passwords&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;numbers&quot;: {&quot;type&quot;: &quot;array&quot;, &quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}}
     }
-}</code></pre>
-
-<h2>Appendix B: Benchmark Methodology</h2>
-<p>All benchmarks were conducted using exclusively synthetic data:</p>
+}
+</code></pre>
+<h2 id="appendix-b-benchmark-methodology">Appendix B: Benchmark Methodology</h2>
+<p>Primary evaluation was conducted using real breach data from publicly available corpora (RockYou):</p>
 <ol>
-<li>Five synthetic target profiles were created with typical Brazilian personal information patterns.</li>
-<li>For each profile, "ground truth" passwords were generated following documented cognitive creation patterns (first name + year, keyword + suffix, old password mutation, leet variant, etc.).</li>
-<li>Three approaches were evaluated: CogPIE (full pipeline, no training corpus), CUPP baseline (simple concatenation), and Markov baseline (common password dictionary).</li>
-<li>Hit rate is defined as |generated &cap; ground_truth| / |ground_truth|.</li>
-<li>No real breach data, personal information, or credentials were used.</li>
+<li>A corpus of up to 1,000,000 passwords was sampled from the RockYou leak dataset.</li>
+<li>The <code>pii_correlator</code> module identified passwords with detectable PII (names from 5-language databases: EN, PT-BR, ES, FR, DE; dates; numeric sequences).</li>
+<li>PII-bearing passwords were extracted as test targets; remaining passwords constituted the training set.</li>
+<li>For each test password, a synthetic profile was derived from its detected PII components (name, dates).</li>
+<li>CogPIE was trained on the training split and evaluated by generating up to 100,000 candidates per target profile.</li>
+<li>Hit rate is defined as: for each target password, 1 if the password appears in the generated candidate list at budget K, 0 otherwise. hit@K = sum(hits) / total_targets.</li>
+<li>Six algorithms were compared: CogPIE (full 5-layer pipeline), CUPP-style (deterministic concatenation), Markov order-3, Frequency baseline, Levenshtein (edit-distance mutations), and Random.</li>
+<li>Parameters: alpha=0.4, beta=0.2, Markov order=3. Training time: ~3.2s for 500K passwords.</li>
+<li>Scale evaluation: 500K and 1M training corpora with 500 and 2000 test targets respectively.</li>
 </ol>
-
-<h2>Appendix C: Cognitive Bias Summary Table</h2>
+<h2 id="appendix-c-cognitive-bias-summary-table">Appendix C: Cognitive Bias Summary Table</h2>
 <table>
-<thead><tr><th>Bias</th><th>Effect on Passwords</th><th>Prevalence</th><th>CogPIE Layer</th></tr></thead>
+<thead>
+<tr>
+<th>Bias</th>
+<th>Effect on Passwords</th>
+<th>Prevalence</th>
+<th>CogPIE Layer</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>Anchoring</td><td>Base word remains recognizable</td><td>&gt;90%</td><td>Layer 1, 2</td></tr>
-<tr><td>Serial Position</td><td>Modifications at start/end</td><td>&gt;85% (end)</td><td>Layer 2</td></tr>
-<tr><td>Familiarity</td><td>Personally meaningful tokens</td><td>&gt;70%</td><td>Layer 1</td></tr>
-<tr><td>Minimal Effort</td><td>Smallest change to satisfy policy</td><td>&gt;60%</td><td>Layer 2, 5</td></tr>
-<tr><td>Status Quo</td><td>Reuse with minor modification</td><td>~76%</td><td>Layer 1 (old_pw)</td></tr>
-<tr><td>Hyperbolic Discounting</td><td>Prioritize memorability over security</td><td>~76%</td><td>All layers</td></tr>
-<tr><td>Availability</td><td>Use recently encountered info</td><td>~40%</td><td>Layer 1</td></tr>
+<tr>
+<td>Anchoring</td>
+<td>Base word remains recognizable</td>
+<td>&gt;90%</td>
+<td>Layer 1, 2</td>
+</tr>
+<tr>
+<td>Serial Position</td>
+<td>Modifications at start/end</td>
+<td>&gt;85% (end)</td>
+<td>Layer 2</td>
+</tr>
+<tr>
+<td>Familiarity</td>
+<td>Personally meaningful tokens</td>
+<td>&gt;70%</td>
+<td>Layer 1</td>
+</tr>
+<tr>
+<td>Minimal Effort</td>
+<td>Smallest change to satisfy policy</td>
+<td>&gt;60%</td>
+<td>Layer 2, 5</td>
+</tr>
+<tr>
+<td>Status Quo</td>
+<td>Reuse with minor modification</td>
+<td>~76%</td>
+<td>Layer 1 (old_pw)</td>
+</tr>
+<tr>
+<td>Hyperbolic Discounting</td>
+<td>Prioritize memorability over security</td>
+<td>~76%</td>
+<td>All layers</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>Use recently encountered info</td>
+<td>~40%</td>
+<td>Layer 1</td>
+</tr>
 </tbody>
 </table>
-
+<h2 id="appendix-d-mitre-attck-mapping">Appendix D: MITRE ATT&amp;CK Mapping</h2>
+<p>Relevant MITRE ATT&amp;CK techniques for the CogPIE context:</p>
+<table>
+<thead>
+<tr>
+<th>Technique</th>
+<th>ID</th>
+<th>Relation to CogPIE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brute Force: Password Guessing</td>
+<td>T1110.001</td>
+<td>CogPIE improves efficiency of this technique</td>
+</tr>
+<tr>
+<td>Brute Force: Password Spraying</td>
+<td>T1110.003</td>
+<td>CogPIE candidates as spray list</td>
+</tr>
+<tr>
+<td>Credentials from Password Stores</td>
+<td>T1555</td>
+<td>Recommended defense (password vaults)</td>
+</tr>
+<tr>
+<td>Valid Accounts</td>
+<td>T1078</td>
+<td>Result of compromised passwords</td>
+</tr>
+<tr>
+<td>Phishing for Information</td>
+<td>T1598</td>
+<td>PII collection for profiles</td>
+</tr>
+<tr>
+<td>Gather Victim Identity Information</td>
+<td>T1589</td>
+<td>Profile construction for CogPIE</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-e-cwe-and-owasp-mapping">Appendix E: CWE and OWASP Mapping</h2>
+<table>
+<thead>
+<tr>
+<th>CWE/OWASP</th>
+<th>ID</th>
+<th>Relation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weak Password Requirements</td>
+<td>CWE-521</td>
+<td>Policies that CogPIE trivially satisfies</td>
+</tr>
+<tr>
+<td>Use of Hard-coded Password</td>
+<td>CWE-259</td>
+<td>Predictable passwords due to cognitive bias</td>
+</tr>
+<tr>
+<td>Identification and Authentication Failures</td>
+<td>OWASP A07:2021</td>
+<td>Primary impact category</td>
+</tr>
+<tr>
+<td>Broken Authentication</td>
+<td>OWASP Top 10</td>
+<td>Risk mitigated by MFA and passkeys</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-f-recommended-defenses-nist-d3fend">Appendix F: Recommended Defenses (NIST D3FEND)</h2>
+<table>
+<thead>
+<tr>
+<th>D3FEND Technique</th>
+<th>ID</th>
+<th>Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-factor Authentication</td>
+<td>D3-MFA</td>
+<td>Fully mitigates guessing attacks</td>
+</tr>
+<tr>
+<td>Credential Hardening</td>
+<td>D3-CH</td>
+<td>Robust password policies</td>
+</tr>
+<tr>
+<td>Account Locking</td>
+<td>D3-AL</td>
+<td>Rate limiting against online attempts</td>
+</tr>
+<tr>
+<td>Credential Rotation</td>
+<td>D3-CR</td>
+<td>Periodic rotation with leak screening</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-g-unit-test-suite-as-experimental-evidence">Appendix G: Unit Test Suite as Experimental Evidence</h2>
+<p>CogPIE validation includes a comprehensive suite of 55 automated unit tests verifying each pipeline component. These tests constitute reproducible evidence of functional correctness and serve as regression benchmarks for future modifications. Full documentation organized by layer follows.</p>
+<h3 id="g1-layer-1-semantic-expansion-8-tests">G.1 Layer 1: Semantic Expansion (8 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_expand_token_basic</code></td>
+<td>Case variant generation</td>
+<td>&ldquo;Andre&rdquo;</td>
+<td>Produces lowercase, uppercase, capitalize; &gt;5 variants</td>
+</tr>
+<tr>
+<td><code>test_expand_token_accents</code></td>
+<td>PT-BR accent handling</td>
+<td>&ldquo;Joao&rdquo;</td>
+<td>Generates &ldquo;joao&rdquo;, &ldquo;JOAO&rdquo;; preserves unaccented variants</td>
+</tr>
+<tr>
+<td><code>test_expand_token_nicknames</code></td>
+<td>Cultural nickname database</td>
+<td>&ldquo;Eduardo&rdquo;</td>
+<td>Contains &ldquo;dudu&rdquo; or &ldquo;edu&rdquo; (BR nicknames)</td>
+</tr>
+<tr>
+<td><code>test_expand_token_leet</code></td>
+<td>Partial leetspeak substitution</td>
+<td>&ldquo;password&rdquo;</td>
+<td>At least one variant with &ldquo;4&rdquo; or &ldquo;0&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_expand_date_full</code></td>
+<td>DD/MM/YYYY dates</td>
+<td>&ldquo;15/03/1990&rdquo;</td>
+<td>Generates &ldquo;1990&rdquo;, &ldquo;90&rdquo;, &ldquo;15031990&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_expand_date_year_only</code></td>
+<td>Year-only dates</td>
+<td>&ldquo;1985&rdquo;</td>
+<td>Generates &ldquo;1985&rdquo;, &ldquo;85&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_expand_profile_names</code></td>
+<td>Full profile with names</td>
+<td>&ldquo;Andre Henrique&rdquo;, &ldquo;Maria Silva&rdquo;</td>
+<td>&gt;5 tokens; contains &ldquo;andre&rdquo;; initials &ldquo;ah&rdquo;/&rdquo;AH&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_expand_profile_phones</code></td>
+<td>Phone suffix extraction</td>
+<td>&ldquo;11987654321&rdquo;</td>
+<td>Last 4 digits &ldquo;4321&rdquo; extracted</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g2-layer-2-cognitive-transforms-5-tests">G.2 Layer 2: Cognitive Transforms (5 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_capitalization</code></td>
+<td>7 capitalization patterns</td>
+<td>&ldquo;password&rdquo;</td>
+<td>Contains &ldquo;Password&rdquo;, &ldquo;PASSWORD&rdquo;, &ldquo;password&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_numeric_suffixes</code></td>
+<td>Common suffixes + year range</td>
+<td>&ldquo;test&rdquo;</td>
+<td>Contains &ldquo;test1&rdquo;, &ldquo;test123&rdquo;; some with &ldquo;1990&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_leet_partial</code></td>
+<td>Partial leet (1 substitution)</td>
+<td>&ldquo;password&rdquo;</td>
+<td>Some variant with &ldquo;4&rdquo; (a-&gt;4)</td>
+</tr>
+<tr>
+<td><code>test_transform_token</code></td>
+<td>Full per-token pipeline</td>
+<td>&ldquo;andre&rdquo;</td>
+<td>&gt;50 candidates generated</td>
+</tr>
+<tr>
+<td><code>test_transform_pair</code></td>
+<td>Pair concatenation</td>
+<td>&ldquo;andre&rdquo;, &ldquo;1990&rdquo;</td>
+<td>Some candidate contains both tokens</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g3-layer-3-hybrid-markovpcfg-ranking-3-tests">G.3 Layer 3: Hybrid Markov+PCFG Ranking (3 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_train_and_score</code></td>
+<td>Score reflects training frequency</td>
+<td>Corpus: &ldquo;password123&rdquo;, &ldquo;letmein&rdquo;, etc.</td>
+<td>score(&ldquo;password123&rdquo;) &gt; score(&ldquo;xKz9!mQ#vR2$&rdquo;)</td>
+</tr>
+<tr>
+<td><code>test_rank_ordering</code></td>
+<td>Probability ordering</td>
+<td>Corpus with &ldquo;password&rdquo; repeated 10x</td>
+<td>&ldquo;password&rdquo; ranked above &ldquo;xz9qmvr2&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_train_from_file</code></td>
+<td>File-based training</td>
+<td>100 passwords &ldquo;testpassN&rdquo;</td>
+<td>count = 100</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g4-layer-4-entropy-scoring-4-tests">G.4 Layer 4: Entropy Scoring (4 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_estimate_guesses_simple</code></td>
+<td>Guess estimation</td>
+<td>&ldquo;123456&rdquo; with rank=1</td>
+<td>guesses = 1.0</td>
+</tr>
+<tr>
+<td><code>test_entropy_positive</code></td>
+<td>Positive practical entropy</td>
+<td>&ldquo;Xk9!mQ#vR2$pL&rdquo;</td>
+<td>entropy &gt; 0</td>
+</tr>
+<tr>
+<td><code>test_zxcvbn_score_range</code></td>
+<td>Entropy-to-score mapping</td>
+<td>Entropy 5,15,25,30,40</td>
+<td>Scores 0,1,2,3,4 respectively</td>
+</tr>
+<tr>
+<td><code>test_score_candidate_structure</code></td>
+<td>Complete metadata</td>
+<td>&ldquo;Password123!&rdquo;</td>
+<td>Dict with &ldquo;candidate&rdquo;, &ldquo;entropy_bits&rdquo;, &ldquo;score&rdquo;</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g5-layer-5-policy-filtering-3-tests">G.5 Layer 5: Policy Filtering (3 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_policy_accepts</code></td>
+<td>Min length + require_digit</td>
+<td>Policy(min_length=8, require_digit=True)</td>
+<td>&ldquo;Password1&rdquo;=True; &ldquo;short&rdquo;=False; &ldquo;NoDigitsHere&rdquo;=False</td>
+</tr>
+<tr>
+<td><code>test_policy_classes</code></td>
+<td>Min character classes</td>
+<td>Policy(min_char_classes=3)</td>
+<td>&ldquo;Abc123&rdquo;=True; &ldquo;abcdef&rdquo;=False</td>
+</tr>
+<tr>
+<td><code>test_filter_candidates</code></td>
+<td>Filtering with deduplication</td>
+<td>[&ldquo;pass&rdquo;,&rdquo;Password1&rdquo;,&rdquo;ab&rdquo;] with min_length=6</td>
+<td>Only &ldquo;Password1&rdquo; survives</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g6-integrated-pipeline-5-tests">G.6 Integrated Pipeline (5 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_full_pipeline_no_corpus</code></td>
+<td>5-layer pipeline without training</td>
+<td>&ldquo;Carlos Silva&rdquo;, 1985, &ldquo;flamengo&rdquo;, &ldquo;Rex&rdquo;</td>
+<td>&gt;0 results; contains &ldquo;carlos&rdquo; or &ldquo;silva&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_full_pipeline_with_corpus</code></td>
+<td>Pipeline with trained corpus</td>
+<td>&ldquo;Maria&rdquo;, 2000, &ldquo;amor&rdquo; + 400-password corpus</td>
+<td>&gt;0 results after training</td>
+</tr>
+<tr>
+<td><code>test_stream_mode</code></td>
+<td>Streaming mode</td>
+<td>&ldquo;Pedro&rdquo;, 1995, &ldquo;gato&rdquo;</td>
+<td>Generates strings; correct types</td>
+</tr>
+<tr>
+<td><code>test_stats_populated</code></td>
+<td>Pipeline metrics</td>
+<td>Basic profile</td>
+<td>Stats contains &ldquo;total_time&rdquo;, &ldquo;output_count&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_policy_integration</code></td>
+<td>End-to-end policy</td>
+<td>&ldquo;Ana&rdquo;, 2010, &ldquo;sol&rdquo; with min_length=8</td>
+<td>All candidates &gt;= 8 chars, &gt;= 2 classes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g7-pii-correlation-and-training-pipeline-18-tests">G.7 PII Correlation and Training Pipeline (18 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_name_detection_english</code></td>
+<td>EN names</td>
+<td>&ldquo;michael123&rdquo;</td>
+<td>Category: name_based/hybrid; name: &ldquo;michael&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_name_detection_portuguese</code></td>
+<td>PT-BR names</td>
+<td>&ldquo;fernanda2024&rdquo;</td>
+<td>Category: name_based/hybrid; name: &ldquo;fernanda&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_name_detection_spanish</code></td>
+<td>ES names</td>
+<td>&ldquo;alejandro99&rdquo;</td>
+<td>Category: name_based/hybrid; name: &ldquo;alejandro&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_name_detection_french</code></td>
+<td>FR names</td>
+<td>&ldquo;sebastien01&rdquo;</td>
+<td>Category: name_based/hybrid; name: &ldquo;sebastien&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_name_detection_german</code></td>
+<td>DE names</td>
+<td>&ldquo;maximilian7&rdquo;</td>
+<td>Category: name_based/hybrid; name: &ldquo;maximilian&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_date_detection_full</code></td>
+<td>Full dates</td>
+<td>&ldquo;pass15031990&rdquo;</td>
+<td>date_found != None</td>
+</tr>
+<tr>
+<td><code>test_date_detection_year</code></td>
+<td>Embedded year</td>
+<td>&ldquo;love2024ever&rdquo;</td>
+<td>date_type = &ldquo;year_4&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_hybrid_name_date</code></td>
+<td>Name+date combination</td>
+<td>&ldquo;maria1990&rdquo;</td>
+<td>Category hybrid; both name and date detected</td>
+</tr>
+<tr>
+<td><code>test_sequential_detection</code></td>
+<td>Numeric sequences</td>
+<td>&ldquo;123456&rdquo;</td>
+<td>Category: sequential</td>
+</tr>
+<tr>
+<td><code>test_qwerty_sequential</code></td>
+<td>Keyboard sequences</td>
+<td>&ldquo;qwerty&rdquo;</td>
+<td>Category: sequential</td>
+</tr>
+<tr>
+<td><code>test_random_like</code></td>
+<td>Random passwords</td>
+<td>&ldquo;xkj9!mQ&rdquo;</td>
+<td>Category: random_like</td>
+</tr>
+<tr>
+<td><code>test_empty_password</code></td>
+<td>Empty string</td>
+<td>&rdquo;&ldquo;</td>
+<td>Category: random_like</td>
+</tr>
+<tr>
+<td><code>test_short_password</code></td>
+<td>Short password</td>
+<td>&ldquo;ab&rdquo;</td>
+<td>Category: random_like</td>
+</tr>
+<tr>
+<td><code>test_name_databases_populated</code></td>
+<td>Name databases</td>
+<td>5 languages</td>
+<td>EN&gt;100, PT&gt;100, ES&gt;100, FR&gt;100, DE&gt;100, ALL&gt;500</td>
+</tr>
+<tr>
+<td><code>test_cross_cultural_coverage</code></td>
+<td>Cross-cultural coverage</td>
+<td>james, joao, juan, pierre, hans</td>
+<td>All detected in password + &ldquo;2024&rdquo;</td>
+</tr>
+<tr>
+<td><code>test_confidence_range</code></td>
+<td>Confidence interval</td>
+<td>&ldquo;michael1990&rdquo;</td>
+<td>0.0 &lt;= confidence &lt;= 1.0</td>
+</tr>
+<tr>
+<td><code>test_corpus_stats_in_memory</code></td>
+<td>In-memory statistics</td>
+<td>5 varied passwords</td>
+<td>total=5; as_dict() functional</td>
+</tr>
+<tr>
+<td><code>test_corpus_stats_from_file</code></td>
+<td>File-based statistics</td>
+<td>4 passwords in file</td>
+<td>total=4; pii_detectable_pct &gt; 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g8-training-persistence-and-benchmark-9-tests">G.8 Training, Persistence and Benchmark (9 tests)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Validates</th>
+<th>Inputs</th>
+<th>Assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_train_from_corpus</code></td>
+<td>Training count</td>
+<td>16 distinct passwords</td>
+<td>count = 16</td>
+</tr>
+<tr>
+<td><code>test_train_from_corpus_max_lines</code></td>
+<td>Line limit</td>
+<td>max_lines=5</td>
+<td>count = 5</td>
+</tr>
+<tr>
+<td><code>test_save_and_load_model</code></td>
+<td>Pickle serialization</td>
+<td>Trained model, save+load</td>
+<td>trained_count preserved; generates results</td>
+</tr>
+<tr>
+<td><code>test_generate_after_training</code></td>
+<td>Post-training generation</td>
+<td>&ldquo;maria&rdquo;, 2024, &ldquo;love&rdquo;</td>
+<td>&gt;0 results; correct types</td>
+</tr>
+<tr>
+<td><code>test_trained_model_scores_higher</code></td>
+<td>Training improves ranking</td>
+<td>&ldquo;michael&rdquo;, 1990 trained</td>
+<td>&ldquo;michael1990&rdquo; or &ldquo;Michael1990&rdquo; in top 1000</td>
+</tr>
+<tr>
+<td><code>test_build_small_corpus</code></td>
+<td>Corpus pipeline</td>
+<td>7 raw passwords</td>
+<td>Generates processed corpus, stats JSON, patterns JSON</td>
+</tr>
+<tr>
+<td><code>test_extract_synthetic_profile</code></td>
+<td>Profile extraction</td>
+<td>&ldquo;michael1990&rdquo;</td>
+<td>&ldquo;michael&rdquo; in names; &ldquo;1990&rdquo; in dates</td>
+</tr>
+<tr>
+<td><code>test_extract_no_pii</code></td>
+<td>No detectable PII</td>
+<td>&ldquo;xkj9mQ!!&rdquo;</td>
+<td>Returns None</td>
+</tr>
+<tr>
+<td><code>test_split_corpus</code></td>
+<td>Train/test split</td>
+<td>9 passwords, ratio=0.3</td>
+<td>train + test &lt;= total; test &gt;= 1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g9-coverage-summary">G.9 Coverage Summary</h3>
+<ul>
+<li><strong>55 tests</strong> covering all 8 CogPIE modules</li>
+<li><strong>5 languages</strong> validated for PII detection (EN, PT-BR, ES, FR, DE)</li>
+<li><strong>Execution time</strong>: ~1.1s (all tests)</li>
+<li><strong>Framework</strong>: pytest 9.0.2, Python 3.14.4</li>
+<li><strong>Layer coverage</strong>: 100% of the 5 pipeline layers tested individually and integrated</li>
+<li><strong>Scenarios</strong>: with and without training corpus; with and without policies; batch and streaming modes</li>
+</ul>
+<p>All 55 tests pass consistently (300/300 in the full suite including other WordlistXPL-Forge modules), validating the functional correctness of each component and end-to-end pipeline integrity.</p>
+<hr>
+<p><em>This research was conducted for authorized security testing and academic purposes. All experiments used public leak data exclusively for scientific validation. The author advocates for the adoption of password managers and passwordless authentication as the primary defense against targeted password attacks.</em></p>
 </div>
-
-<p class="footer-note">This research was conducted for authorized security testing and academic purposes. All experiments used synthetic data exclusively. The authors advocate for the adoption of password managers and passwordless authentication as the primary defense against targeted password attacks.</p>
-
 </body>
 </html>
