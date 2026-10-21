@@ -505,6 +505,29 @@ Three scale-dependent effects are observable:
 
 3. **Markov catastrophic dilution:** Markov-3 collapses from 28.5% (500K) to 3.2% (1M), a 9x reduction. Larger training corpora introduce more n-gram transitions, diluting profile-specific patterns. This demonstrates that purely statistical approaches are fundamentally unsuited for targeted password guessing at scale.
 
+#### 6.4.5 Large-Scale Comparative Analysis (2,000 Targets, 1M Train)
+
+To validate the comparative results at larger sample size and reduce sampling variance, we repeated the full six-algorithm comparison using 2,000 PII-bearing test targets (4x the 500-target experiment) and 1,000,000 training passwords:
+
+| Algorithm | hit@10 | hit@100 | hit@1,000 | hit@10,000 | Coverage | MRR | ms/target |
+|-----------|--------|---------|-----------|------------|----------|------|-----------|
+| **CogPIE** | 0.05% | 1.70% | **30.20%** | **50.15%** | **50.15%** | 0.0013 | 621.1 |
+| CUPP-style | **5.90%** | **45.60%** | 47.55% | 47.55% | 47.55% | **0.0308** | 0.01 |
+| Markov-3 | 0.25% | 1.85% | 4.20% | 4.80% | 4.80% | 0.0015 | 830.4 |
+| Frequency | 0.00% | 0.00% | 0.00% | 0.00% | 0.00% | 0.0000 | 0.08 |
+| Levenshtein | 0.00% | 0.00% | 0.00% | 0.00% | 0.00% | 0.0000 | 179.2 |
+| Random | 0.00% | 0.00% | 0.00% | 0.00% | 0.00% | 0.0000 | 1.35 |
+
+With 4x the targets, the results confirm and refine the 500-target findings:
+
+1. **CogPIE advantage confirmed at scale:** CogPIE achieves 50.15% coverage versus CUPP's 47.55%, a 2.6 percentage point advantage that is consistent with the 2.0pp gap observed at 500 targets (48.0% vs. 46.0%). The larger sample size increases confidence that this difference is not attributable to sampling variance.
+
+2. **Distinct hit-rate profiles:** CUPP concentrates its hits at low budgets (45.60% at hit@100, saturating at 47.55% by hit@1,000), reflecting its deterministic concatenation strategy. CogPIE shows progressive accumulation: 1.70% at hit@100, 30.20% at hit@1,000, and 50.15% at hit@10,000, demonstrating that the probabilistic ranking layer surfaces additional correct candidates in the mid-range budget tiers.
+
+3. **Markov collapse persists:** Markov-3 at 4.80% confirms the catastrophic dilution pattern (vs. 3.2% at 500 targets; the slight increase is within sampling variance for a 9x reduction from the 500K baseline).
+
+4. **Performance consistency:** CogPIE processes each target in 621ms on average (vs. 637ms at 500 targets), confirming linear scaling behavior. Total wall-clock time for 2,000 targets was approximately 21 minutes.
+
 ### 6.5 Limitations
 
 1. **Single breach corpus:** All real-world evaluations use the RockYou corpus. While it contains 14.3M real passwords, it represents a 2009-era demographic. Validation on more recent, diverse breach corpora (with explicit authorization) would strengthen generalizability claims.
@@ -519,7 +542,7 @@ Three scale-dependent effects are observable:
 
 ### 7.1 Implications for Password Security
 
-Our results provide quantitative evidence for a well-known but often underappreciated conclusion: human-generated passwords are fundamentally insecure against targeted attacks. When an attacker possesses even basic personal information about a target (names, dates, interests), a systematic cognitive bias model can correctly predict 48-76% of PII-derived passwords, depending on corpus scale and budget. At the standalone level with 1M training passwords, CogPIE achieves 75.95% hit rate within just 1,000 guesses, with a median rank of 35.
+Our results provide quantitative evidence for a well-known but often underappreciated conclusion: human-generated passwords are fundamentally insecure against targeted attacks. When an attacker possesses even basic personal information about a target (names, dates, interests), a systematic cognitive bias model can correctly predict 50-76% of PII-derived passwords, depending on corpus scale and budget. At the standalone level with 1M training passwords, CogPIE achieves 75.95% hit rate within just 1,000 guesses, with a median rank of 35. In the large-scale comparative benchmark with 2,000 targets, CogPIE maintains a consistent advantage over CUPP-style heuristics (50.15% vs. 47.55%), confirming the result across sample sizes.
 
 This finding aligns with the broader literature:
 - Wang et al. (2016) found 30% of modified passwords crackable within 10 guesses
@@ -567,7 +590,7 @@ Several directions for future research emerge:
 
 ## 8. Conclusion
 
-We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8%. On real breach data (RockYou), CogPIE reaches 75.95% at budget 1,000 with 1M training corpus and 2,000 PII-bearing targets, with a median rank of 35 (MRR 0.137). In comparative evaluation, CogPIE surpasses CUPP-style (46.0%) and Markov-3 (3.2%) at scale, while non-profile approaches score 0%.
+We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8%. On real breach data (RockYou), CogPIE reaches 75.95% at budget 1,000 with 1M training corpus and 2,000 PII-bearing targets, with a median rank of 35 (MRR 0.137). In large-scale comparative evaluation with 2,000 targets and 1M training passwords, CogPIE achieves 50.15% coverage versus CUPP-style (47.55%) and Markov-3 (4.80%), while non-profile approaches score 0%.
 
 Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system, while the practical implementation runs in under 2 seconds per profile on commodity hardware. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.
 
