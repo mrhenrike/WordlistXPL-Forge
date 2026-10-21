@@ -5,13 +5,13 @@ Covers: pii_correlator, corpus_builder, real_benchmark, engine save/load.
 """
 from __future__ import annotations
 
-import json
 import os
 import tempfile
 from pathlib import Path
 
 import pytest
 
+from wlf_modules.cogpie.engine import CogPIEEngine
 from wlf_modules.cogpie.pii_correlator import (
     ALL_NAMES,
     NAMES_DE,
@@ -19,12 +19,9 @@ from wlf_modules.cogpie.pii_correlator import (
     NAMES_ES,
     NAMES_FR,
     NAMES_PT,
-    CorpusStats,
-    PIIMatch,
     correlate_corpus,
     correlate_password,
 )
-from wlf_modules.cogpie.engine import CogPIEEngine
 
 
 class TestPIICorrelator:

@@ -33,7 +33,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import re
 import sys
 import time
@@ -180,7 +179,7 @@ def process_file(
     parse_errors = 0
     no_pii = 0
 
-    with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(filepath, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             total_lines += 1
             if max_lines and total_lines > max_lines:

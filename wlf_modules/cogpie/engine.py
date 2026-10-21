@@ -26,29 +26,22 @@ Version: 0.1.0
 """
 from __future__ import annotations
 
-import itertools
-import json
 import logging
 import pickle
 import time
 from collections.abc import Generator
-from pathlib import Path
 from typing import Any
 
 from wlf_modules.cogpie.cognitive_transforms import (
-    apply_capitalization,
     apply_credential_mutation,
-    apply_leet_partial,
-    apply_numeric_suffixes,
-    apply_prefix_transforms,
     transform_pair,
     transform_token,
     transform_triple,
 )
 from wlf_modules.cogpie.markov_pcfg_hybrid import HybridRanker
 from wlf_modules.cogpie.policy_filter import PasswordPolicy, filter_candidates
-from wlf_modules.cogpie.scorer import practical_entropy, score_candidate
-from wlf_modules.cogpie.semantic_expander import expand_date, expand_profile, expand_token
+from wlf_modules.cogpie.scorer import score_candidate
+from wlf_modules.cogpie.semantic_expander import expand_profile
 
 logger = logging.getLogger(__name__)
 
@@ -373,7 +366,7 @@ class CogPIEEngine:
         """
         count = 0
         t0 = time.monotonic()
-        with open(corpus_path, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(corpus_path, encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 pw = line.rstrip("\n\r")
                 if pw:
@@ -407,7 +400,7 @@ class CogPIEEngine:
         logger.info("Model saved: %s", path)
 
     @classmethod
-    def load_model(cls, path: str) -> "CogPIEEngine":
+    def load_model(cls, path: str) -> CogPIEEngine:
         """Load a previously saved model."""
         with open(path, "rb") as f:
             model_data = pickle.load(f)

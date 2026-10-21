@@ -27,7 +27,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 import sys
 import time
@@ -36,8 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from wlf_modules.cogpie.engine import CogPIEEngine
-from wlf_modules.cogpie.pii_correlator import correlate_password, _detect_name, _detect_date
-from wlf_modules.cogpie.policy_filter import PasswordPolicy
+from wlf_modules.cogpie.pii_correlator import _detect_date, _detect_name, correlate_password
 
 logger = logging.getLogger("cogpie.benchmark")
 
@@ -90,7 +88,7 @@ def _extract_synthetic_profile(password: str) -> dict | None:
 def load_corpus(filepath: str, max_lines: int = 0) -> list[str]:
     """Load passwords from a file."""
     passwords = []
-    with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(filepath, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             pw = line.rstrip("\n\r")
             if pw:
@@ -312,7 +310,7 @@ def main() -> None:
         seed=args.seed,
     )
 
-    print(f"\nBenchmark Results:")
+    print("\nBenchmark Results:")
     print(f"  Train: {summary['train_size']:,} | Test: {summary['test_size']:,}")
     print(f"  Train time: {summary['train_time_seconds']:.1f}s")
     print(f"  Eval time: {summary['eval_time_seconds']:.1f}s")

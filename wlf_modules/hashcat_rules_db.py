@@ -10,11 +10,8 @@ Version: 1.0.0
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import logging
 import re
-from collections import Counter
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass, field
 from pathlib import Path

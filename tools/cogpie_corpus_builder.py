@@ -99,7 +99,7 @@ def build_processed_corpus(
             src_kept = 0
             logger.info("Processing %s: %s", label, path)
 
-            with open(path, "r", encoding="utf-8", errors="ignore") as in_fh:
+            with open(path, encoding="utf-8", errors="ignore") as in_fh:
                 for line in in_fh:
                     pw = line.rstrip("\n\r")
                     total_raw += 1

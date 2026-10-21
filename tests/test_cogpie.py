@@ -6,11 +6,7 @@ Version: 0.1.0
 """
 from __future__ import annotations
 
-import json
 import tempfile
-from pathlib import Path
-
-import pytest
 
 from wlf_modules.cogpie.cognitive_transforms import (
     apply_capitalization,

@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from wlf_modules.cogpie.engine import CogPIEEngine
 from wlf_modules.cogpie.markov_pcfg_hybrid import HybridRanker
-from wlf_modules.cogpie.pii_correlator import correlate_password, _detect_name, _detect_date
+from wlf_modules.cogpie.pii_correlator import _detect_date, _detect_name, correlate_password
 
 logger = logging.getLogger("cogpie.gpu_comparison")
 
@@ -68,7 +68,7 @@ def _extract_profile(password: str) -> dict | None:
 
 def load_and_split(corpus_path, max_lines=0, max_test=500, seed=42):
     passwords = []
-    with open(corpus_path, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(corpus_path, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             pw = line.rstrip("\n\r")
             if pw:

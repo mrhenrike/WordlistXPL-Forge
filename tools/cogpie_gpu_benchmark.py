@@ -33,7 +33,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 import statistics
 import sys
@@ -160,7 +159,7 @@ class CPUSetMatcher:
 
 def load_corpus(filepath: str, max_lines: int = 0) -> list[str]:
     passwords = []
-    with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+    with open(filepath, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             pw = line.rstrip("\n\r")
             if pw:
@@ -174,7 +173,7 @@ def load_pairs(filepath: str, max_targets: int = 0, seed: int = 42) -> list[dict
     """Load PII:password pairs from JSONL or generate from corpus."""
     pairs = []
     if filepath.endswith(".jsonl"):
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(filepath, encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 line = line.strip()
                 if not line:
@@ -186,7 +185,7 @@ def load_pairs(filepath: str, max_targets: int = 0, seed: int = 42) -> list[dict
                 except json.JSONDecodeError:
                     continue
     else:
-        from wlf_modules.cogpie.pii_correlator import correlate_password, _detect_name, _detect_date
+        from wlf_modules.cogpie.pii_correlator import _detect_date, _detect_name, correlate_password
 
         passwords = load_corpus(filepath, max_lines=max_targets * 10 if max_targets else 0)
         rng = random.Random(seed)

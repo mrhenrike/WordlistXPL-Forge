@@ -32,7 +32,6 @@ import math
 import re
 from typing import Any
 
-
 _SEQUENCES = [
     "0123456789",
     "abcdefghijklmnopqrstuvwxyz",

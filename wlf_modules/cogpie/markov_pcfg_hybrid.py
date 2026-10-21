@@ -27,7 +27,6 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter, defaultdict
-from typing import Any
 
 
 class _MiniMarkov:
@@ -189,7 +188,7 @@ class HybridRanker:
 
     def train_from_file(self, filepath: str, max_lines: int = 0) -> int:
         processed = 0
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(filepath, encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 pw = line.rstrip("\n\r")
                 if pw:
