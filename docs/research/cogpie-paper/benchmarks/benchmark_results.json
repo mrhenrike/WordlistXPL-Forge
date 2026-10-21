@@ -1,0 +1,129 @@
+{
+  "profiles": [
+    {
+      "profile_id": 1,
+      "name": "Carlos Eduardo Silva",
+      "real_passwords": 19,
+      "cogpie": {
+        "candidates": 130775,
+        "hits": 12,
+        "hit_rate": 0.631578947368421,
+        "time_s": 1.2912
+      },
+      "cupp": {
+        "candidates": 133,
+        "hits": 9,
+        "hit_rate": 0.47368421052631576,
+        "time_s": 0.0
+      },
+      "markov": {
+        "candidates": 71,
+        "hits": 0,
+        "hit_rate": 0.0,
+        "time_s": 0.0
+      }
+    },
+    {
+      "profile_id": 2,
+      "name": "Maria Fernanda Costa",
+      "real_passwords": 17,
+      "cogpie": {
+        "candidates": 118801,
+        "hits": 11,
+        "hit_rate": 0.6470588235294118,
+        "time_s": 1.2273
+      },
+      "cupp": {
+        "candidates": 119,
+        "hits": 9,
+        "hit_rate": 0.5294117647058824,
+        "time_s": 0.0
+      },
+      "markov": {
+        "candidates": 71,
+        "hits": 0,
+        "hit_rate": 0.0,
+        "time_s": 0.0
+      }
+    },
+    {
+      "profile_id": 3,
+      "name": "Joao Pedro Almeida",
+      "real_passwords": 17,
+      "cogpie": {
+        "candidates": 120071,
+        "hits": 10,
+        "hit_rate": 0.5882352941176471,
+        "time_s": 1.2222
+      },
+      "cupp": {
+        "candidates": 119,
+        "hits": 9,
+        "hit_rate": 0.5294117647058824,
+        "time_s": 0.0
+      },
+      "markov": {
+        "candidates": 71,
+        "hits": 0,
+        "hit_rate": 0.0,
+        "time_s": 0.0
+      }
+    },
+    {
+      "profile_id": 4,
+      "name": "Ana Beatriz Santos",
+      "real_passwords": 17,
+      "cogpie": {
+        "candidates": 107824,
+        "hits": 9,
+        "hit_rate": 0.5294117647058824,
+        "time_s": 1.0297
+      },
+      "cupp": {
+        "candidates": 133,
+        "hits": 9,
+        "hit_rate": 0.5294117647058824,
+        "time_s": 0.0
+      },
+      "markov": {
+        "candidates": 71,
+        "hits": 0,
+        "hit_rate": 0.0,
+        "time_s": 0.0
+      }
+    },
+    {
+      "profile_id": 5,
+      "name": "Roberto Nascimento",
+      "real_passwords": 17,
+      "cogpie": {
+        "candidates": 121931,
+        "hits": 11,
+        "hit_rate": 0.6470588235294118,
+        "time_s": 1.1494
+      },
+      "cupp": {
+        "candidates": 102,
+        "hits": 9,
+        "hit_rate": 0.5294117647058824,
+        "time_s": 0.0
+      },
+      "markov": {
+        "candidates": 71,
+        "hits": 0,
+        "hit_rate": 0.0,
+        "time_s": 0.0
+      }
+    }
+  ],
+  "summary": {
+    "total_profiles": 5,
+    "total_real_passwords": 87,
+    "cogpie_total_hits": 53,
+    "cogpie_hit_rate": 0.6091954022988506,
+    "cupp_total_hits": 45,
+    "cupp_hit_rate": 0.5172413793103449,
+    "markov_total_hits": 0,
+    "markov_hit_rate": 0.0
+  }
+}
