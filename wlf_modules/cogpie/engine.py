@@ -53,11 +53,27 @@ from wlf_modules.cogpie.semantic_expander import expand_date, expand_profile, ex
 logger = logging.getLogger(__name__)
 
 
+def _init_ranker(
+    alpha: float, beta: float, markov_order: int, use_gpu: bool
+) -> HybridRanker:
+    if use_gpu:
+        try:
+            from wlf_modules.cogpie.gpu_backend import GPUHybridRanker, is_gpu_available
+            if is_gpu_available():
+                logger.info("Initializing GPU-accelerated ranker (CUDA)")
+                return GPUHybridRanker(alpha=alpha, beta=beta, markov_order=markov_order)
+            logger.warning("GPU requested but CUDA unavailable; falling back to CPU")
+        except ImportError:
+            logger.warning("gpu_backend not available; falling back to CPU")
+    return HybridRanker(alpha=alpha, beta=beta, markov_order=markov_order)
+
+
 class CogPIEEngine:
     """Cognitive Pattern Inference Engine.
 
     Orchestrates the 5-layer pipeline for targeted password generation
-    based on cognitive bias modeling.
+    based on cognitive bias modeling. When use_gpu=True (default),
+    Layer 3 scoring runs on CUDA if available.
     """
 
     def __init__(
@@ -66,10 +82,12 @@ class CogPIEEngine:
         beta: float = 0.2,
         markov_order: int = 3,
         max_pair_depth: int = 2,
+        use_gpu: bool = True,
     ) -> None:
-        self.ranker = HybridRanker(alpha=alpha, beta=beta, markov_order=markov_order)
+        self.ranker = _init_ranker(alpha, beta, markov_order, use_gpu)
         self.max_pair_depth = max_pair_depth
         self._stats: dict[str, Any] = {}
+        self._use_gpu = use_gpu
 
     def train(self, corpus_path: str, max_lines: int = 0) -> int:
         """Train the probabilistic model from a password corpus file.
