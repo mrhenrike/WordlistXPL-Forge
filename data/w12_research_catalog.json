@@ -1,0 +1,346 @@
+{
+  "version": "12.0",
+  "description": "Wave 12 research catalog: external tools, generators, lists and cracking references for WordlistXPL",
+  "updated": "2026-10-21",
+  "clusters": {
+    "generators_profiling": {
+      "description": "Wordlist generators based on personal profiling and social engineering",
+      "entries": [
+        {
+          "id": "SRC-100",
+          "name": "CUPP",
+          "url": "https://github.com/Mebus/cupp",
+          "technique": "Personal profiling wordlist generation",
+          "license": "GPL-3.0",
+          "priority": "Alta",
+          "stars": 4200,
+          "wlf_module_ref": "wlf profile",
+          "notes": "Common User Passwords Profiler; generates targeted wordlists from personal info"
+        },
+        {
+          "id": "SRC-108",
+          "name": "elpscrk",
+          "url": "https://github.com/D4Vinci/elpscrk",
+          "technique": "Term permutation generation",
+          "license": "GPL-3.0",
+          "priority": "Media",
+          "notes": "Permutation-based generator from personal terms; complements CUPP"
+        },
+        {
+          "id": "SRC-109",
+          "name": "BEWGor",
+          "url": "https://github.com/berzerk0/BEWGor",
+          "technique": "Biographical wordlist generation",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "Advanced biographical profiling generator"
+        },
+        {
+          "id": "SRC-027",
+          "name": "BruteForceAI",
+          "url": "https://github.com/MorDavid/BruteForceAI",
+          "technique": "AI-assisted contextual generation",
+          "license": "verify",
+          "priority": "Pesquisa",
+          "notes": "Contextual generation and policy analysis; research reference only"
+        }
+      ]
+    },
+    "generators_pattern": {
+      "description": "Charset, pattern and template-based wordlist generators",
+      "entries": [
+        {
+          "id": "SRC-101",
+          "name": "crunch",
+          "url": "https://github.com/jim3ma/crunch",
+          "technique": "Charset and pattern-based generation",
+          "license": "GPL-2.0",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf charset",
+          "notes": "Standard charset/pattern generator"
+        },
+        {
+          "id": "SRC-110",
+          "name": "pnwgen",
+          "url": "https://github.com/toxydose/pnwgen",
+          "technique": "Phone number wordlist generation",
+          "license": "MIT",
+          "priority": "Baixa",
+          "notes": "Phone number-based generation; niche use case"
+        },
+        {
+          "id": "SRC-148",
+          "name": "werdy",
+          "url": "https://github.com/derv82/werdy",
+          "technique": "Wordlist generation and parsing",
+          "license": "N/A",
+          "priority": "Media",
+          "notes": "Python wordlist generator/parser; complements pipeline"
+        }
+      ]
+    },
+    "generators_web": {
+      "description": "Web scraping-based wordlist generators",
+      "entries": [
+        {
+          "id": "SRC-102",
+          "name": "CeWL",
+          "url": "https://github.com/digininja/CeWL",
+          "technique": "Web content scraping for wordlists",
+          "license": "GPL-2.0+",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf web",
+          "notes": "Classic web scraping generator (Ruby)"
+        },
+        {
+          "id": "SRC-103",
+          "name": "CeWLeR",
+          "url": "https://github.com/roys/cewler",
+          "technique": "Modern web scraping (JS/CSS/PDF)",
+          "license": "MIT",
+          "priority": "Alta",
+          "notes": "Python alternative to CeWL with JS/CSS/PDF support"
+        },
+        {
+          "id": "SRC-129",
+          "name": "cewlai",
+          "url": "https://github.com/chocapikk/cewlai",
+          "technique": "OSINT AI-assisted wordlist generation",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "LLM-assisted contextual wordlist generation from OSINT"
+        }
+      ]
+    },
+    "generators_dns": {
+      "description": "DNS and subdomain wordlist generation",
+      "entries": [
+        {
+          "id": "SRC-105",
+          "name": "alterx",
+          "url": "https://github.com/projectdiscovery/alterx",
+          "technique": "Template-based DNS/subdomain wordlist generation",
+          "license": "MIT",
+          "priority": "Media",
+          "wlf_module_ref": "wlf dns",
+          "notes": "projectdiscovery tool for subdomain fuzzing wordlists"
+        }
+      ]
+    },
+    "generators_advanced": {
+      "description": "Advanced generation techniques: PCFG, Markov, Neural, PRINCE",
+      "entries": [
+        {
+          "id": "SRC-113",
+          "name": "pcfg_cracker",
+          "url": "https://github.com/lakiw/pcfg_cracker",
+          "technique": "Probabilistic Context-Free Grammar (Weir et al.)",
+          "license": "MIT",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf pcfg",
+          "notes": "Academic reference for PCFG-based password generation"
+        },
+        {
+          "id": "SRC-114",
+          "name": "OMEN",
+          "url": "https://github.com/RUB-SysSec/OMEN",
+          "technique": "Ordered Markov ENumerator",
+          "license": "MIT",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf markov",
+          "notes": "Markov chain password generator from RUB-SysSec"
+        },
+        {
+          "id": "SRC-126",
+          "name": "PassGPT",
+          "url": "https://github.com/javirandor/passgpt",
+          "technique": "Transformer-based password modeling",
+          "license": "verify",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf neural",
+          "notes": "GPT-based password generation; academic reference for neural adapter"
+        },
+        {
+          "id": "SRC-127",
+          "name": "FLA neural_network_cracking",
+          "url": "https://github.com/cupslab/neural_network_cracking",
+          "technique": "LSTM password guessing",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "LSTM-based neural password guessing; academic reference"
+        },
+        {
+          "id": "SRC-117",
+          "name": "princeprocessor",
+          "url": "https://github.com/hashcat/princeprocessor",
+          "technique": "PRINCE word combination attack",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "hashcat PRINCE attack mode processor"
+        },
+        {
+          "id": "SRC-115",
+          "name": "kwprocessor",
+          "url": "https://github.com/hashcat/kwprocessor",
+          "technique": "Keyboard walk generation",
+          "license": "MIT",
+          "priority": "Media",
+          "wlf_module_ref": "wlf keyboard",
+          "notes": "Keyboard walk wordlist generator from hashcat"
+        }
+      ]
+    },
+    "lists_reference": {
+      "description": "Curated reference wordlists and collections",
+      "entries": [
+        {
+          "id": "SRC-107",
+          "name": "SecLists",
+          "url": "https://github.com/danielmiessler/SecLists",
+          "technique": "Curated security testing lists",
+          "license": "MIT",
+          "priority": "Alta",
+          "stars": 60000,
+          "notes": "Mandatory reference for wordlist coverage"
+        },
+        {
+          "id": "SRC-111",
+          "name": "intelligence-wordlist-generator",
+          "url": "https://github.com/MichaelDim02/intelligence-wordlist-generator",
+          "technique": "OSINT keyword combination",
+          "license": "GPL-3.0",
+          "priority": "Media",
+          "notes": "OSINT keyword combiner for targeted wordlists"
+        }
+      ]
+    },
+    "analysis_benchmark": {
+      "description": "Password analysis, benchmarking and scoring tools",
+      "entries": [
+        {
+          "id": "SRC-106",
+          "name": "pipal",
+          "url": "https://github.com/digininja/pipal",
+          "technique": "Statistical password list analysis",
+          "license": "verify",
+          "priority": "Media",
+          "notes": "Password list statistics and gap analysis"
+        },
+        {
+          "id": "SRC-116",
+          "name": "PACK",
+          "url": "https://github.com/iphelix/pack",
+          "technique": "Password Analysis and Cracking Kit",
+          "license": "GPL-2.0",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf rulegen",
+          "notes": "Rule generation and policy analysis toolkit"
+        },
+        {
+          "id": "SRC-118",
+          "name": "MAYA",
+          "url": "https://github.com/williamcorrias/MAYA-Password-Benchmarking",
+          "technique": "Password wordlist benchmarking framework",
+          "license": "verify",
+          "priority": "Alta",
+          "wlf_module_ref": "wlf benchmark",
+          "notes": "Framework for benchmarking wordlist effectiveness"
+        },
+        {
+          "id": "SRC-124",
+          "name": "zxcvbn",
+          "url": "https://github.com/dropbox/zxcvbn",
+          "technique": "Password strength and entropy estimation",
+          "license": "MIT",
+          "priority": "Media",
+          "wlf_module_ref": "wlf score",
+          "notes": "Dropbox password strength estimator"
+        },
+        {
+          "id": "SRC-125",
+          "name": "zxcvbn-ts",
+          "url": "https://github.com/zxcvbn-ts/zxcvbn",
+          "technique": "TypeScript port of zxcvbn",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "Modern TypeScript alternative for web integration"
+        }
+      ]
+    },
+    "cracking_engines": {
+      "description": "Cracking engines and rule processors",
+      "entries": [
+        {
+          "id": "SRC-119",
+          "name": "hashcat",
+          "url": "https://github.com/hashcat/hashcat",
+          "technique": "GPU-accelerated password cracking engine",
+          "license": "MIT",
+          "priority": "Alta",
+          "stars": 22000,
+          "notes": "Mandatory reference for rule syntax and mask tokens"
+        },
+        {
+          "id": "SRC-120",
+          "name": "hashcat-utils",
+          "url": "https://github.com/hashcat/hashcat-utils",
+          "technique": "Wordlist operations (splitlen, rli, rules_optimize)",
+          "license": "MIT",
+          "priority": "Media",
+          "notes": "Auxiliary list operations tools"
+        },
+        {
+          "id": "SRC-123",
+          "name": "John the Ripper",
+          "url": "https://github.com/openwall/john",
+          "technique": "Rule dialect and conversion",
+          "license": "GPL-2.0",
+          "priority": "Alta",
+          "notes": "Reference for JtR rule compatibility in wlf"
+        },
+        {
+          "id": "SRC-128",
+          "name": "Name-That-Hash",
+          "url": "https://github.com/HashPals/Name-That-Hash",
+          "technique": "Automatic hash type identification",
+          "license": "GPL-3.0",
+          "priority": "Media",
+          "notes": "Hash identification utility for crack pipeline"
+        }
+      ]
+    },
+    "dedup_tools": {
+      "description": "High-performance deduplication for large wordlists",
+      "entries": [
+        {
+          "id": "SRC-121",
+          "name": "rling",
+          "url": "https://github.com/Cynosureprime/rling",
+          "technique": "High-performance list dedup and subtraction",
+          "license": "verify",
+          "priority": "Media",
+          "notes": "Designed for massive wordlist deduplication"
+        },
+        {
+          "id": "SRC-122",
+          "name": "duplicut",
+          "url": "https://github.com/nil0x42/duplicut",
+          "technique": "High-performance dedup for massive lists",
+          "license": "GPL-3.0",
+          "priority": "Media",
+          "notes": "Complement to rling for large-scale dedup"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_entries": 30,
+    "alta_count": 14,
+    "media_count": 14,
+    "baixa_count": 1,
+    "pesquisa_count": 1,
+    "clusters_count": 9,
+    "license_compatible_bsd3": ["MIT", "Apache-2.0"],
+    "license_copyleft": ["GPL-2.0", "GPL-2.0+", "GPL-3.0"]
+  }
+}
