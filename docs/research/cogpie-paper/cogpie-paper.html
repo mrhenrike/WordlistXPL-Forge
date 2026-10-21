@@ -933,9 +933,54 @@ E_p(c) = log2(G(c))
 <p><strong>Passphrase analysis:</strong> Extending cognitive bias modeling to multi-word passphrases, which exhibit different but equally exploitable patterns.</p>
 </li>
 </ol>
+<h3 id="75-gpu-acceleration">7.5 GPU Acceleration</h3>
+<p>CogPIE includes an optional CUDA-accelerated backend for Layer 3 (Probabilistic Ranking), which dominates pipeline runtime at 96-97% of total execution time. The GPU backend implements three key optimizations:</p>
+<ol>
+<li>
+<p><strong>Numpy bulk character encoding:</strong> Replaces per-candidate Python loops with vectorized numpy array operations for converting password strings to index tensors, eliminating the primary CPU bottleneck.</p>
+</li>
+<li>
+<p><strong>GPU hash tables with open addressing:</strong> Context key lookup for positional Markov scoring uses pre-built hash tables stored as GPU tensors, enabling fully vectorized probing without CPU-GPU round trips.</p>
+</li>
+<li>
+<p><strong>Batched tensor gather operations:</strong> All Markov n-gram lookups and PCFG structural scoring run as batched GPU gather/index operations over the full candidate set simultaneously.</p>
+</li>
+</ol>
+<p><strong>Performance results</strong> (NVIDIA GeForce RTX 4060 Laptop GPU, 8 GB VRAM):</p>
+<table>
+<thead>
+<tr>
+<th>Training Corpus</th>
+<th>Candidates</th>
+<th>CPU Time</th>
+<th>GPU Time</th>
+<th>Speedup</th>
+<th>VRAM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100K passwords</td>
+<td>97K</td>
+<td>2.91s</td>
+<td>0.74s</td>
+<td>3.93x</td>
+<td>52 MB</td>
+</tr>
+<tr>
+<td>1M passwords</td>
+<td>97K</td>
+<td>15.12s</td>
+<td>0.75s</td>
+<td>20.18x</td>
+<td>174 MB</td>
+</tr>
+</tbody>
+</table>
+<p>The speedup scales with corpus size because larger training corpora produce denser Markov tables where GPU parallelism provides greater benefit. The 1M corpus benchmark demonstrates that CogPIE can score approximately 130,000 candidates per second on GPU, compared to approximately 6,400 per second on CPU. The GPU backend falls back transparently to CPU when CUDA is unavailable.</p>
 <h2 id="8-conclusion">8. Conclusion</h2>
 <p>We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8%. On real breach data (RockYou), CogPIE reaches 75.95% at budget 1,000 with 1M training corpus and 2,000 PII-bearing targets, with a median rank of 35 (MRR 0.137). In large-scale comparative evaluation with 2,000 targets and 1M training passwords, CogPIE achieves 50.15% coverage versus CUPP-style (47.55%) and Markov-3 (4.80%), while non-profile approaches score 0%.</p>
-<p>Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system, while the practical implementation runs in under 2 seconds per profile on commodity hardware. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.</p>
+<p>Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system. The CUDA-accelerated backend achieves a 20x speedup over CPU scoring on 1M-corpus workloads, generating 10,000 ranked candidates in under 0.75 seconds per profile on a laptop GPU. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.</p>
 <p>The central thesis of this work, that passwords generated &ldquo;from the head&rdquo; always resort to patterns derived from cognitive context, is supported by both our experimental results and the extensive body of prior literature. The measurable cognitive bias in password creation is not a failure of user education or policy design; it is a fundamental property of human cognition. Password managers with cryptographically random generation represent the only provably secure defense against this class of vulnerability.</p>
 <h2 id="references">References</h2>
 <ol>

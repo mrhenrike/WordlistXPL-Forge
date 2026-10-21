@@ -693,13 +693,32 @@ Diversas direções para pesquisa futura emergem:
 
 6. **Análise de passphrases:** Extensão da modelagem de viés cognitivo para passphrases multi-palavras, que exibem padrões diferentes, porém igualmente exploráveis. A transição para passphrases não elimina o viés cognitivo; apenas desloca-o para o nível léxico.
 
-7. **Validação em cenários de pentest real:** Avaliação do CogPIE em engajamentos autorizados de teste de penetração, comparando taxas de hit reais com as previstas pelo modelo. Essa validação exige acordo ético é escopo formal.
+7. **Validação em cenários de pentest real:** Avaliação do CogPIE em engajamentos autorizados de teste de penetração, comparando taxas de hit reais com as previstas pelo modelo. Essa validação exige acordo ético e escopo formal.
+
+### 7.6 Aceleração GPU
+
+O CogPIE inclui um backend CUDA opcional para a Camada 3 (Ranqueamento Probabilístico), que domina o tempo de execução do pipeline em 96-97% do tempo total. O backend GPU implementa tres otimizações principais:
+
+1. **Codificação bulk via numpy:** Substitui loops Python por-candidato por operações vetorizadas de arrays numpy para converter strings de senhas em tensores de índices, eliminando o gargalo principal na CPU.
+
+2. **Tabelas hash GPU com endereçamento aberto:** O lookup de chaves de contexto para scoring Markov posicional utiliza tabelas hash pre-construídas armazenadas como tensores GPU, permitindo probing totalmente vetorizado sem round-trips CPU-GPU.
+
+3. **Operações gather em lote:** Todos os lookups de n-gramas Markov e scoring estrutural PCFG executam como operações batched de gather/index sobre o conjunto completo de candidatos simultaneamente.
+
+**Resultados de performance** (NVIDIA GeForce RTX 4060 Laptop GPU, 8 GB VRAM):
+
+| Corpus de Treino | Candidatos | Tempo CPU | Tempo GPU | Speedup | VRAM |
+|---|---|---|---|---|---|
+| 100K senhas | 97K | 2,91s | 0,74s | 3,93x | 52 MB |
+| 1M senhas | 97K | 15,12s | 0,75s | 20,18x | 174 MB |
+
+O speedup escala com o tamanho do corpus porque corpora maiores de treino produzem tabelas Markov mais densas, onde o paralelismo GPU oferece maior benefício. O benchmark de 1M demonstra que o CogPIE pode pontuar aproximadamente 130.000 candidatos por segundo em GPU, comparado a aproximadamente 6.400 por segundo em CPU. O backend GPU faz fallback transparente para CPU quando CUDA não esta disponível.
 
 ## 8. Conclusão
 
 Apresentamos o CogPIE, um motor de inferência de padrões cognitivos de 5 camadas para geração direcionada de candidatos a senhas. Ao modelar explicitamente os vieses psicologicos que impulsionam a criação de senhas por humanos, o CogPIE atinge 75,95% de hit rate em budget 1.000 com corpus de 1M de treinamento e 2.000 alvos PII-bearing, com rank mediano de 35 (MRR 0,137). Na avaliação comparativa em larga escala com 2.000 alvos, o CogPIE alcanca 50,15% de cobertura contra CUPP-style (47,55%) e Markov-3 (4,80%), enquanto abordagens sem perfil marcam 0%.
 
-Nosso framework matemático formal fornece garantias de convergência para o sistema híbrido de ranqueamento Markov/PCFG, enquanto a implementação prática executa em menos de 2 segundos por perfil em hardware convencional. A arquitetura modular permite extensão para contextos culturais adicionais é integração com ferramentas existentes de auditoria de senhas.
+Nosso framework matemático formal fornece garantias de convergência para o sistema híbrido de ranqueamento Markov/PCFG. O backend CUDA alcanca speedup de 20x sobre o scoring CPU em workloads de corpus 1M, gerando 10.000 candidatos ranqueados em menos de 0,75 segundos por perfil em GPU de laptop. A arquitetura modular permite extensão para contextos culturais adicionais é integração com ferramentas existentes de auditoria de senhas.
 
 A tese central deste trabalho, de que senhas geradas "de cabeca" sempre recorrem a padrões derivados do contexto cognitivo, é sustentada tanto por nossos resultados experimentais quanto pelo extenso corpo de literatura previa. O viés cognitivo mensurável na criação de senhas não é uma falha de educação de usuários ou de design de políticas; é uma propriedade fundamental da cognição humana. Cofres de senhas com geração criptograficamente aleatória representam a única defesa provavelmente segura contra esta classe de vulnerabilidade.
 

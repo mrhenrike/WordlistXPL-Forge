@@ -588,11 +588,30 @@ Several directions for future research emerge:
 
 5. **Passphrase analysis:** Extending cognitive bias modeling to multi-word passphrases, which exhibit different but equally exploitable patterns.
 
+### 7.5 GPU Acceleration
+
+CogPIE includes an optional CUDA-accelerated backend for Layer 3 (Probabilistic Ranking), which dominates pipeline runtime at 96-97% of total execution time. The GPU backend implements three key optimizations:
+
+1. **Numpy bulk character encoding:** Replaces per-candidate Python loops with vectorized numpy array operations for converting password strings to index tensors, eliminating the primary CPU bottleneck.
+
+2. **GPU hash tables with open addressing:** Context key lookup for positional Markov scoring uses pre-built hash tables stored as GPU tensors, enabling fully vectorized probing without CPU-GPU round trips.
+
+3. **Batched tensor gather operations:** All Markov n-gram lookups and PCFG structural scoring run as batched GPU gather/index operations over the full candidate set simultaneously.
+
+**Performance results** (NVIDIA GeForce RTX 4060 Laptop GPU, 8 GB VRAM):
+
+| Training Corpus | Candidates | CPU Time | GPU Time | Speedup | VRAM |
+|---|---|---|---|---|---|
+| 100K passwords | 97K | 2.91s | 0.74s | 3.93x | 52 MB |
+| 1M passwords | 97K | 15.12s | 0.75s | 20.18x | 174 MB |
+
+The speedup scales with corpus size because larger training corpora produce denser Markov tables where GPU parallelism provides greater benefit. The 1M corpus benchmark demonstrates that CogPIE can score approximately 130,000 candidates per second on GPU, compared to approximately 6,400 per second on CPU. The GPU backend falls back transparently to CPU when CUDA is unavailable.
+
 ## 8. Conclusion
 
 We presented CogPIE, a 5-layer cognitive pattern inference engine for targeted password candidate generation. By explicitly modeling the psychological biases that drive human password creation, CogPIE achieves a 60.9% hit rate on synthetic benchmarks, outperforming CUPP-style profiling by 17.8%. On real breach data (RockYou), CogPIE reaches 75.95% at budget 1,000 with 1M training corpus and 2,000 PII-bearing targets, with a median rank of 35 (MRR 0.137). In large-scale comparative evaluation with 2,000 targets and 1M training passwords, CogPIE achieves 50.15% coverage versus CUPP-style (47.55%) and Markov-3 (4.80%), while non-profile approaches score 0%.
 
-Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system, while the practical implementation runs in under 2 seconds per profile on commodity hardware. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.
+Our formal mathematical framework provides convergence guarantees for the hybrid Markov/PCFG ranking system. The CUDA-accelerated backend achieves a 20x speedup over CPU scoring on 1M-corpus workloads, generating 10,000 ranked candidates in under 0.75 seconds per profile on a laptop GPU. The modular architecture enables extension to additional cultural contexts and integration with existing password auditing tools.
 
 The central thesis of this work, that passwords generated "from the head" always resort to patterns derived from cognitive context, is supported by both our experimental results and the extensive body of prior literature. The measurable cognitive bias in password creation is not a failure of user education or policy design; it is a fundamental property of human cognition. Password managers with cryptographically random generation represent the only provably secure defense against this class of vulnerability.
 
