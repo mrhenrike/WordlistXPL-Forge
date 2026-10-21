@@ -247,9 +247,9 @@ def run_gpu_benchmark(
     logger.info("Corpus: %d passwords", len(train_passwords))
 
     if torch_mod is not None:
-        matcher = GPUHashMatcher(train_passwords, torch_mod, device)
+        GPUHashMatcher(train_passwords, torch_mod, device)
     else:
-        matcher = CPUSetMatcher(train_passwords)
+        CPUSetMatcher(train_passwords)
 
     logger.info("Loading test targets...")
     if pairs_path:

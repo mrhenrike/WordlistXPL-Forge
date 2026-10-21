@@ -753,7 +753,7 @@ def gpu_benchmark_evaluate(
             candidates = gen_fn(profile, max_budget)
         except Exception:
             continue
-        gen_time = time.monotonic() - t0
+        time.monotonic() - t0
 
         found_at = matcher.find_rank(target_pw, candidates, max_budget)
         total_time += time.monotonic() - t0
