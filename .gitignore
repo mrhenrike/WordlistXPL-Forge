@@ -1,6 +1,11 @@
 # IDE / editor local
 .cursor/
+.claude/
 wiki/
+
+# Large data (corpus, benchmark results)
+corpus/
+benchmark/
 
 __pycache__/
 *.pyc
@@ -84,9 +89,14 @@ tests/*
 !tests/test_cogpie_training.py
 setup_venv.sh
 setup_venv.ps1
-tools/
+tools/*
 !tools/cogpie_corpus_builder.py
 !tools/cogpie_real_benchmark.py
+!tools/cogpie_comparison_benchmark.py
+!tools/cogpie_leak_extractor.py
+!tools/cogpie_scale_benchmark.py
+!tools/cogpie_gpu_benchmark.py
+!tools/cogpie_gpu_comparison.py
 scripts/
 third_party_manifest.json
 THIRD_PARTY_COMPONENTS.md
