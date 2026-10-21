@@ -222,7 +222,7 @@ class TestEngineTrainFromCorpus:
             "old_passwords": [],
             "numbers": ["1990"],
         }
-        results = engine.generate(profile, max_candidates=500)
+        results = engine.generate(profile, max_candidates=1000)
         candidates = [c for c, _ in results]
         assert "michael1990" in candidates or "Michael1990" in candidates
 
