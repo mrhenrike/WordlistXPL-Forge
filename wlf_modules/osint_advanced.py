@@ -128,7 +128,7 @@ def collect_github_org(org: str, max_repos: int = 200,
         try:
             resp = requests.get(
                 f"https://api.github.com/orgs/{org}/repos",
-                params={"per_page": 100, "page": page, "type": "public"},
+                params={"per_page": str(100), "page": str(page), "type": "public"},
                 headers=headers,
                 timeout=timeout,
             )

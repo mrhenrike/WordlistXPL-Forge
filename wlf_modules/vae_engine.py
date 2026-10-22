@@ -49,7 +49,7 @@ def _build_vae(latent_dim: int = 64, hidden_dim: int = 256, max_len: int = 20) -
     torch = _require_torch()
     import torch.nn as nn
 
-    class CharVAE(nn.Module):  # type: ignore[misc]
+    class CharVAE(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, 32)

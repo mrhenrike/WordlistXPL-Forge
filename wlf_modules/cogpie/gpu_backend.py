@@ -70,10 +70,10 @@ class GPUMarkov:
     ) -> None:
         self.order = order
         self.smoothing = smoothing
-        self.device = device or get_device()
+        self.device: torch.device | None = device or get_device()
         self._char2idx: dict[str, int] = {}
         self._idx_counter = 0
-        self._ngram_counts: dict[int, dict[str, Counter]] = defaultdict(
+        self._ngram_counts: dict[int, dict[str, Counter[str]]] = defaultdict(
             lambda: defaultdict(Counter)
         )
         self._total_by_pos: dict[int, dict[str, int]] = defaultdict(
@@ -82,10 +82,11 @@ class GPUMarkov:
         self._trained = 0
         self._gpu_tables: dict[int, torch.Tensor] = {}
         self._gpu_totals: dict[int, torch.Tensor] = {}
-        self._ctx2idx: dict[int, dict[str, int]] = {}
+        self._ctx2idx: dict[int, dict[int, int]] = {}
+        self._ctx_hash_tables: dict[int, tuple[torch.Tensor, torch.Tensor]] = {}
         self._materialized = False
 
-    def __getstate__(self) -> dict:
+    def __getstate__(self) -> dict[str, Any]:
         return {
             "order": self.order,
             "smoothing": self.smoothing,
@@ -99,7 +100,7 @@ class GPUMarkov:
             "trained": self._trained,
         }
 
-    def __setstate__(self, state: dict) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self.order = state["order"]
         self.smoothing = state["smoothing"]
         self._char2idx = state["char2idx"]
@@ -168,7 +169,7 @@ class GPUMarkov:
         self._gpu_tables.clear()
         self._gpu_totals.clear()
         self._ctx2idx.clear()
-        self._ctx_hash_tables: dict[int, tuple[torch.Tensor, torch.Tensor]] = {}
+        self._ctx_hash_tables.clear()
 
         max_ord = 0
         for ch in self._char2idx:
@@ -247,7 +248,7 @@ class GPUMarkov:
             len(self._gpu_tables), V, mem_mb, self.device,
         )
 
-    def _encode_candidates(self, candidates: list[str]) -> tuple:
+    def _encode_candidates(self, candidates: list[str]) -> tuple[torch.Tensor, int]:
         """Encode candidates as char-index tensor using numpy bulk conversion."""
         import numpy as np
 
@@ -401,19 +402,19 @@ class GPUPCFG:
     """
 
     def __init__(self, device: torch.device | None = None) -> None:
-        self.device = device or get_device()
-        self._structure_counts: Counter = Counter()
-        self._terminal_counts: dict[str, Counter] = defaultdict(Counter)
+        self.device: torch.device | None = device or get_device()
+        self._structure_counts: Counter[str] = Counter()
+        self._terminal_counts: dict[str, Counter[str]] = defaultdict(Counter)
         self._total = 0
 
-    def __getstate__(self) -> dict:
+    def __getstate__(self) -> dict[str, Any]:
         return {
             "structure_counts": dict(self._structure_counts),
             "terminal_counts": {k: dict(v) for k, v in self._terminal_counts.items()},
             "total": self._total,
         }
 
-    def __setstate__(self, state: dict) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self._structure_counts = Counter(state["structure_counts"])
         self._terminal_counts = defaultdict(Counter)
         for k, v in state["terminal_counts"].items():
@@ -528,15 +529,15 @@ class GPUHybridRanker:
         markov_order: int = 3,
         device: torch.device | None = None,
     ) -> None:
-        self.device = device or get_device()
+        self.device: torch.device | None = device or get_device()
         self.alpha = alpha
         self.beta = beta
         self._markov = GPUMarkov(order=markov_order, device=self.device)
         self._pcfg = GPUPCFG(device=self.device)
-        self._freq_counts: Counter = Counter()
+        self._freq_counts: Counter[str] = Counter()
         self._freq_total: int = 0
 
-    def __getstate__(self) -> dict:
+    def __getstate__(self) -> dict[str, Any]:
         return {
             "alpha": self.alpha,
             "beta": self.beta,
@@ -546,7 +547,7 @@ class GPUHybridRanker:
             "freq_total": self._freq_total,
         }
 
-    def __setstate__(self, state: dict) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self.alpha = state["alpha"]
         self.beta = state["beta"]
         self.device = get_device() if is_gpu_available() else None
@@ -701,8 +702,8 @@ class GPUCandidateMatcher:
             return None
 
         for idx in matches.cpu().tolist():
-            if chunk[idx] == target:
-                return idx + 1
+            if chunk[int(idx)] == target:
+                return int(idx) + 1
 
         return None
 
@@ -742,11 +743,18 @@ def gpu_benchmark_evaluate(
     evaluated = 0
 
     for idx, target_pw in enumerate(test_set):
-        from tools.cogpie_gpu_comparison import _extract_profile
+        from wlf_modules.cogpie.pii_correlator import correlate_password
 
-        profile = _extract_profile(target_pw)
-        if profile is None:
+        result = correlate_password(target_pw)
+        if result.category == "random_like":
             continue
+        profile: dict[str, Any] = {
+            "names": [result.name_found] if result.name_found else [],
+            "dates": [result.date_found] if result.date_found else [],
+            "keywords": [], "pets": [], "companies": [],
+            "phones": [], "emails": [], "old_passwords": [],
+            "numbers": [result.date_found] if result.date_found else [],
+        }
 
         t0 = time.monotonic()
         try:

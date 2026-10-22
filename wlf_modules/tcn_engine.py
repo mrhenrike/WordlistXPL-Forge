@@ -63,7 +63,7 @@ def _build_tcn(
     import torch.nn as nn
     import torch.nn.functional as F
 
-    class CausalConv1d(nn.Module):  # type: ignore[misc]
+    class CausalConv1d(nn.Module):
         def __init__(self, channels: Any, kernel: Any, dilation: Any) -> None:
             super().__init__()
             self.pad = (kernel - 1) * dilation
@@ -77,7 +77,7 @@ def _build_tcn(
             x_pad = F.pad(x, (self.pad, 0))
             return self.dropout(F.relu(self.conv(x_pad)))
 
-    class TCNPasswordModel(nn.Module):  # type: ignore[misc]
+    class TCNPasswordModel(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(vocab, d_model)

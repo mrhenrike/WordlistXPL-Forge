@@ -22,12 +22,27 @@ except ImportError:
         BRIGHT = RESET_ALL = ""
 
 # ── tqdm ─────────────────────────────────────────────────────────────────────
+_tqdm: Any
 try:
     from tqdm import tqdm as _tqdm
     _TQDM = True
 except ImportError:
     _TQDM = False
     _tqdm = None
+
+__all__ = [
+    "BANNER",
+    "VERSION",
+    "_COLOR",
+    "_GLOBAL_CTX",
+    "_SHUTDOWN_REQUESTED",
+    "_TQDM",
+    "Fore",
+    "Style",
+    "_tqdm",
+    "is_shutdown",
+    "logger",
+]
 
 # ── Path setup ───────────────────────────────────────────────────────────────
 _HERE = Path(__file__).resolve().parent.parent.parent

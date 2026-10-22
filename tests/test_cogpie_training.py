@@ -225,66 +225,38 @@ class TestEngineTrainFromCorpus:
 
 
 class TestCorpusBuilder:
-    """Tests for corpus builder functions (imported)."""
+    """Tests for corpus builder (tools/ removed in dist cleanup, using engine directly)."""
 
-    def test_build_small_corpus(self, tmp_path):
+    def test_engine_corpus_train(self, tmp_path):
         input_file = tmp_path / "input.txt"
         input_file.write_text(
             "michael123\nmaria1990\n123456\nab\n"
             "john2024\nmichael123\nxkj9mQ!!\n"
         )
-
-        sys_path_backup = list(__import__("sys").path)
-        try:
-            forge_root = str(Path(__file__).resolve().parent.parent)
-            if forge_root not in __import__("sys").path:
-                __import__("sys").path.insert(0, forge_root)
-
-            from tools.cogpie_corpus_builder import build_processed_corpus
-
-            sources = [("test", str(input_file))]
-            summary = build_processed_corpus(
-                sources=sources,
-                output_dir=str(tmp_path / "output"),
-                max_lines=0,
-                min_length=4,
-                max_length=64,
-            )
-            assert summary["total_kept"] > 0
-            assert summary["total_kept"] <= 7
-            assert summary["skipped_duplicate"] >= 1
-            assert os.path.isfile(tmp_path / "output" / "processed_corpus.txt")
-            assert os.path.isfile(tmp_path / "output" / "corpus_stats.json")
-            assert os.path.isfile(tmp_path / "output" / "pii_patterns.json")
-        finally:
-            __import__("sys").path[:] = sys_path_backup
+        engine = CogPIEEngine()
+        count = engine.train_from_corpus(str(input_file))
+        assert count >= 4
 
 
 class TestBenchmarkHelpers:
-    """Tests for benchmark helper functions."""
+    """Tests for PII correlation used in benchmarks."""
 
-    def test_extract_synthetic_profile(self):
-        from tools.cogpie_real_benchmark import _extract_synthetic_profile
-
-        profile = _extract_synthetic_profile("michael1990")
-        assert profile is not None
-        assert "michael" in profile["names"]
-        assert any("1990" in d for d in profile["dates"])
+    def test_extract_name_date_profile(self):
+        result = correlate_password("michael1990")
+        assert result.name_found == "michael"
+        assert result.date_found is not None
 
     def test_extract_no_pii(self):
-        from tools.cogpie_real_benchmark import _extract_synthetic_profile
+        result = correlate_password("xkj9mQ!!")
+        assert result.category == "random_like"
 
-        profile = _extract_synthetic_profile("xkj9mQ!!")
-        assert profile is None
-
-    def test_split_corpus(self):
-        from tools.cogpie_real_benchmark import split_corpus
-
+    def test_corpus_split_via_correlator(self):
         passwords = [
             "michael123", "maria1990", "john2024",
             "xkj9mQ!!", "randompass", "123456",
             "fernanda2024", "carlos99", "test1234",
         ]
-        train, test = split_corpus(passwords, test_ratio=0.3, seed=42)
-        assert len(train) + len(test) <= len(passwords)
-        assert len(test) >= 1
+        stats = correlate_corpus(passwords=passwords)
+        assert stats.total == 9
+        d = stats.as_dict()
+        assert d["pii_detectable_pct"] > 0

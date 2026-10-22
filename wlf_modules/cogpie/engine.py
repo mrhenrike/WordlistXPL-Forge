@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 def _init_ranker(
     alpha: float, beta: float, markov_order: int, use_gpu: bool
-) -> HybridRanker:
+) -> HybridRanker | Any:
     if use_gpu:
         try:
             from wlf_modules.cogpie.gpu_backend import GPUHybridRanker, is_gpu_available

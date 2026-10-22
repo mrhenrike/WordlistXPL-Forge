@@ -50,7 +50,7 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int) -> Any:
     import torch.nn as nn
     import torch.nn.functional as F
 
-    class CouplingLayer(nn.Module):  # type: ignore[misc]
+    class CouplingLayer(nn.Module):
         def __init__(self, d: Any, mask: Any) -> None:
             super().__init__()
             self.register_buffer("mask", mask)
@@ -64,21 +64,23 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int) -> Any:
             )
 
         def forward(self, x: Any) -> Any:
-            x_m = x * self.mask
-            s = self.net_s(x_m) * (1 - self.mask)
-            t = self.net_t(x_m) * (1 - self.mask)
-            y = x_m + (1 - self.mask) * (x * torch.exp(s) + t)
-            log_det = (s * (1 - self.mask)).sum(dim=-1)
+            m: Any = self.mask
+            x_m = x * m
+            s = self.net_s(x_m) * (1 - m)
+            t = self.net_t(x_m) * (1 - m)
+            y = x_m + (1 - m) * (x * torch.exp(s) + t)
+            log_det = (s * (1 - m)).sum(dim=-1)
             return y, log_det
 
         def inverse(self, y: Any) -> Any:
-            y_m = y * self.mask
-            s = self.net_s(y_m) * (1 - self.mask)
-            t = self.net_t(y_m) * (1 - self.mask)
-            x = y_m + (1 - self.mask) * ((y - t) * torch.exp(-s))
+            m: Any = self.mask
+            y_m = y * m
+            s = self.net_s(y_m) * (1 - m)
+            t = self.net_t(y_m) * (1 - m)
+            x = y_m + (1 - m) * ((y - t) * torch.exp(-s))
             return x
 
-    class RealNVP(nn.Module):  # type: ignore[misc]
+    class RealNVP(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.proj = nn.Linear(_VOCAB, d_model)
@@ -106,8 +108,8 @@ def _build_flow(d_model: int, seq_len: int, n_layers: int) -> Any:
 
         def sample(self, n: Any, seq_len_: Any) -> Any:
             z = torch.randn(n, seq_len_ * d_model)
-            for layer in reversed(self.coupling):
-                z = layer.inverse(z)
+            for layer in reversed(list(self.coupling)):
+                z = layer.inverse(z)  # type: ignore[operator]
             z = z.view(n, seq_len_, d_model)
             logits = self.unproj(z)
             return logits

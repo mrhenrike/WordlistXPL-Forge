@@ -77,7 +77,7 @@ def _parse_generate_body(body: dict[str, Any]) -> dict[str, Any]:
 
 # ── FastAPI application ───────────────────────────────────────────────────────
 
-def _make_fastapi_app(api_key: str = "") -> Generator[str, None, None]:
+def _make_fastapi_app(api_key: str = "") -> Any:
     try:
         from fastapi import Depends, FastAPI, Header, HTTPException, Request
         from fastapi.responses import JSONResponse, StreamingResponse
@@ -202,7 +202,7 @@ def _make_fastapi_app(api_key: str = "") -> Generator[str, None, None]:
         except Exception as exc:
             raise HTTPException(status_code=404, detail=str(exc))
 
-    return app  # type: ignore[no-any-return]
+    return app
 
 
 def _dispatch_generation(params: dict[str, Any]) -> Generator[str, None, None]:

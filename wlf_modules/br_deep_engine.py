@@ -80,6 +80,51 @@ _OPERADORAS = [
     "vivo","claro","tim","oi","nextel","algar","sercomtel",
 ]
 
+_CAPITAIS_BR = [
+    "brasilia", "saopaulo", "riodejaneiro", "salvador", "fortaleza",
+    "belohorizonte", "manaus", "curitiba", "recife", "goiania",
+    "belem", "portoalegre", "saoluis", "maceio", "campogrande",
+    "teresina", "joaopessoa", "natal", "aracaju", "cuiaba",
+    "portovelho", "florianopolis", "macapa", "riobranco", "vitoria",
+    "boavista", "palmas",
+]
+
+_CIDADES_TOP100 = [
+    "guarulhos", "campinas", "saobernardo", "santoandre", "osasco",
+    "sorocaba", "ribeirapreto", "saojosedoscampos", "uberlandia",
+    "contagem", "niteroi", "juizdefora", "santos", "joinville",
+    "londrina", "maringa", "anapolis", "aparecidadegoiania",
+    "diadema", "carapicuiba", "piracicaba", "jundiai", "bauru",
+    "franca", "taubate", "praia_grande", "saojoao_meriti",
+    "canoas", "vilavelha", "serra", "pelotas", "caxiasdosul",
+    "blumenau", "cascavel", "saojosedospinhais", "pontagrossa",
+    "olinda", "caruaru", "petrolina", "paulista", "cabofrio",
+    "novaiguacu", "duquedecaxias", "saogoncalo", "petropolis",
+    "volta_redonda", "campos_goytacazes", "limeira", "americana",
+    "santamaria", "fozdoiguacu", "maraba", "santarem",
+    "imperatriz", "montes_claros", "uberaba", "governadorvaladares",
+    "sete_lagoas", "divinopolis", "ipatinga", "betim",
+    "ribeiraodasneves", "pocosdecaldas", "patosdeminas",
+    "itabuna", "ilheus", "vitoriadaconquista", "feiradesantana",
+    "laurodefreitas", "camacari", "jequie", "barreiras",
+    "mossoro", "parnamirim", "jiparana", "vilhena",
+    "dourados", "treslagoas", "rondonopolis", "sinop",
+    "varzea_grande", "tangara_serra", "chapeco", "criciuma",
+    "itajai", "balneariocamboriu", "lages", "jaraguadosul",
+]
+
+_CAPITAL_UF: dict[str, str] = {
+    "brasilia": "df", "saopaulo": "sp", "riodejaneiro": "rj",
+    "salvador": "ba", "fortaleza": "ce", "belohorizonte": "mg",
+    "manaus": "am", "curitiba": "pr", "recife": "pe",
+    "goiania": "go", "belem": "pa", "portoalegre": "rs",
+    "saoluis": "ma", "maceio": "al", "campogrande": "ms",
+    "teresina": "pi", "joaopessoa": "pb", "natal": "rn",
+    "aracaju": "se", "cuiaba": "mt", "portovelho": "ro",
+    "florianopolis": "sc", "macapa": "ap", "riobranco": "ac",
+    "vitoria": "es", "boavista": "rr", "palmas": "to",
+}
+
 _GOV_PATTERNS = [
     "gov","govbr","minha_conta","cpf_br","rg_sp","rg_rj","sus","inss",
     "detran","ibge","receita","sefaz","sefazes","prouni","fies","enem",
@@ -447,3 +492,96 @@ class BRDeepEngine:
                 yield (cand, 0.5)
             if max_candidates and count >= max_candidates:
                 return
+
+
+# ── City-based password generator ────────────────────────────────────────────
+
+_CITY_SUFFIXES = ["123", "!", "@", "2024", "2025", "2026"]
+
+_CITY_FAN_PATTERNS = ["eu_amo_{city}", "sou_de_{city}", "nascido_em_{city}"]
+
+
+def generate_city_br(
+    include_capitals: bool = True,
+    include_top100: bool = True,
+    with_suffixes: bool = True,
+    max_results: int = 0,
+) -> Generator[str, None, None]:
+    """Generate password candidates from Brazilian city names.
+
+    Combines capitals and top-100 cities with common password patterns:
+    casing variants, year/symbol suffixes, fan phrases, and state
+    abbreviation tags for capitals.
+
+    Args:
+        include_capitals: Include the 27 state capitals.
+        include_top100: Include top-100 cities by population.
+        with_suffixes: Append year/symbol suffixes and fan patterns.
+        max_results: Cap output size; 0 means unlimited.
+
+    Yields:
+        Deduplicated password candidate strings.
+    """
+    seen: set[str] = set()
+    count = 0
+
+    def _emit(candidate: str) -> bool:
+        nonlocal count
+        candidate = candidate.strip()
+        if not candidate or candidate in seen:
+            return False
+        seen.add(candidate)
+        count += 1
+        return True
+
+    def _reached_limit() -> bool:
+        return max_results > 0 and count >= max_results
+
+    cities: list[str] = []
+    if include_capitals:
+        cities.extend(_CAPITAIS_BR)
+    if include_top100:
+        cities.extend(_CIDADES_TOP100)
+
+    for city in cities:
+        # Base variants: raw, capitalized, upper
+        for variant in (city, city.capitalize(), city.upper()):
+            if _emit(variant):
+                yield variant
+            if _reached_limit():
+                return
+
+        # Without underscores (e.g. "praia_grande" -> "praiagrande")
+        if "_" in city:
+            no_us = city.replace("_", "")
+            for variant in (no_us, no_us.capitalize(), no_us.upper()):
+                if _emit(variant):
+                    yield variant
+                if _reached_limit():
+                    return
+
+        if with_suffixes:
+            # Year and symbol suffixes
+            for sfx in _CITY_SUFFIXES:
+                cand = f"{city}{sfx}"
+                if _emit(cand):
+                    yield cand
+                if _reached_limit():
+                    return
+
+            # Fan patterns
+            for pattern in _CITY_FAN_PATTERNS:
+                cand = pattern.format(city=city)
+                if _emit(cand):
+                    yield cand
+                if _reached_limit():
+                    return
+
+        # UF tag for capitals
+        uf = _CAPITAL_UF.get(city)
+        if uf:
+            for cand in (f"{city}_{uf}", f"{city}{uf}", f"{uf}_{city}"):
+                if _emit(cand):
+                    yield cand
+                if _reached_limit():
+                    return

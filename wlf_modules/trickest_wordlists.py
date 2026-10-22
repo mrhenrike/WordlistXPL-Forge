@@ -463,7 +463,7 @@ class TrickestWordlists:
                     if stripped:
                         if deduplicate:
                             if stripped not in lines:
-                                lines.add(stripped)  # type: ignore[union-attr]
+                                lines.add(stripped)
                                 ordered.append(stripped)
                         else:
                             ordered.append(stripped)

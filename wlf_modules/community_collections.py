@@ -536,7 +536,7 @@ class CommunityCollections:
                             if deduplicate:
                                 if stripped in seen:
                                     continue
-                                seen.add(stripped)  # type: ignore[union-attr]
+                                seen.add(stripped)
                             outf.write(stripped + "\n")
                             line_count += 1
                             if line_count >= max_lines:

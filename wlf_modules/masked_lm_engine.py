@@ -62,7 +62,7 @@ def _build_masked_lm(d_model: int = 256, n_layers: int = 4, max_len: int = 32) -
     torch = _require_torch()
     import torch.nn as nn
 
-    class MaskedLM(nn.Module):  # type: ignore[misc]
+    class MaskedLM(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_TOTAL_VOCAB, d_model, padding_idx=_PAD_IDX)

@@ -64,7 +64,7 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
     torch = _require_torch()
     import torch.nn as nn
 
-    class CausalSelfAttention(nn.Module):  # type: ignore[misc]
+    class CausalSelfAttention(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.attn = nn.MultiheadAttention(d_model, n_heads, batch_first=True)
@@ -72,11 +72,13 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
 
         def forward(self, x: Any) -> Any:
             T = x.shape[1]
-            mask = ~self.mask[:T, :T]
+            buf = self.mask
+            assert isinstance(buf, torch.Tensor)
+            mask = ~buf[:T, :T]
             out, _ = self.attn(x, x, x, attn_mask=mask)
             return out
 
-    class Block(nn.Module):  # type: ignore[misc]
+    class Block(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.ln1 = nn.LayerNorm(d_model)
@@ -93,7 +95,7 @@ def _build_gpt(n_layers: int = 4, d_model: int = 256, n_heads: int = 4, max_len:
             x = x + self.ff(self.ln2(x))
             return x
 
-    class CharGPT(nn.Module):  # type: ignore[misc]
+    class CharGPT(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, d_model)
