@@ -40,7 +40,7 @@ except ImportError:
     logger.warning("requests e beautifulsoup4 não instalados. web_scraper desativado.")
 
 try:
-    from pypdf import PdfReader  # type: ignore[import-not-found]
+    from pypdf import PdfReader
     _PDF_OK = True
 except ImportError:
     _PDF_OK = False
