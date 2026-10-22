@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.1.0",
+  "product": "WordlistXPL-Forge",
+  "focus": "Wordlist generation, harvesting, mutation, OCR extraction, deduplication",
+  "generated": "2026-10-16",
+  "phase": "G0-T03",
+  "components": [
+    {
+      "source_id": "pypi:colorama",
+      "name": "colorama",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/tartley/colorama",
+      "version_spec": ">=0.4.6",
+      "license": "BSD-3-Clause",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:tqdm",
+      "name": "tqdm",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/tqdm/tqdm",
+      "version_spec": ">=4.66.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:requests",
+      "name": "requests",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/psf/requests",
+      "version_spec": ">=2.31.0",
+      "license": "Apache-2.0",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:beautifulsoup4",
+      "name": "beautifulsoup4",
+      "category": "python_dep",
+      "upstream_url": "https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/",
+      "version_spec": ">=4.12.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:lxml",
+      "name": "lxml",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/lxml/lxml",
+      "version_spec": ">=4.9.0",
+      "license": "BSD-3-Clause",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:chardet",
+      "name": "chardet",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/chardet/chardet",
+      "version_spec": ">=5.2.0",
+      "license": "LGPL-2.1",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:unidecode",
+      "name": "unidecode",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/avian2/unidecode",
+      "version_spec": ">=1.3.6",
+      "license": "GPL-2.0",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:easyocr",
+      "name": "easyocr",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/JaidedAI/EasyOCR",
+      "version_spec": ">=1.7.0",
+      "license": "Apache-2.0",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:Pillow",
+      "name": "Pillow (PIL)",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/python-pillow/Pillow",
+      "version_spec": ">=10.0.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:openpyxl",
+      "name": "openpyxl",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/theorchard/openpyxl",
+      "version_spec": ">=3.1.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:pdfplumber",
+      "name": "pdfplumber",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/jsvine/pdfplumber",
+      "version_spec": ">=0.10.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "pypi:python-docx",
+      "name": "python-docx",
+      "category": "python_dep",
+      "upstream_url": "https://github.com/python-openxml/python-docx",
+      "version_spec": ">=1.1.0",
+      "license": "MIT",
+      "integration_mode": "pip_install",
+      "modifications": "none",
+      "requires_sandbox": false
+    },
+    {
+      "source_id": "data:SecLists",
+      "name": "SecLists \u2014 wordlist collection",
+      "category": "data_reference",
+      "upstream_url": "https://github.com/danielmiessler/SecLists",
+      "license": "MIT",
+      "integration_mode": "data_reference",
+      "integration_location": "data/, generated/",
+      "modifications": "subsets curated and filtered; not bundled; downloaded at runtime via update_wordlists.py",
+      "requires_sandbox": false,
+      "security_risk": "LOW"
+    },
+    {
+      "source_id": "data:CrackStation",
+      "name": "CrackStation wordlist",
+      "category": "data_reference",
+      "upstream_url": "https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm",
+      "license": "CC0/public domain",
+      "integration_mode": "data_reference",
+      "integration_location": "data/",
+      "modifications": "not bundled; referenced in update_wordlists.py",
+      "requires_sandbox": false,
+      "security_risk": "LOW"
+    }
+  ]
+}
