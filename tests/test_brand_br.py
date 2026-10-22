@@ -118,19 +118,18 @@ class TestGenerateBrandBr:
         assert len(results) <= 100
 
     def test_max_results_zero_is_unlimited(self) -> None:
-        limited = list(generate_brand_br(max_results=50))
+        list(generate_brand_br(max_results=50))
         unlimited = list(generate_brand_br(max_results=0, categories=["telecom"]))
         assert len(unlimited) > 50
 
     def test_category_filtering(self) -> None:
         results = list(generate_brand_br(categories=["telecom"], max_results=500))
-        # All base brands should come from telecom
+        # Collect stripped base forms for sanity check
         telecom_set = set(_TELECOM)
-        for r in results:
-            base = r.lower().rstrip("!@#*.0123456789")
-            # After stripping suffixes the residual should relate to a telecom brand
-            # or be a leet variant; just verify at least one telecom name appears
-        # Simpler check: raw brand names should be present
+        bases = {r.lower().rstrip("!@#*.0123456789") for r in results}
+        # At least one raw telecom brand must appear among the base forms
+        assert bases & telecom_set, "No telecom brand base found in results"
+        # Raw brand names should also be present
         assert any(brand in results for brand in _TELECOM)
 
     def test_casing_variants(self) -> None:

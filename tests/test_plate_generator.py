@@ -20,7 +20,6 @@ from wlf_modules.plate_generator import (
     sanitize_plate,
 )
 
-
 # ── Sanitization ─────────────────────────────────────────────────────────────
 
 class TestSanitizePlate:

@@ -1,11 +1,9 @@
 """Tests for generate_city_br in br_deep_engine."""
 from __future__ import annotations
 
-import pytest
-
 from wlf_modules.br_deep_engine import (
-    _CAPITAL_UF,
     _CAPITAIS_BR,
+    _CAPITAL_UF,
     _CIDADES_TOP100,
     generate_city_br,
 )
