@@ -2274,6 +2274,20 @@ def interactive_profile(
                 profile["church_name"]  = _ask(t("church.name"))
                 profile["church_group"] = _ask(t("church.group"))
 
+    # -- Vehicle plates -------------------------------------------------------
+    print(f"\n{t('section.vehicles')}")
+    print(t("vehicles.hint"))
+    profile["vehicle_plates"] = []
+    if _yes(_ask(t("vehicles.add"))):
+        while True:
+            raw = _ask(t("vehicles.plate"))
+            if not raw:
+                break
+            sanitized = re.sub(r"[^A-Za-z0-9]", "", raw).upper()
+            if sanitized:
+                profile["vehicle_plates"].append(sanitized)
+                print(f"  + {sanitized}")
+
     # ── Keywords & special dates ──────────────────────────────
     print(f"\n{t('section.keywords')}")
     profile["keywords"] = _ask_multi(t("keywords.list"), multi_hint)
@@ -2858,6 +2872,19 @@ def generate_from_profile(
     rel_custom = (profile.get("religion_custom") or "").strip()
     if rel_custom:
         add_words(rel_custom)
+
+    # Vehicle plate tokens
+    for plate in profile.get("vehicle_plates", []):
+        plate_up = plate.upper()
+        plate_lo = plate.lower()
+        for tok in [plate_up, plate_lo]:
+            if tok and tok not in word_tokens:
+                word_tokens.append(tok)
+        letters_only = re.sub(r"[0-9]", "", plate_up)
+        digits_only = re.sub(r"[A-Za-z]", "", plate_up)
+        for part in [letters_only.lower(), digits_only, plate_up[::-1], plate_lo[::-1]]:
+            if part and part not in word_tokens:
+                word_tokens.append(part)
 
     # Special dates
     if _eng(2):

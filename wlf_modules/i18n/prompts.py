@@ -321,6 +321,28 @@ _CATALOG: dict[str, dict[str, str]] = {
         "pt-pt": "Nome do grupo / célula / ministério (ou ignorar)", "es": "Nombre del grupo / célula / ministerio (u omitir)",
     },
 
+    # ── Vehicle plates ────────────────────────────────────────────────────────
+    "section.vehicles": {
+        "en": "=== Vehicle Plates ===", "pt-br": "=== Placas de Veiculos ===",
+        "pt-pt": "=== Matriculas de Veiculos ===", "es": "=== Placas de Vehiculos ===",
+    },
+    "vehicles.add": {
+        "en": "Add vehicle license plates? [y/N]", "pt-br": "Adicionar placas de veiculos? [s/N]",
+        "pt-pt": "Adicionar matriculas de veiculos? [s/N]", "es": "Agregar placas de vehiculos? [s/N]",
+    },
+    "vehicles.plate": {
+        "en": "Enter plate (letters+digits only, empty to stop)",
+        "pt-br": "Digite a placa (letras+digitos, vazio para parar)",
+        "pt-pt": "Introduza a matricula (letras+digitos, vazio para parar)",
+        "es": "Ingrese la placa (letras+digitos, vacio para parar)",
+    },
+    "vehicles.hint": {
+        "en": "  Separators (-/._) will be stripped automatically.",
+        "pt-br": "  Separadores (-/._) serao removidos automaticamente.",
+        "pt-pt": "  Separadores (-/._) serao removidos automaticamente.",
+        "es": "  Separadores (-/._) se eliminaran automaticamente.",
+    },
+
     # ── Keywords ──────────────────────────────────────────────────────────────
     "keywords.list": {
         "en": "Keywords / topics of interest (hobbies, teams, idols, games...)", "pt-br": "Palavras-chave / interesses (hobbies, times, ídolos, jogos...)",
