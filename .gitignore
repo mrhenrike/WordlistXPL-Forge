@@ -91,7 +91,7 @@ tests/*
 !tests/test_cogpie_training.py
 !tests/test_w14_modules.py
 !tests/test_lyrics_engine.py
-!tests/test_username_gen_engine.py
+!tests/test_username_gen.py
 !tests/test_default_creds_engine.py
 !tests/test_diceware_engine.py
 
