@@ -166,7 +166,7 @@ def _build_model(torch: Any, vocab_size: int, cfg: dict[str, Any]) -> Any:
     """Construct the character-level LSTM model."""
     import torch.nn as nn
 
-    class CharLSTM(nn.Module):  # type: ignore[misc]
+    class CharLSTM(nn.Module):
         def __init__(self, vocab: Any, embed: Any, hidden: Any, layers: Any) -> None:
             super().__init__()
             self.embed = nn.Embedding(vocab, embed, padding_idx=0)

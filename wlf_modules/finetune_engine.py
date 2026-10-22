@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import random
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +47,9 @@ def _to_completion(instruction: str, inp: str, output: str) -> dict[str, str]:
     return {"prompt": prompt, "completion": output}
 
 
-_FORMAT_MAP: dict[str, Any] = {
+_Formatter = Callable[[str, str, str], dict[str, str]]
+
+_FORMAT_MAP: dict[str, _Formatter] = {
     "alpaca": _to_alpaca,
     "sharegpt": _to_sharegpt,
     "completion": _to_completion,
@@ -125,35 +127,35 @@ class FinetuneEngine:
         self.passwords = passwords
         self.fmt = fmt
         self.augment = augment
-        self.formatter = _FORMAT_MAP[fmt]
+        self.formatter: _Formatter = _FORMAT_MAP[fmt]
         self._rng = random.Random(seed)
 
-    def _make_completion_sample(self, pw: str) -> dict[str, Any]:
+    def _make_completion_sample(self, pw: str) -> dict[str, str]:
         """Create a prefix-completion training sample."""
         hint = _prefix_hint(pw)
         instruction = self._rng.choice(_INSTRUCTIONS_COMPLETE)
         return self.formatter(instruction, hint, pw)
 
-    def _make_mask_sample(self, pw: str) -> dict[str, Any]:
+    def _make_mask_sample(self, pw: str) -> dict[str, str]:
         """Create a masked-completion training sample."""
         masked = _mask_partial(pw)
         instruction = self._rng.choice(_INSTRUCTIONS_COMPLETE)
         return self.formatter(instruction, masked, pw)
 
-    def _make_style_sample(self, pw: str) -> dict[str, Any]:
+    def _make_style_sample(self, pw: str) -> dict[str, str]:
         """Create a style-transfer training sample (pattern → password)."""
         pattern = _extract_pattern(pw)
         tmpl = self._rng.choice(_INSTRUCTIONS_STYLE)
         instruction = tmpl.format(pattern=pattern)
         return self.formatter(instruction, "", pw)
 
-    def _make_similar_sample(self, pw: str) -> dict[str, Any]:
+    def _make_similar_sample(self, pw: str) -> dict[str, str]:
         """Create a similarity sample using another password as reference."""
         ref = self._rng.choice(self.passwords)
         instruction = self._rng.choice(_INSTRUCTIONS_SIMILAR)
         return self.formatter(instruction, ref, pw)
 
-    def generate(self, max_samples: int = 0) -> Generator[dict[str, Any], None, None]:
+    def generate(self, max_samples: int = 0) -> Generator[dict[str, str], None, None]:
         """Yield training samples from the password list.
 
         Each password produces 1 base sample + up to 3 augmented variants.

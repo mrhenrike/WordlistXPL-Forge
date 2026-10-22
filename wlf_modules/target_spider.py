@@ -89,7 +89,7 @@ def _get_links(html: str, base_url: str) -> list[str]:
     base_parsed = urllib.parse.urlparse(base_url)
 
     for a in soup.find_all("a", href=True):
-        href = a["href"].strip()
+        href = str(a["href"]).strip()
         if href.startswith("#") or href.startswith("mailto:"):
             continue
         if href.startswith("/"):

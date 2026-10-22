@@ -175,7 +175,7 @@ class CUDABackend(ComputeBackend):
     def is_available(self) -> bool:
         try:
             import torch
-            return torch.cuda.is_available()  # type: ignore[no-any-return]
+            return torch.cuda.is_available()
         except ImportError:
             return False
 
@@ -198,7 +198,7 @@ class CUDABackend(ComputeBackend):
             a_t    = torch.tensor(a, dtype=torch.float32, device=device)
             B_t    = torch.tensor(B, dtype=torch.float32, device=device)
             result = (B_t @ a_t).cpu().tolist()
-            return result  # type: ignore[no-any-return]
+            return result
         except Exception as exc:
             logger.warning("CUDA dot_product failed (%s), falling back to CPU", exc)
             return CPUBackend().dot_product_batch(a, B)
@@ -256,7 +256,7 @@ class ROCmBackend(ComputeBackend):
             device = torch.device("cuda")
             a_t    = torch.tensor(a, dtype=torch.float32, device=device)
             B_t    = torch.tensor(B, dtype=torch.float32, device=device)
-            return (B_t @ a_t).cpu().tolist()  # type: ignore[no-any-return]
+            return (B_t @ a_t).cpu().tolist()
         except Exception as exc:
             logger.warning("ROCm dot_product failed (%s), CPU fallback", exc)
             return CPUBackend().dot_product_batch(a, B)
@@ -292,7 +292,7 @@ class MPSBackend(ComputeBackend):
             device = torch.device("mps")
             a_t    = torch.tensor(a, dtype=torch.float32, device=device)
             B_t    = torch.tensor(B, dtype=torch.float32, device=device)
-            return (B_t @ a_t).cpu().tolist()  # type: ignore[no-any-return]
+            return (B_t @ a_t).cpu().tolist()
         except Exception as exc:
             logger.warning("MPS dot_product failed (%s), CPU fallback", exc)
             return CPUBackend().dot_product_batch(a, B)

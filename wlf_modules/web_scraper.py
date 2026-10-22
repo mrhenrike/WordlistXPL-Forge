@@ -40,7 +40,7 @@ except ImportError:
     logger.warning("requests e beautifulsoup4 não instalados. web_scraper desativado.")
 
 try:
-    from pypdf import PdfReader
+    from pypdf import PdfReader  # type: ignore[import-not-found]
     _PDF_OK = True
 except ImportError:
     _PDF_OK = False
@@ -223,7 +223,7 @@ class WebScraper:
             inline_parts: list[str] = []
             if self.include_js:
                 for tag in soup.find_all("script"):
-                    src = (tag.get("src") or "").strip()
+                    src = str(tag.get("src") or "").strip()
                     body = tag.string or tag.get_text() or ""
                     if body.strip() and not src:
                         inline_parts.append(body)
@@ -315,8 +315,8 @@ class WebScraper:
         soup = BeautifulSoup(html, "lxml")
         values: set[str] = set()
         for meta in soup.find_all("meta"):
-            name = (meta.get("name") or meta.get("property") or "").lower()
-            content = meta.get("content") or ""
+            name = str(meta.get("name") or meta.get("property") or "").lower()
+            content = str(meta.get("content") or "")
             if name in _META_FIELDS and content:
                 for match in _WORD_RE.finditer(content):
                     word = match.group()
@@ -361,8 +361,8 @@ class WebScraper:
             tags_attrs.append(("link", "href"))
 
         for tag_name, attr in tags_attrs:
-            for el in soup.find_all(tag_name, **{attr: True}):
-                href = el[attr].strip()
+            for el in soup.find_all(tag_name, attrs={attr: True}):
+                href = str(el[attr]).strip()
                 full = urljoin(current_url, href)
                 clean = full.split("#")[0].split("?")[0]
                 if self._is_allowed_domain(clean):

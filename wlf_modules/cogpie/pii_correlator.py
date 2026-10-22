@@ -200,9 +200,9 @@ class CorpusStats:
     date_types: dict[str, int] = field(default_factory=lambda: {
         "full_date": 0, "short_date": 0, "year_4": 0, "year_2": 0,
     })
-    top_names: Counter = field(default_factory=Counter)
-    top_years: Counter = field(default_factory=Counter)
-    length_distribution: Counter = field(default_factory=Counter)
+    top_names: Counter[str] = field(default_factory=Counter)
+    top_years: Counter[str] = field(default_factory=Counter)
+    length_distribution: Counter[int] = field(default_factory=Counter)
 
     def as_dict(self) -> dict[str, Any]:
         return {

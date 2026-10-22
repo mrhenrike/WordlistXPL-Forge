@@ -52,7 +52,7 @@ def _build_denoising_net(d_model: int = 256, n_layers: int = 4, max_len: int = 2
     _require_torch()
     import torch.nn as nn
 
-    class DenoisingNet(nn.Module):  # type: ignore[misc]
+    class DenoisingNet(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_TOTAL_VOCAB, d_model)

@@ -61,7 +61,7 @@ def _build_generator(latent_dim: int = 128, hidden_dim: int = 256, seq_len: int 
     torch = _require_torch()
     import torch.nn as nn
 
-    class Generator(nn.Module):  # type: ignore[misc]
+    class Generator(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.fc = nn.Linear(latent_dim, hidden_dim)
@@ -81,7 +81,7 @@ def _build_discriminator(hidden_dim: int = 256) -> Any:
     torch = _require_torch()
     import torch.nn as nn
 
-    class Discriminator(nn.Module):  # type: ignore[misc]
+    class Discriminator(nn.Module):
         def __init__(self) -> None:
             super().__init__()
             self.emb = nn.Embedding(_VOCAB_SIZE, 64)

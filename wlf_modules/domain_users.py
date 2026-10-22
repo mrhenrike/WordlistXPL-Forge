@@ -30,6 +30,7 @@ import logging
 import os
 import re
 import time
+import urllib.parse
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
@@ -505,7 +506,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext == ".pdf":
         try:
-            import pdfplumber
+            import pdfplumber  # type: ignore[import-not-found]
             with pdfplumber.open(filepath) as pdf:
                 for page in pdf.pages:
                     text = page.extract_text() or ""
@@ -635,7 +636,7 @@ def search_names_google_dorks(
         if len(collected) >= max_results:
             break
         try:
-            url = f"https://www.google.com/search?q={requests.utils.quote(query)}&num=20&hl=pt-BR"
+            url = f"https://www.google.com/search?q={urllib.parse.quote(query)}&num=20&hl=pt-BR"
             resp = requests.get(url, headers=headers, timeout=10)
             if resp.status_code == 429:
                 logger.warning("Google rate-limited. Try again later or use --file.")

@@ -153,13 +153,13 @@ def _hash_one(pw: str, algo: str) -> str | None:
             import bcrypt
         except ImportError:
             return None
-        return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("ascii")  # type: ignore[no-any-return]
+        return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("ascii")
     if a in ("argon2", "argon2id"):
         try:
             from argon2 import PasswordHasher
         except ImportError:
             return None
-        return PasswordHasher().hash(pw)  # type: ignore[no-any-return]
+        return PasswordHasher().hash(pw)
     if a == "pbkdf2":
         salt = b"wlf-static-salt"  # test corpora only; not for production storage
         dk = hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), salt, 100_000)

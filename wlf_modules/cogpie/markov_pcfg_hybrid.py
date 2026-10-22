@@ -27,6 +27,7 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter, defaultdict
+from typing import Any
 
 
 class _MiniMarkov:
@@ -35,7 +36,7 @@ class _MiniMarkov:
     def __init__(self, order: int = 3, smoothing: float = 0.01) -> None:
         self.order = order
         self.smoothing = smoothing
-        self._ngrams: dict[int, dict[str, Counter]] = defaultdict(
+        self._ngrams: dict[int, dict[str, Counter[str]]] = defaultdict(
             lambda: defaultdict(Counter)
         )
         self._total_by_pos: dict[int, dict[str, int]] = defaultdict(
@@ -44,7 +45,7 @@ class _MiniMarkov:
         self._alphabet: set[str] = set()
         self._trained = 0
 
-    def __getstate__(self) -> dict:
+    def __getstate__(self) -> dict[str, Any]:
         return {
             "order": self.order,
             "smoothing": self.smoothing,
@@ -54,7 +55,7 @@ class _MiniMarkov:
             "trained": self._trained,
         }
 
-    def __setstate__(self, state: dict) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self.order = state["order"]
         self.smoothing = state["smoothing"]
         self._ngrams = defaultdict(lambda: defaultdict(Counter))
@@ -105,8 +106,8 @@ class _MiniPCFG:
     """Lightweight PCFG structural model."""
 
     def __init__(self) -> None:
-        self._structure_counts: Counter = Counter()
-        self._terminal_counts: dict[str, Counter] = defaultdict(Counter)
+        self._structure_counts: Counter[str] = Counter()
+        self._terminal_counts: dict[str, Counter[str]] = defaultdict(Counter)
         self._total = 0
 
     @staticmethod
@@ -175,7 +176,7 @@ class HybridRanker:
         self.beta = beta
         self._markov = _MiniMarkov(order=markov_order)
         self._pcfg = _MiniPCFG()
-        self._freq_counts: Counter = Counter()
+        self._freq_counts: Counter[str] = Counter()
         self._freq_total: int = 0
 
     def train(self, password: str) -> None:
