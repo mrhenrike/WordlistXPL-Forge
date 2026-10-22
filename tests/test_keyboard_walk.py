@@ -13,11 +13,18 @@ from wlf_modules.keyboard_walk import (
 class TestListLayouts:
     """Tests for list_layouts()."""
 
-    def test_returns_both_layouts(self) -> None:
+    def test_returns_all_layouts(self) -> None:
         layouts = list_layouts()
         assert "qwerty" in layouts
         assert "abnt2" in layouts
-        assert len(layouts) == 2
+        assert "azerty" in layouts
+        assert "qwertz" in layouts
+        assert "dvorak" in layouts
+        assert "colemak" in layouts
+        assert "qwerty_latam" in layouts
+        assert "qwerty_pt" in layouts
+        assert "qwerty_it" in layouts
+        assert len(layouts) == 9
 
     def test_returns_sorted(self) -> None:
         layouts = list_layouts()
@@ -95,9 +102,13 @@ class TestGenerateKeyboardWalks:
         walks = set(generate_keyboard_walks(layout="abnt2", max_results=500))
         assert "çlkjhg" in walks
 
+    def test_dvorak_yields_results(self) -> None:
+        walks = list(generate_keyboard_walks(layout="dvorak", max_results=10))
+        assert len(walks) > 0
+
     def test_invalid_layout_raises(self) -> None:
         with pytest.raises(ValueError, match="Layout desconhecido"):
-            list(generate_keyboard_walks(layout="dvorak", max_results=10))
+            list(generate_keyboard_walks(layout="nonexistent_layout", max_results=10))
 
 
 class TestIsKeyboardWalk:
@@ -143,9 +154,86 @@ class TestIsKeyboardWalk:
         # cedilla adjacent to l, k, j, h, g on ABNT2
         assert is_keyboard_walk("çlkj", layout="abnt2") is True
 
+    def test_colemak_detection(self) -> None:
+        assert is_keyboard_walk("arst", layout="colemak") is True
+
     def test_invalid_layout_raises(self) -> None:
         with pytest.raises(ValueError, match="Layout desconhecido"):
-            is_keyboard_walk("qwerty", layout="colemak")
+            is_keyboard_walk("qwerty", layout="nonexistent_layout")
 
     def test_empty_string(self) -> None:
         assert is_keyboard_walk("") is False
+
+
+class TestNewLayouts:
+    """Tests for AZERTY, QWERTZ, DVORAK, COLEMAK, LATAM, PT, IT layouts."""
+
+    def test_azerty_adjacency(self) -> None:
+        assert is_keyboard_walk("azert", layout="azerty") is True
+        assert is_keyboard_walk("qsdfg", layout="azerty") is True
+
+    def test_azerty_generates(self) -> None:
+        walks = set(generate_keyboard_walks(layout="azerty", max_results=500))
+        assert len(walks) == 500
+        assert "azerty" in walks
+
+    def test_qwertz_adjacency(self) -> None:
+        assert is_keyboard_walk("qwert", layout="qwertz") is True
+        assert is_keyboard_walk("yxcvb", layout="qwertz") is True
+
+    def test_qwertz_generates(self) -> None:
+        walks = set(generate_keyboard_walks(layout="qwertz", max_results=500))
+        assert len(walks) == 500
+        assert "qwertz" in walks
+
+    def test_dvorak_adjacency(self) -> None:
+        assert is_keyboard_walk("aoeu", layout="dvorak") is True
+        assert is_keyboard_walk("htns", layout="dvorak") is True
+
+    def test_dvorak_generates(self) -> None:
+        walks = set(generate_keyboard_walks(layout="dvorak", max_results=500))
+        assert len(walks) == 500
+        assert "aoeui" in walks
+
+    def test_colemak_adjacency(self) -> None:
+        assert is_keyboard_walk("arst", layout="colemak") is True
+        assert is_keyboard_walk("dhne", layout="colemak") is True
+
+    def test_colemak_generates(self) -> None:
+        walks = set(generate_keyboard_walks(layout="colemak", max_results=500))
+        assert len(walks) == 500
+        assert "arst" in walks
+
+    def test_latam_adjacency(self) -> None:
+        assert is_keyboard_walk("qwer", layout="qwerty_latam") is True
+        assert is_keyboard_walk("asdf", layout="qwerty_latam") is True
+
+    def test_latam_generates(self) -> None:
+        walks = list(generate_keyboard_walks(layout="qwerty_latam", max_results=50))
+        assert len(walks) == 50
+
+    def test_pt_adjacency(self) -> None:
+        assert is_keyboard_walk("qwer", layout="qwerty_pt") is True
+        assert is_keyboard_walk("çlkj", layout="qwerty_pt") is True
+
+    def test_pt_generates(self) -> None:
+        walks = list(generate_keyboard_walks(layout="qwerty_pt", max_results=50))
+        assert len(walks) == 50
+
+    def test_it_adjacency(self) -> None:
+        assert is_keyboard_walk("qwer", layout="qwerty_it") is True
+        assert is_keyboard_walk("asdf", layout="qwerty_it") is True
+
+    def test_it_generates(self) -> None:
+        walks = list(generate_keyboard_walks(layout="qwerty_it", max_results=50))
+        assert len(walks) == 50
+
+    def test_no_duplicates_any_layout(self) -> None:
+        for layout in list_layouts():
+            walks = list(generate_keyboard_walks(layout=layout, max_results=200))
+            assert len(walks) == len(set(walks)), f"duplicates in {layout}"
+
+    def test_all_layouts_generate_at_least_100(self) -> None:
+        for layout in list_layouts():
+            walks = list(generate_keyboard_walks(layout=layout, max_results=100))
+            assert len(walks) == 100, f"{layout} generated only {len(walks)}"
