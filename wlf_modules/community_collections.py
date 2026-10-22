@@ -519,7 +519,7 @@ class CommunityCollections:
         out = Path(output_file)
         out.parent.mkdir(parents=True, exist_ok=True)
 
-        seen: set[str] = set() if deduplicate else None  # type: ignore[assignment]
+        seen: set[str] = set() if deduplicate else None
         line_count = 0
 
         with open(out, "w", encoding="utf-8") as outf:

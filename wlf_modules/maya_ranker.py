@@ -233,13 +233,13 @@ def _build_torch_model(input_dim: int = 12, hidden: int = 32) -> object:
     class _MLP(nn.Module):  # type: ignore[misc, name-defined]
         def __init__(self) -> None:
             super().__init__()
-            self.net = nn.Sequential(  # type: ignore[union-attr]
-                nn.Linear(input_dim, hidden),  # type: ignore[union-attr]
-                nn.ReLU(),  # type: ignore[union-attr]
-                nn.Linear(hidden, 16),  # type: ignore[union-attr]
-                nn.ReLU(),  # type: ignore[union-attr]
-                nn.Linear(16, 1),  # type: ignore[union-attr]
-                nn.Sigmoid(),  # type: ignore[union-attr]
+            self.net = nn.Sequential(
+                nn.Linear(input_dim, hidden),
+                nn.ReLU(),
+                nn.Linear(hidden, 16),
+                nn.ReLU(),
+                nn.Linear(16, 1),
+                nn.Sigmoid(),
             )
 
         def forward(self, x: Any) -> Any:
@@ -264,8 +264,8 @@ def _torch_score_batch(words: list[str], device: str = "cpu") -> list[float]:
 
     features = [_extract_features(w) for w in words]
 
-    with torch.no_grad():  # type: ignore[union-attr]
-        x = torch.tensor(features, dtype=torch.float32, device=device)  # type: ignore[union-attr]
+    with torch.no_grad():
+        x = torch.tensor(features, dtype=torch.float32, device=device)
         scores = _session_model(x).cpu().tolist()  # type: ignore[operator]
 
     # Blend with fallback pattern score for untrained model
@@ -320,9 +320,9 @@ def train_session_model(
     # Determine device
     device = "cpu"
     if use_gpu:
-        if torch.cuda.is_available():  # type: ignore[union-attr]
+        if torch.cuda.is_available():
             device = "cuda"
-        elif hasattr(torch, "backends") and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
+        elif hasattr(torch, "backends") and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             device = "mps"
         else:
             logger.info("maya_ranker: GPU requested but not available, using CPU")
@@ -353,22 +353,22 @@ def train_session_model(
         hit = any(patterns[pid].match(w) for pid in high_weight_patterns if pid in patterns)
         labels.append(1.0 if hit else 0.0)
 
-    x = torch.tensor(features, dtype=torch.float32, device=device)  # type: ignore[union-attr]
-    y = torch.tensor(labels, dtype=torch.float32, device=device)  # type: ignore[union-attr]
+    x = torch.tensor(features, dtype=torch.float32, device=device)
+    y = torch.tensor(labels, dtype=torch.float32, device=device)
 
     model = _build_torch_model()
     model.to(device)  # type: ignore[attr-defined]
     model.train()  # type: ignore[attr-defined]
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)  # type: ignore[union-attr, attr-defined]
-    criterion = nn.BCELoss()  # type: ignore[union-attr]
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)  # type: ignore[attr-defined]
+    criterion = nn.BCELoss()
 
     batch_size = 512
     n_epochs = 5
     n = len(words)
 
     for epoch in range(n_epochs):
-        perm = torch.randperm(n, device=device)  # type: ignore[union-attr]
+        perm = torch.randperm(n, device=device)
         epoch_loss = 0.0
         batches = 0
         for start in range(0, n, batch_size):
@@ -463,9 +463,9 @@ def score_candidates(
         device = "cpu"
         if use_gpu:
             torch = _torch_mod
-            if torch.cuda.is_available():  # type: ignore[union-attr]
+            if torch.cuda.is_available():
                 device = "cuda"
-            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
                 device = "mps"
 
         for batch_start in range(0, len(words), batch_size):
@@ -554,9 +554,9 @@ def rank_wordlist(
         actual_backend = "torch"
         if use_gpu:
             torch = _torch_mod
-            if torch.cuda.is_available():  # type: ignore[union-attr]
+            if torch.cuda.is_available():
                 device_used = "cuda"
-            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore[union-attr]
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
                 device_used = "mps"
 
     all_scored: list[ScoredCandidate] = []

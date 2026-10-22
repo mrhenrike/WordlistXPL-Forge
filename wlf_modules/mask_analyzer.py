@@ -154,7 +154,7 @@ class PositionHeatmap:
             CHARSET_SPECIAL: self.special,
             CHARSET_BYTE: self.byte,
         }
-        return max(counts, key=counts.get)  # type: ignore[arg-type]
+        return max(counts, key=counts.get)
 
 
 @dataclass

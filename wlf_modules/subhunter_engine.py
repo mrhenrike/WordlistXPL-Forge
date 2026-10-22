@@ -247,7 +247,7 @@ class SubHunterEngine:
             return self._binary
 
         if self.is_built:
-            return self._binary  # type: ignore[return-value]
+            return self._binary
 
         return self.build()
 

@@ -174,7 +174,7 @@ class VAEPasswordEngine:
                 return torch.device("cuda")  # type: ignore[no-any-return]
             return torch.device("cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None  # type: ignore[return-value]
+            return None
 
     def encode(self, password: str) -> Generator[Any, None, None]:
         """Encode a password → (mu, logvar) tensors in latent space."""

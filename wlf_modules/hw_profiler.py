@@ -72,7 +72,7 @@ class HWProfile:
         return max(1, min(self.cpu_threads, 16))
 
     def one_liner(self) -> str:
-        gpu_info = f" | GPU: {self.primary_gpu().one_liner()}" if self.has_gpu() else " | No GPU"  # type: ignore[union-attr]
+        gpu_info = f" | GPU: {self.primary_gpu().one_liner()}" if self.has_gpu() else " | No GPU"
         return (
             f"CPU: {self.cpu_model} ({self.cpu_cores}c/{self.cpu_threads}t) "
             f"| RAM: {self.ram_total_mb}MB{gpu_info} "

@@ -285,7 +285,7 @@ def apply_rule(word: str, rule: str) -> str | None:
     ops = parse_rule(rule)
     w: str | None = word
     for func, args in ops:
-        w = _apply_op(w, func, args)  # type: ignore[arg-type]
+        w = _apply_op(w, func, args)
         if w is None:
             return None
     return w
@@ -348,7 +348,7 @@ def apply_rules_stream(
         for ops in compiled:
             w: str | None = word
             for func, args in ops:
-                w = _apply_op(w, func, args)  # type: ignore[arg-type]
+                w = _apply_op(w, func, args)
                 if w is None:
                     break
             if w is None:
