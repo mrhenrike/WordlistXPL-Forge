@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wordlistxpl"
-version = "2.0.0"
+version = "2.1.0"
 description = "WordlistXPL-Forge. Wordlist generation toolkit for authorized pentest and red team operations. Member of the XPL-Forge suite."
 readme = "README.md"
 license = { text = "BSD-3-Clause" }
