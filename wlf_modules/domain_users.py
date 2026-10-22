@@ -506,7 +506,7 @@ def collect_names_from_file(filepath: str) -> list[str]:
 
     elif ext == ".pdf":
         try:
-            import pdfplumber  # type: ignore[import-not-found]
+            import pdfplumber
             with pdfplumber.open(filepath) as pdf:
                 for page in pdf.pages:
                     text = page.extract_text() or ""
