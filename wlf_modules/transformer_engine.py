@@ -129,7 +129,7 @@ def _parse_mask_pattern(pattern: str) -> list[set[int] | None]:
             idx = _CHAR_TO_IDX.get(c)
             allowed.append({idx} if idx else set(_CHAR_TO_IDX.values()))
             i += 1
-    return allowed  # type: ignore[return-value]
+    return allowed
 
 
 def _sample(logits: Any, temperature: float, allowed_indices: set[int] | None = None) -> Any:
@@ -189,7 +189,7 @@ class TransformerPasswordEngine:
             torch = _require_torch()
             return torch.device("cuda" if torch.cuda.is_available() else "cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None  # type: ignore[return-value]
+            return None
 
     def load(self, path: str | None = None) -> bool:
         path = path or self.model_path

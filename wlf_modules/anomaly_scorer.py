@@ -173,8 +173,8 @@ def _path_length(node: _IsoNode, x: list[float], current_depth: int) -> float:
         return current_depth + c
 
     if x[node.feature_idx] < node.split_value:
-        return _path_length(node.left, x, current_depth + 1)  # type: ignore[arg-type]
-    return _path_length(node.right, x, current_depth + 1)  # type: ignore[arg-type]
+        return _path_length(node.left, x, current_depth + 1)
+    return _path_length(node.right, x, current_depth + 1)
 
 
 def _iso_forest_scores(

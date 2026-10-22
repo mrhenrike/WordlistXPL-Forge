@@ -448,7 +448,7 @@ class TrickestWordlists:
         out_path = Path(output_file)
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
-        lines: set[str] = set() if deduplicate else None  # type: ignore[assignment]
+        lines: set[str] = set() if deduplicate else None
         ordered: list[str] = [] if not deduplicate else []
 
         for name in names:

@@ -481,7 +481,7 @@ def load_templates_from_yaml(filepath: str) -> list[str]:
     else:
         raw = []
 
-    for t in raw:  # type: ignore[union-attr]
+    for t in raw:
         if isinstance(t, str):
             templates.append(t)
 

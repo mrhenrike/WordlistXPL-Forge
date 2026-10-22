@@ -185,7 +185,7 @@ class GANPasswordEngine:
                     return torch.device("cuda")  # type: ignore[no-any-return]
             return torch.device("cpu")  # type: ignore[no-any-return]
         except RuntimeError:
-            return None  # type: ignore[return-value]
+            return None
 
     def load(self, path: str | None = None) -> bool:
         path = path or self.model_path

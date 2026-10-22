@@ -83,7 +83,7 @@ class DateProfile:
 
     def _resolve_age_window(self) -> None:
         """Deriva janela de ano de nascimento a partir da idade."""
-        base = _CURRENT_YEAR - self.age  # type: ignore[operator]
+        base = _CURRENT_YEAR - self.age
         # pessoa com X anos pode ter nascido em base ou base-1
         self.year_min = base - 1
         self.year_max = base
@@ -409,16 +409,16 @@ def build_date_tokens(dp: DateProfile, locale: str | None = None) -> list[str]:
         idx = dp.sign_index
         # nome principal no locale ativo
         names = get_zodiac_names(active_locale)
-        if 0 <= idx < len(names):  # type: ignore[operator]
-            add(names[idx])  # type: ignore[index]
+        if 0 <= idx < len(names):
+            add(names[idx])
         # variações/aliases no locale ativo
-        for alt in get_zodiac_alts(active_locale, idx):  # type: ignore[arg-type]
+        for alt in get_zodiac_alts(active_locale, idx):
             add(alt)
         # elemento e regente
-        el = get_element_for_sign(idx, active_locale)  # type: ignore[arg-type]
+        el = get_element_for_sign(idx, active_locale)
         if el:
             add(el)
-        pl = get_planet_for_sign(idx, active_locale)  # type: ignore[arg-type]
+        pl = get_planet_for_sign(idx, active_locale)
         if pl:
             add(pl)
 

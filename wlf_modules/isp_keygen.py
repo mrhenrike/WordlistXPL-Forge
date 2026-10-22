@@ -120,7 +120,8 @@ def list_isps() -> list[str]:
 def get_isp_info(isp: str) -> dict[str, Any] | None:
     """Return pattern info for a specific ISP."""
     patterns = _load_isp_patterns()
-    return patterns.get(isp)
+    result: dict[str, Any] | None = patterns.get(isp)
+    return result
 
 
 def estimate_keyspace(

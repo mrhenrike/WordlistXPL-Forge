@@ -121,7 +121,7 @@ def discover(plugin_dir: Path | None = None, validate: bool = True) -> list[str]
                 continue
             mod = importlib.util.module_from_spec(spec)
             sys.modules[spec.name] = mod
-            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+            spec.loader.exec_module(mod)
             loaded.append(p.stem)
             logger.info("Plugin loaded: %s", p)
         except Exception as exc:
@@ -145,7 +145,7 @@ def discover_packages(plugin_dir: Path | None = None) -> list[str]:
                     continue
                 mod = importlib.util.module_from_spec(spec)
                 sys.modules[spec.name] = mod
-                spec.loader.exec_module(mod)  # type: ignore[union-attr]
+                spec.loader.exec_module(mod)
                 loaded.append(p.name)
             except Exception as exc:
                 logger.warning("Plugin package error %s: %s", p, exc)

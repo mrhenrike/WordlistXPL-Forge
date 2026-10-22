@@ -272,7 +272,7 @@ class PBMPFull:
     def select_strategy(self) -> tuple[str, dict[str, float]]:
         """Select the best strategy and return (name, weight_dict)."""
         weights = self.model.predict(self._context_feat, self.history, self.behavior)
-        best = max(weights, key=weights.get)  # type: ignore[arg-type]
+        best = max(weights, key=weights.get)
         return best, weights
 
     def record_batch(
