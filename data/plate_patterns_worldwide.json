@@ -1,0 +1,1698 @@
+{
+  "version": "1.0.0",
+  "total_countries": 75,
+  "description": "License plate patterns for password generation and PII analysis. Each format includes a regex pattern, charset breakdown, and example.",
+  "countries": [
+    {
+      "code": "BR",
+      "name": "Brazil",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Legacy format (3 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "legacy",
+          "notes": "Used until 2018, still valid on older vehicles"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9][A-Z][0-9]{2}",
+          "description": "Mercosul format (3 letters + 1 digit + 1 letter + 2 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1D23",
+          "era": "current",
+          "notes": "Mercosul standard since 2018. 4th char replaced by letter."
+        }
+      ]
+    },
+    {
+      "code": "AR",
+      "name": "Argentina",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Legacy 6-char format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "legacy",
+          "notes": "Used 1995-2016"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Mercosul format (2 letters + 3 digits + 2 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "Mercosul standard since 2016"
+        }
+      ]
+    },
+    {
+      "code": "CL",
+      "name": "Chile",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}",
+          "description": "Legacy format (2 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "legacy",
+          "notes": "Older series"
+        },
+        {
+          "pattern": "[A-Z]{4}[0-9]{2}",
+          "description": "Current format (4 letters + 2 digits)",
+          "charset": {"letters": "BCDFGHJKLPRSTVWXYZ", "digits": "0-9"},
+          "example": "BBCD12",
+          "era": "current",
+          "notes": "Since 2007. No vowels to avoid forming words."
+        }
+      ]
+    },
+    {
+      "code": "CO",
+      "name": "Colombia",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Private vehicles"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{2}[A-Z]",
+          "description": "Motorcycle format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC12D",
+          "era": "current",
+          "notes": "Motorcycles"
+        }
+      ]
+    },
+    {
+      "code": "PE",
+      "name": "Peru",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard private vehicles"
+        },
+        {
+          "pattern": "[A-Z][0-9][A-Z][0-9]{3}",
+          "description": "Newer format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "A1B234",
+          "era": "current",
+          "notes": "Newer series"
+        }
+      ]
+    },
+    {
+      "code": "UY",
+      "name": "Uruguay",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Legacy format (3 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "SBA1234",
+          "era": "legacy",
+          "notes": "Used until 2015"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Mercosul format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "Mercosul standard since 2015"
+        }
+      ]
+    },
+    {
+      "code": "PY",
+      "name": "Paraguay",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Legacy format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "legacy",
+          "notes": "Pre-Mercosul"
+        },
+        {
+          "pattern": "[A-Z]{4}[0-9]{3}",
+          "description": "Mercosul format (4 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABCD123",
+          "era": "current",
+          "notes": "Mercosul standard"
+        }
+      ]
+    },
+    {
+      "code": "BO",
+      "name": "Bolivia",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[0-9]{4}[A-Z]{3}",
+          "description": "Standard format (4 digits + 3 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1234ABC",
+          "era": "current",
+          "notes": "Digits first, then letters"
+        }
+      ]
+    },
+    {
+      "code": "EC",
+      "name": "Ecuador",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3,4}",
+          "description": "Standard format (3 letters + 3-4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Province code in first letter(s)"
+        }
+      ]
+    },
+    {
+      "code": "VE",
+      "name": "Venezuela",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "7-character format"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{2}[A-Z]",
+          "description": "Older 6-char format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC12D",
+          "era": "legacy",
+          "notes": "Previous series"
+        }
+      ]
+    },
+    {
+      "code": "GY",
+      "name": "Guyana",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2,3}[0-9]{4}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "current",
+          "notes": "2-3 letter prefix + 4 digits"
+        }
+      ]
+    },
+    {
+      "code": "SR",
+      "name": "Suriname",
+      "continent": "South America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4,5}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12345",
+          "era": "current",
+          "notes": "District prefix + digits"
+        }
+      ]
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "continent": "North America",
+      "formats": [
+        {
+          "pattern": "[A-Z0-9]{5,8}",
+          "description": "General US plate (varies by state)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Format varies widely by state. Common patterns: AAA-0000, 000-AAA, 0AAA000, AAA-000"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Common state format: 3 letters + 4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Used in CA, TX, NY, FL and many other states"
+        },
+        {
+          "pattern": "[0-9]{3}[A-Z]{3}",
+          "description": "Common state format: 3 digits + 3 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "123ABC",
+          "era": "current",
+          "notes": "Used in IL, OH and several other states"
+        },
+        {
+          "pattern": "[0-9][A-Z]{3}[0-9]{3}",
+          "description": "Format: 1 digit + 3 letters + 3 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1ABC234",
+          "era": "current",
+          "notes": "Used in CA newer series"
+        }
+      ]
+    },
+    {
+      "code": "CA",
+      "name": "Canada",
+      "continent": "North America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{4}[0-9]{3}",
+          "description": "Ontario format (4 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABCD123",
+          "era": "current",
+          "notes": "Ontario"
+        },
+        {
+          "pattern": "[0-9]{3}[A-Z]{3}",
+          "description": "Quebec format (3 digits + 3 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "123ABC",
+          "era": "current",
+          "notes": "Quebec"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9][A-Z][0-9]{2}",
+          "description": "British Columbia format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1C23",
+          "era": "current",
+          "notes": "British Columbia"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Alberta format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Alberta. Format varies by province."
+        }
+      ]
+    },
+    {
+      "code": "MX",
+      "name": "Mexico",
+      "continent": "North America",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3,4}",
+          "description": "Standard format (3 letters + 3-4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Varies by state; common 7-char format"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Newer digital format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "Some states adopted 7-char format"
+        }
+      ]
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,3}[A-Z]{1,2}[0-9]{1,4}",
+          "description": "Standard format: city code + letters + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "B AB 1234",
+          "era": "current",
+          "notes": "1-3 letter district code, then 1-2 letters, then 1-4 digits. Max 8 chars total (excl. spaces/hyphens). No umlauts."
+        },
+        {
+          "pattern": "[A-Z]{1,3}[A-Z]{1,2}[0-9]{1,4}E",
+          "description": "Electric vehicle plate",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "B AB 1234E",
+          "era": "current",
+          "notes": "Suffix E for electric vehicles"
+        }
+      ]
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "SIV format (2 letters + 3 digits + 2 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "Systeme d'Immatriculation des Vehicules since 2009. Excludes I, O, U."
+        },
+        {
+          "pattern": "[0-9]{3,4}[A-Z]{2,3}[0-9]{2}",
+          "description": "FNI legacy format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1234AB75",
+          "era": "legacy",
+          "notes": "Old departmental system, last 2 digits = department"
+        }
+      ]
+    },
+    {
+      "code": "GB",
+      "name": "United Kingdom",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[A-Z]{3}",
+          "description": "Current UK format (2 letters + 2 digits age + 3 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12CDE",
+          "era": "current",
+          "notes": "Since 2001. First 2 = region, digits = age identifier (change every 6 months)"
+        },
+        {
+          "pattern": "[A-Z][0-9]{1,3}[A-Z]{3}",
+          "description": "Prefix system (1983-2001)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "A123BCD",
+          "era": "legacy",
+          "notes": "First letter = year"
+        }
+      ]
+    },
+    {
+      "code": "ES",
+      "name": "Spain",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[0-9]{4}[A-Z]{3}",
+          "description": "Current format (4 digits + 3 letters)",
+          "charset": {"letters": "BCDFGHJKLMNPRSTVWXYZ", "digits": "0-9"},
+          "example": "1234BCD",
+          "era": "current",
+          "notes": "Since 2000. No vowels, no Q, no N-tilde."
+        },
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{4}[A-Z]{2}",
+          "description": "Provincial legacy format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "M1234AB",
+          "era": "legacy",
+          "notes": "Province prefix (M=Madrid, B=Barcelona, etc.)"
+        }
+      ]
+    },
+    {
+      "code": "IT",
+      "name": "Italy",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Current format (2 letters + 3 digits + 2 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123CD",
+          "era": "current",
+          "notes": "Since 1994. Sequential nationwide."
+        }
+      ]
+    },
+    {
+      "code": "PT",
+      "name": "Portugal",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[A-Z]{2}",
+          "description": "Current format (2 letters + 2 digits + 2 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12CD",
+          "era": "current",
+          "notes": "Since 2020. AA-00-AA format."
+        },
+        {
+          "pattern": "[0-9]{2}[A-Z]{2}[0-9]{2}",
+          "description": "Previous format (00-AA-00)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12AB34",
+          "era": "legacy",
+          "notes": "2005-2020"
+        },
+        {
+          "pattern": "[0-9]{2}[0-9]{2}[A-Z]{2}",
+          "description": "Older format (00-00-AA)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1234AB",
+          "era": "legacy",
+          "notes": "1992-2005"
+        }
+      ]
+    },
+    {
+      "code": "NL",
+      "name": "Netherlands",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z][0-9]{3}[A-Z]{2}",
+          "description": "Current sidecode 9 format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "A123BC",
+          "era": "current",
+          "notes": "Since 2021. Various sidecodes over the years."
+        },
+        {
+          "pattern": "[0-9]{2}[A-Z]{3}[0-9]",
+          "description": "Sidecode 8 format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12ABC3",
+          "era": "legacy",
+          "notes": "2015-2021"
+        },
+        {
+          "pattern": "[0-9][A-Z]{3}[0-9]{2}",
+          "description": "Sidecode 7 format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1ABC23",
+          "era": "legacy",
+          "notes": "2008-2015"
+        }
+      ]
+    },
+    {
+      "code": "BE",
+      "name": "Belgium",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[12][A-Z]{3}[0-9]{3}",
+          "description": "Current format (1/2 + 3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1ABC123",
+          "era": "current",
+          "notes": "Since 2010. Starts with 1 or 2."
+        }
+      ]
+    },
+    {
+      "code": "AT",
+      "name": "Austria",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{1,5}[A-Z]{1,3}",
+          "description": "Standard format: district + digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "W12345A",
+          "era": "current",
+          "notes": "District code (W=Wien, S=Salzburg, etc.) + up to 5 digits + up to 3 letters"
+        }
+      ]
+    },
+    {
+      "code": "CH",
+      "name": "Switzerland",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{1,6}",
+          "description": "Standard format: canton code + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ZH123456",
+          "era": "current",
+          "notes": "2-letter canton code (ZH, BE, LU, etc.) + 1-6 digits"
+        }
+      ]
+    },
+    {
+      "code": "PL",
+      "name": "Poland",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2,3}[A-Z0-9]{4,5}",
+          "description": "Standard format: region code + alphanumeric",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "WA12345",
+          "era": "current",
+          "notes": "2-3 letter voivodeship/city prefix + 4-5 alphanumeric chars. Total 7 chars."
+        }
+      ]
+    },
+    {
+      "code": "CZ",
+      "name": "Czech Republic",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[0-9][A-Z][0-9][0-9]{4}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1A12345",
+          "era": "current",
+          "notes": "Region digit + region letter + serial. 7 chars."
+        }
+      ]
+    },
+    {
+      "code": "SE",
+      "name": "Sweden",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{2}[A-Z0-9]",
+          "description": "Current format (3 letters + 2 digits + 1 letter or digit)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC12D",
+          "era": "current",
+          "notes": "Since 2019, last char can be letter. Previously ABC123."
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Legacy format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "legacy",
+          "notes": "Pre-2019"
+        }
+      ]
+    },
+    {
+      "code": "NO",
+      "name": "Norway",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{5}",
+          "description": "Standard format (2 letters + 5 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12345",
+          "era": "current",
+          "notes": "Standard private vehicles"
+        },
+        {
+          "pattern": "E[KLVB][0-9]{5}",
+          "description": "Electric vehicle format",
+          "charset": {"letters": "EKLVB", "digits": "0-9"},
+          "example": "EK12345",
+          "era": "current",
+          "notes": "EK/EL/EV/EB prefix for electric vehicles"
+        }
+      ]
+    },
+    {
+      "code": "DK",
+      "name": "Denmark",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{5}",
+          "description": "Standard format (2 letters + 5 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12345",
+          "era": "current",
+          "notes": "Since 2012"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[0-9]{3}",
+          "description": "Older format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12345",
+          "era": "legacy",
+          "notes": "Same pattern, different series ranges"
+        }
+      ]
+    },
+    {
+      "code": "FI",
+      "name": "Finland",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard Finnish plate. No I, O, Q."
+        }
+      ]
+    },
+    {
+      "code": "IE",
+      "name": "Ireland",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[0-9]{2,3}[A-Z]{1,2}[0-9]{1,6}",
+          "description": "Standard format: year + county + serial",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "231D12345",
+          "era": "current",
+          "notes": "Year (2 digits) + optional 1/2 for half-year + county code (1-2 letters) + serial. Since 2013 split-year system."
+        }
+      ]
+    },
+    {
+      "code": "RO",
+      "name": "Romania",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{2,3}[A-Z]{3}",
+          "description": "Standard format: county + digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "B123ABC",
+          "era": "current",
+          "notes": "B = Bucharest (1 letter), other counties 2 letters. 2-3 digits + 3 letters."
+        }
+      ]
+    },
+    {
+      "code": "HU",
+      "name": "Hungary",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Since 2022 newer series. Excludes some letters."
+        },
+        {
+          "pattern": "[A-Z]{4}[0-9]{3}",
+          "description": "Newer format (4 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABCD123",
+          "era": "current",
+          "notes": "Extended series"
+        }
+      ]
+    },
+    {
+      "code": "GR",
+      "name": "Greece",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Standard format (3 Greek-to-Latin letters + 4 digits)",
+          "charset": {"letters": "ABEZHIKMNOPTYX", "digits": "0-9"},
+          "example": "ABE1234",
+          "era": "current",
+          "notes": "Only letters that exist in both Greek and Latin alphabets"
+        }
+      ]
+    },
+    {
+      "code": "BG",
+      "name": "Bulgaria",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{4}[A-Z]{2}",
+          "description": "Standard format: region + 4 digits + 2 letters",
+          "charset": {"letters": "ABEKMHOPTCYX", "digits": "0-9"},
+          "example": "A1234BX",
+          "era": "current",
+          "notes": "Letters common to Cyrillic and Latin. Region prefix."
+        }
+      ]
+    },
+    {
+      "code": "HR",
+      "name": "Croatia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3,4}[A-Z]{1,2}",
+          "description": "Standard format: city + digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ZG1234AB",
+          "era": "current",
+          "notes": "ZG=Zagreb, ST=Split, RI=Rijeka, etc."
+        }
+      ]
+    },
+    {
+      "code": "SK",
+      "name": "Slovakia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Standard format: district + 3 digits + 2 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "BA123AB",
+          "era": "current",
+          "notes": "BA=Bratislava, KE=Kosice, etc."
+        }
+      ]
+    },
+    {
+      "code": "SI",
+      "name": "Slovenia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[A-Z0-9]{2}[0-9][A-Z0-9]{2}",
+          "description": "Standard format: region + alphanumeric mix",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "LJ12A34",
+          "era": "current",
+          "notes": "LJ=Ljubljana, MB=Maribor, etc."
+        }
+      ]
+    },
+    {
+      "code": "LT",
+      "name": "Lithuania",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard Lithuanian plate"
+        }
+      ]
+    },
+    {
+      "code": "LV",
+      "name": "Latvia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}",
+          "description": "Standard format (2 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "current",
+          "notes": "Standard Latvian plate"
+        }
+      ]
+    },
+    {
+      "code": "EE",
+      "name": "Estonia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[0-9]{3}[A-Z]{3}",
+          "description": "Standard format (3 digits + 3 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "123ABC",
+          "era": "current",
+          "notes": "Standard Estonian plate"
+        }
+      ]
+    },
+    {
+      "code": "JP",
+      "name": "Japan",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2,3}[A-Z][0-9]{2}[0-9]{2}",
+          "description": "Standard format: class + kana + 4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "500A1234",
+          "era": "current",
+          "notes": "Classification number (1-3 digits) + kana character (mapped to letter for gen) + 4-digit serial. Kana is Japanese; for password gen use A-Z proxy."
+        }
+      ]
+    },
+    {
+      "code": "KR",
+      "name": "South Korea",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2,3}[A-Z][0-9]{4}",
+          "description": "New format: digits + Hangul + 4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12A3456",
+          "era": "current",
+          "notes": "2-3 digit prefix + Korean character (A-Z proxy for gen) + 4 digits. Since 2019."
+        },
+        {
+          "pattern": "[0-9]{2}[A-Z][0-9]{4}",
+          "description": "Legacy format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12A3456",
+          "era": "legacy",
+          "notes": "Pre-2019"
+        }
+      ]
+    },
+    {
+      "code": "CN",
+      "name": "China",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z][A-Z][A-Z0-9]{5}",
+          "description": "Standard format: province + city + 5 alphanumeric",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ACABC12",
+          "era": "current",
+          "notes": "First char = province (Chinese char, mapped to A-Z). Second = city letter. Then 5 alphanumeric."
+        },
+        {
+          "pattern": "[A-Z][A-Z][A-Z0-9]{5}[DF]",
+          "description": "New energy vehicle plate (green plate)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ACABC12D",
+          "era": "current",
+          "notes": "8-char plate for electric/hybrid vehicles. D=electric, F=hybrid."
+        }
+      ]
+    },
+    {
+      "code": "IN",
+      "name": "India",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}",
+          "description": "Standard HSRP format: state + district + series + number",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "MH12AB1234",
+          "era": "current",
+          "notes": "State code (2 letters) + district (2 digits) + series (1-2 letters) + serial (4 digits). 9-10 chars."
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}",
+          "description": "BH series (nationwide)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "MH02BH1234",
+          "era": "current",
+          "notes": "Bharat (nationwide) series for transferable registration"
+        }
+      ]
+    },
+    {
+      "code": "TH",
+      "name": "Thailand",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{1,4}",
+          "description": "Standard format: 2 Thai chars (A-Z proxy) + 1-4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "current",
+          "notes": "Thai characters mapped to A-Z for gen. Bangkok plates differ from provincial."
+        }
+      ]
+    },
+    {
+      "code": "ID",
+      "name": "Indonesia",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{1,4}[A-Z]{1,3}",
+          "description": "Standard format: region + digits + suffix",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "B1234ABC",
+          "era": "current",
+          "notes": "B=Jakarta, D=Bandung, etc. 1-2 letter prefix + 1-4 digits + 1-3 letter suffix."
+        }
+      ]
+    },
+    {
+      "code": "MY",
+      "name": "Malaysia",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,3}[0-9]{1,4}",
+          "description": "Standard format: state code + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "WA1234",
+          "era": "current",
+          "notes": "State prefix (W=KL, J=Johor, etc.) + optional letter + 1-4 digits"
+        },
+        {
+          "pattern": "[A-Z]{1,3}[0-9]{1,4}[A-Z]",
+          "description": "Extended format with suffix",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "WA1234B",
+          "era": "current",
+          "notes": "With letter suffix for newer series"
+        }
+      ]
+    },
+    {
+      "code": "SG",
+      "name": "Singapore",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "S[A-Z]{2}[0-9]{1,4}[A-Z]",
+          "description": "Standard format: S + 2 letters + digits + checksum letter",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "SBA1234A",
+          "era": "current",
+          "notes": "Prefix S (private), then 2-letter series, then 1-4 digits, then check letter"
+        }
+      ]
+    },
+    {
+      "code": "PH",
+      "name": "Philippines",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Standard format (3 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Standard Philippine plate"
+        }
+      ]
+    },
+    {
+      "code": "VN",
+      "name": "Vietnam",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2}[A-Z][0-9]{4,5}",
+          "description": "Standard format: province + letter + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "30A12345",
+          "era": "current",
+          "notes": "Province code (2 digits) + series letter + 4-5 digit serial"
+        }
+      ]
+    },
+    {
+      "code": "TW",
+      "name": "Taiwan",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Current format (3 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Since 2014 for passenger cars"
+        },
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}",
+          "description": "Legacy format (2 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "legacy",
+          "notes": "Pre-2014"
+        }
+      ]
+    },
+    {
+      "code": "AE",
+      "name": "United Arab Emirates",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{1,2}[0-9]{1,5}",
+          "description": "Standard format: category letter(s) + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "A12345",
+          "era": "current",
+          "notes": "Format varies by emirate. Dubai: letter + 5 digits. Abu Dhabi: 1-2 digits + 1-5 digits."
+        }
+      ]
+    },
+    {
+      "code": "SA",
+      "name": "Saudi Arabia",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{4}",
+          "description": "Standard format: 3 Arabic letters (A-Z map) + 4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Arabic+Latin parallel script. Letters mapped to A-Z for generation."
+        }
+      ]
+    },
+    {
+      "code": "IL",
+      "name": "Israel",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2}[0-9]{3}[0-9]{2}",
+          "description": "Standard 7-digit format",
+          "charset": {"digits": "0-9"},
+          "example": "1234567",
+          "era": "legacy",
+          "notes": "All-numeric 7 digits (xx-xxx-xx)"
+        },
+        {
+          "pattern": "[0-9]{3}[0-9]{2}[0-9]{3}",
+          "description": "New 8-digit format",
+          "charset": {"digits": "0-9"},
+          "example": "12345678",
+          "era": "current",
+          "notes": "All-numeric 8 digits (xxx-xx-xxx). Since 2017."
+        }
+      ]
+    },
+    {
+      "code": "TR",
+      "name": "Turkey",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2}[A-Z]{1,3}[0-9]{2,4}",
+          "description": "Standard format: province + letters + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "34ABC1234",
+          "era": "current",
+          "notes": "Province code (01-81) + 1-3 letters + 2-4 digits. 34=Istanbul, 06=Ankara, 35=Izmir."
+        }
+      ]
+    },
+    {
+      "code": "AU",
+      "name": "Australia",
+      "continent": "Oceania",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "NSW/VIC standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "New South Wales, Victoria. Format varies by state."
+        },
+        {
+          "pattern": "[0-9][A-Z]{2}[0-9][A-Z]{2}",
+          "description": "NSW newer format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1AB2CD",
+          "era": "current",
+          "notes": "NSW newer series"
+        },
+        {
+          "pattern": "[0-9]{3}[A-Z]{3}",
+          "description": "Queensland format (3 digits + 3 letters)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "123ABC",
+          "era": "current",
+          "notes": "Queensland"
+        },
+        {
+          "pattern": "[A-Z]{1,3}[0-9]{3}",
+          "description": "SA/WA/TAS format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "S123ABC",
+          "era": "current",
+          "notes": "South Australia, Western Australia, Tasmania. Various formats."
+        }
+      ]
+    },
+    {
+      "code": "NZ",
+      "name": "New Zealand",
+      "continent": "Oceania",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard NZ plate. Excludes I, O, Q."
+        }
+      ]
+    },
+    {
+      "code": "ZA",
+      "name": "South Africa",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[A-Z]{2}GP",
+          "description": "Gauteng format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB12CDGP",
+          "era": "current",
+          "notes": "Province suffix: GP=Gauteng, WC=Western Cape, KZN=KwaZulu-Natal"
+        },
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}[A-Z]{2}",
+          "description": "General SA format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123GP",
+          "era": "current",
+          "notes": "3 letters + 3 digits + 2-letter province code"
+        }
+      ]
+    },
+    {
+      "code": "EG",
+      "name": "Egypt",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3,4}",
+          "description": "Standard format: 3 Arabic letters (A-Z proxy) + 3-4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Arabic script mapped to Latin for generation"
+        }
+      ]
+    },
+    {
+      "code": "NG",
+      "name": "Nigeria",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}[A-Z]{2}",
+          "description": "Standard format: LGA code + digits + state code",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123DE",
+          "era": "current",
+          "notes": "3-letter LGA prefix + 3 digits + 2-letter state code"
+        }
+      ]
+    },
+    {
+      "code": "KE",
+      "name": "Kenya",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "K[A-Z]{2}[0-9]{3}[A-Z]",
+          "description": "Standard format: K + 2 letters + 3 digits + 1 letter",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "KAB123C",
+          "era": "current",
+          "notes": "Always starts with K"
+        }
+      ]
+    },
+    {
+      "code": "MA",
+      "name": "Morocco",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[0-9]{1,5}[A-Z][0-9]{1,2}",
+          "description": "Standard format: digits + letter + district digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12345A12",
+          "era": "current",
+          "notes": "Arabic numerals and Latin letters"
+        }
+      ]
+    },
+    {
+      "code": "TN",
+      "name": "Tunisia",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[0-9]{3}TUN[0-9]{4}",
+          "description": "Standard format: 3 digits + TUN + 4 digits",
+          "charset": {"letters": "TUN", "digits": "0-9"},
+          "example": "123TUN4567",
+          "era": "current",
+          "notes": "TUN in the middle is fixed"
+        }
+      ]
+    },
+    {
+      "code": "GH",
+      "name": "Ghana",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}[0-9]{2}",
+          "description": "Standard format: region + 4 digits + year",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "GR123420",
+          "era": "current",
+          "notes": "Region code + serial + year digits"
+        }
+      ]
+    },
+    {
+      "code": "RU",
+      "name": "Russia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z][0-9]{3}[A-Z]{2}[0-9]{2,3}",
+          "description": "Standard format: letter + 3 digits + 2 letters + region code",
+          "charset": {"letters": "ABEKMHOPCTYX", "digits": "0-9"},
+          "example": "A123BC77",
+          "era": "current",
+          "notes": "Only letters common to Cyrillic and Latin (12 letters). Region code 2-3 digits."
+        }
+      ]
+    },
+    {
+      "code": "UA",
+      "name": "Ukraine",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}[A-Z]{2}",
+          "description": "Standard format: region + 4 digits + 2 letters",
+          "charset": {"letters": "ABEIKMOPCTHX", "digits": "0-9"},
+          "example": "AA1234BB",
+          "era": "current",
+          "notes": "Letters common to Cyrillic and Latin. Region prefix."
+        }
+      ]
+    },
+    {
+      "code": "LU",
+      "name": "Luxembourg",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}",
+          "description": "Standard format (2 letters + 4 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "current",
+          "notes": "Simple format"
+        }
+      ]
+    },
+    {
+      "code": "MT",
+      "name": "Malta",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard Maltese plate"
+        }
+      ]
+    },
+    {
+      "code": "CY",
+      "name": "Cyprus",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{3}[0-9]{3}",
+          "description": "Standard format (3 letters + 3 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC123",
+          "era": "current",
+          "notes": "Standard Cypriot plate"
+        }
+      ]
+    },
+    {
+      "code": "RS",
+      "name": "Serbia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3,4}[A-Z]{2}",
+          "description": "Standard format: city + digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "BG123AB",
+          "era": "current",
+          "notes": "BG=Belgrade, NS=Novi Sad, NI=Nis"
+        }
+      ]
+    },
+    {
+      "code": "BA",
+      "name": "Bosnia and Herzegovina",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z][0-9]{2}[A-Z][0-9]{3}",
+          "description": "Standard format",
+          "charset": {"letters": "AEJKMT", "digits": "0-9"},
+          "example": "A12B345",
+          "era": "current",
+          "notes": "Neutral letters avoiding ethnic identification"
+        }
+      ]
+    },
+    {
+      "code": "ME",
+      "name": "Montenegro",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[A-Z]{2}[0-9]{3}",
+          "description": "Standard format: city + 2 letters + 3 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "PGAB123",
+          "era": "current",
+          "notes": "PG=Podgorica, etc."
+        }
+      ]
+    },
+    {
+      "code": "MK",
+      "name": "North Macedonia",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}[A-Z]{2}",
+          "description": "Standard format: city + 4 digits + 2 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "SK1234AB",
+          "era": "current",
+          "notes": "SK=Skopje, etc."
+        }
+      ]
+    },
+    {
+      "code": "AL",
+      "name": "Albania",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{3}[A-Z]{2}",
+          "description": "Standard format: 2 letters + 3 digits + 2 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AA123BB",
+          "era": "current",
+          "notes": "Standard Albanian plate"
+        }
+      ]
+    },
+    {
+      "code": "IS",
+      "name": "Iceland",
+      "continent": "Europe",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[A-Z0-9][0-9]{2}",
+          "description": "Standard format (2 letters + 1 alphanumeric + 2 digits)",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB123",
+          "era": "current",
+          "notes": "5-character Icelandic plate"
+        }
+      ]
+    },
+    {
+      "code": "PK",
+      "name": "Pakistan",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2,3}[0-9]{3,4}",
+          "description": "Standard format: city + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "ABC1234",
+          "era": "current",
+          "notes": "Province/city prefix + 3-4 digits"
+        }
+      ]
+    },
+    {
+      "code": "BD",
+      "name": "Bangladesh",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{2}[0-9]{4}",
+          "description": "Standard format: region + class + 4-digit serial",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB121234",
+          "era": "current",
+          "notes": "Region code + vehicle class digits + serial"
+        }
+      ]
+    },
+    {
+      "code": "LK",
+      "name": "Sri Lanka",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2,3}[0-9]{4}",
+          "description": "Standard format: prefix + 4 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "AB1234",
+          "era": "current",
+          "notes": "Province/class prefix + serial"
+        }
+      ]
+    },
+    {
+      "code": "MM",
+      "name": "Myanmar",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9][A-Z][0-9]{4}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1A2345",
+          "era": "current",
+          "notes": "Region digit + series letter + 4-digit serial"
+        }
+      ]
+    },
+    {
+      "code": "KH",
+      "name": "Cambodia",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4,5}",
+          "description": "Standard format: province + digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "PP12345",
+          "era": "current",
+          "notes": "PP=Phnom Penh, etc."
+        }
+      ]
+    },
+    {
+      "code": "QA",
+      "name": "Qatar",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{3,6}",
+          "description": "Standard all-numeric format",
+          "charset": {"digits": "0-9"},
+          "example": "123456",
+          "era": "current",
+          "notes": "3-6 digit numeric plate. Lower numbers are prestigious."
+        }
+      ]
+    },
+    {
+      "code": "KW",
+      "name": "Kuwait",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{1,6}[A-Z]{1,3}",
+          "description": "Standard format: digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12345AB",
+          "era": "current",
+          "notes": "Arabic script mapped to Latin"
+        }
+      ]
+    },
+    {
+      "code": "BH",
+      "name": "Bahrain",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{1,6}",
+          "description": "Standard all-numeric format",
+          "charset": {"digits": "0-9"},
+          "example": "123456",
+          "era": "current",
+          "notes": "Numeric only. Lower numbers are prestigious."
+        }
+      ]
+    },
+    {
+      "code": "OM",
+      "name": "Oman",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{1,5}[A-Z]{1,2}",
+          "description": "Standard format: digits + letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "12345AB",
+          "era": "current",
+          "notes": "Arabic numerals and letters"
+        }
+      ]
+    },
+    {
+      "code": "JO",
+      "name": "Jordan",
+      "continent": "Asia",
+      "formats": [
+        {
+          "pattern": "[0-9]{2}[0-9]{5}",
+          "description": "Standard 7-digit format",
+          "charset": {"digits": "0-9"},
+          "example": "1234567",
+          "era": "current",
+          "notes": "Numeric format with area code prefix"
+        }
+      ]
+    },
+    {
+      "code": "DZ",
+      "name": "Algeria",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[0-9]{5}[0-9]{3}[0-9]{2}",
+          "description": "Standard format: serial + department + year",
+          "charset": {"digits": "0-9"},
+          "example": "1234516720",
+          "era": "current",
+          "notes": "All-numeric: 5-digit serial + 3-digit department (wilaya) + 2-digit year"
+        }
+      ]
+    },
+    {
+      "code": "ET",
+      "name": "Ethiopia",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[0-9][A-Z]{2,3}[0-9]{5}",
+          "description": "Standard format",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1AB12345",
+          "era": "current",
+          "notes": "Region digit + series letters + serial"
+        }
+      ]
+    },
+    {
+      "code": "TZ",
+      "name": "Tanzania",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "T[0-9]{3}[A-Z]{3}",
+          "description": "Standard format: T + 3 digits + 3 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "T123ABC",
+          "era": "current",
+          "notes": "Always starts with T"
+        }
+      ]
+    },
+    {
+      "code": "UG",
+      "name": "Uganda",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "U[A-Z]{2}[0-9]{3}[A-Z]",
+          "description": "Standard format: U + 2 letters + 3 digits + 1 letter",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "UAB123C",
+          "era": "current",
+          "notes": "Always starts with U"
+        }
+      ]
+    },
+    {
+      "code": "CI",
+      "name": "Ivory Coast",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[0-9]{4}[A-Z]{2}[0-9]{2}",
+          "description": "Standard format: 4 digits + 2 letters + 2 digits",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "1234AB01",
+          "era": "current",
+          "notes": "Serial + letters + district code"
+        }
+      ]
+    },
+    {
+      "code": "SN",
+      "name": "Senegal",
+      "continent": "Africa",
+      "formats": [
+        {
+          "pattern": "[A-Z]{2}[0-9]{4}[A-Z]{2}",
+          "description": "Standard format: 2 letters + 4 digits + 2 letters",
+          "charset": {"letters": "A-Z", "digits": "0-9"},
+          "example": "DK1234AB",
+          "era": "current",
+          "notes": "DK=Dakar region prefix"
+        }
+      ]
+    }
+  ]
+}
